@@ -526,7 +526,7 @@ function calcWorkDays(from,to){
   let c=0;
   const cur=new Date(from+'T00:00:00'), end=new Date(to+'T00:00:00');
   while(cur<=end){
-    const ds=cur.toISOString().slice(0,10);
+    const ds=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
     if(!isWknd(ds)&&!isOfficialHol(ds)) c++;
     cur.setDate(cur.getDate()+1);
   }

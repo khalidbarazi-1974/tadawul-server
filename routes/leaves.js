@@ -139,7 +139,7 @@ function syncAffectedLeaves(fromDate, toDate) {
         const cur = new Date(start + 'T00:00:00');
         const fin = new Date(end   + 'T00:00:00');
         while (cur <= fin) {
-            const ds  = cur.toISOString().slice(0, 10);
+            const ds  = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
             const dow = cur.getDay(); // 5=Fri, 6=Sat
             if (dow !== 5 && dow !== 6 && !hols.some(h => ds >= h.start_date && ds <= h.end_date)) {
                 count++;
