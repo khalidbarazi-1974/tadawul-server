@@ -925,8 +925,22 @@ function openLeaveModal(editId){
   }
   if(mgr){
     const sel=document.getElementById('fEmpSel');
+    const DEPT_ORDER=[4,0,1,2,3];
+    const sortedEmps=allEmps.slice().sort((a,b)=>{
+      const da=DEPT_ORDER.indexOf(Number(a.dept_id)),db=DEPT_ORDER.indexOf(Number(b.dept_id));
+      if(da!==db) return da-db;
+      if(Number(a.dept_id)===4){
+        const pin=id=>id==='U291590'?0:id==='U292409'?1:2;
+        const pa=pin(a.id),pb=pin(b.id);
+        if(pa!==pb) return pa-pb;
+      } else {
+        const ra=a.role==='manager'?0:1,rb=b.role==='manager'?0:1;
+        if(ra!==rb) return ra-rb;
+      }
+      return a.id<b.id?-1:a.id>b.id?1:0;
+    });
     sel.innerHTML='<option value="">— اختر موظفاً —</option>'+
-      allEmps.map(e=>`<option value="${e.id}" data-name="${e.name}" data-dept="${e.dept_id}" data-bal="${e.annual_leave_balance}"${edit&&e.id==edit.employee_id?' selected':''}>${e.name} | رصيد: ${e.annual_leave_balance} يوم</option>`).join('');
+      sortedEmps.map(e=>`<option value="${e.id}" data-name="${e.name}" data-dept="${e.dept_id}" data-bal="${e.annual_leave_balance}"${edit&&e.id==edit.employee_id?' selected':''}>${e.name} | رصيد: ${e.annual_leave_balance} يوم</option>`).join('');
     if(!edit) leaveEmpId=null;
   }
   if(edit) updateWorkDays();

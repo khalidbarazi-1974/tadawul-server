@@ -484,7 +484,7 @@ async function init() {
     employees = await api('GET', `/employees/dept/${user.deptId}`);
     const empFilter = document.getElementById('filterEmp');
     const empAssign = document.getElementById('fAssign');
-    employees.filter(e => e.role === 'employee').forEach(e => {
+    employees.filter(e => e.role === 'employee').sort((a,b)=>a.id<b.id?-1:1).forEach(e => {
         empFilter.innerHTML += `<option value="${e.name}">${e.name}</option>`;
         empAssign.innerHTML += `<option value="${e.name}">${e.name}</option>`;
     });
