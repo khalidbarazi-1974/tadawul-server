@@ -710,16 +710,33 @@ function renderEmployees(){
   if(df) emps=emps.filter(e=>e.dept_id==df);
   if(sr) emps=emps.filter(e=>e.name.toLowerCase().includes(sr));
   updSortInd({name:'th-ename',dept:'th-edept',title:'th-etitle',tot:'th-etot',used:'th-eused',rem:'th-erem'},empSortCol,empSortDir);
-  emps=sortArr(emps,empSortCol,empSortDir,(e,c)=>{
-    if(c==='name')  return e.name||'';
-    if(c==='dept')  return deptName(e.dept_id)||'';
-    if(c==='title') return e.title||'';
-    const used=usedDays(e.id),rem=e.annual_leave_balance;
-    if(c==='used')  return used;
-    if(c==='rem')   return rem;
-    if(c==='tot')   return used+rem;
-    return '';
-  });
+  if(!empSortCol){
+    const DEPT_ORDER=[4,0,1,2,3];
+    emps=emps.slice().sort((a,b)=>{
+      const da=DEPT_ORDER.indexOf(Number(a.dept_id)), db=DEPT_ORDER.indexOf(Number(b.dept_id));
+      if(da!==db) return da-db;
+      if(Number(a.dept_id)===4){
+        const pin=id=>id==='U291590'?0:id==='U292409'?1:2;
+        const pa=pin(a.id),pb=pin(b.id);
+        if(pa!==pb) return pa-pb;
+      } else {
+        const ra=a.role==='manager'?0:1, rb=b.role==='manager'?0:1;
+        if(ra!==rb) return ra-rb;
+      }
+      return a.id<b.id?-1:a.id>b.id?1:0;
+    });
+  } else {
+    emps=sortArr(emps,empSortCol,empSortDir,(e,c)=>{
+      if(c==='name')  return e.name||'';
+      if(c==='dept')  return deptName(e.dept_id)||'';
+      if(c==='title') return e.title||'';
+      const used=usedDays(e.id),rem=e.annual_leave_balance;
+      if(c==='used')  return used;
+      if(c==='rem')   return rem;
+      if(c==='tot')   return used+rem;
+      return '';
+    });
+  }
   const tb=document.getElementById('empsBody');
   if(!emps.length){tb.innerHTML=`<tr><td colspan="8" class="empty">لا يوجد موظفون</td></tr>`;return;}
   tb.innerHTML=emps.map((e,i)=>{
