@@ -1,0 +1,1015 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجتماع تداول — الموظف</title>
+<script src="/vendor/lucide.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+#_srvDot{width:11px;height:11px;border-radius:50%;background:#fbbf24;flex-shrink:0;transition:background .4s;cursor:default;}
+#_srvDot.up{background:#22c55e;}
+#_srvDot.down{background:#ef4444;}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;min-height:100vh;}
+
+/* topbar */
+.topbar{background:#1a237e;color:#fff;padding:14px 28px;display:flex;justify-content:space-between;align-items:center;}
+.topbar h2{font-size:18px;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:12px;font-size:13px;}
+.role-badge{background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:20px;font-size:12px;}
+.btn-top{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;}
+.btn-top:hover{background:rgba(255,255,255,0.25);}
+
+/* layout */
+.container{max-width:1100px;margin:24px auto;padding:0 20px;}
+
+/* cards row */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat{background:#fff;border-radius:10px;padding:18px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07);cursor:pointer;transition:transform .15s,box-shadow .15s;user-select:none;}
+.stat:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.12);}
+.stat.active-filter{outline:3px solid #1a237e;transform:translateY(-2px);box-shadow:0 4px 14px rgba(26,35,126,.25);}
+.stat .n{font-size:30px;font-weight:700;color:#1a237e;}
+.stat .l{font-size:12px;color:#888;margin-top:3px;}
+
+/* toolbar */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.toolbar h3{font-size:16px;color:#333;font-weight:600;}
+.btn-add{background:#1a237e;color:#fff;border:none;padding:9px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;gap:6px;}
+.btn-add:hover{background:#283593;}
+
+/* table */
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{background:#f5f6fa;padding:12px 14px;font-size:13px;color:#555;font-weight:600;text-align:right;}
+td{padding:12px 14px;font-size:14px;color:#333;border-top:1px solid #f0f0f0;vertical-align:middle;}
+tr:hover td{background:#fafbff;}
+tr.new-row td:first-child{border-right:3px solid #f39c12;}
+tr.rejected-row{opacity:0.7;}
+tr.rejected-row td:first-child{border-right:3px solid #c62828;}
+
+/* badges */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.badge-high{background:#fdecea;color:#c62828;}
+.badge-med{background:#fff8e1;color:#f57f17;}
+.badge-low{background:#e8f5e9;color:#2e7d32;}
+.badge-new{background:#e3f2fd;color:#1565c0;}
+.badge-prog{background:#fff3e0;color:#e65100;}
+.badge-done{background:#e8f5e9;color:#2e7d32;}
+.new-indicator{background:#f39c12;color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;margin-right:6px;}
+.pending-dot{width:8px;height:8px;background:#e74c3c;border-radius:50%;display:inline-block;margin-left:4px;}
+
+/* modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;width:700px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.2);}
+.modal-head{padding:20px 24px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
+.modal-head h3{font-size:17px;color:#1a237e;}
+.btn-close{background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;}
+.modal-body{padding:24px;overflow-y:auto;flex:1;}
+.modal-foot{padding:16px 24px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end;}
+
+/* form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:13px;font-weight:600;color:#555;}
+input,select,textarea{padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;background:#fafafa;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#1a237e;background:#fff;}
+textarea{resize:vertical;min-height:80px;}
+
+/* pending change request */
+.change-form{background:#fffde7;border:1px solid #f9a825;border-radius:8px;padding:14px;margin-top:10px;}
+.change-form label{color:#f57f17;}
+
+/* guidances */
+.guidance-list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.guidance-item{background:#f8f9fa;border-radius:8px;padding:12px 14px;border-right:3px solid #90caf9;}
+.guidance-item.pending{border-right-color:#ffb300;background:#fffde7;}
+.guidance-item.mine{border-right-color:#1a237e;}
+.guidance-meta{font-size:11px;color:#999;margin-bottom:4px;display:flex;justify-content:space-between;}
+.guidance-text{font-size:14px;color:#333;}
+.pending-label{font-size:11px;color:#f57f17;font-weight:600;margin-top:4px;}
+
+/* buttons */
+.btn{padding:9px 18px;border-radius:8px;font-family:inherit;font-size:14px;cursor:pointer;border:none;font-weight:600;}
+.btn-primary{background:#1a237e;color:#fff;}
+.btn-primary:hover{background:#283593;}
+.btn-secondary{background:#f0f0f0;color:#333;}
+.btn-secondary:hover{background:#e0e0e0;}
+.btn-warning{background:#f39c12;color:#fff;}
+.btn-danger{background:#c62828;color:#fff;}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:6px;}
+
+/* export */
+.btn-excel{background:#217346;color:#fff;border:none;padding:8px 16px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;}
+.btn-excel:hover{background:#1a5c38;}
+
+.empty{text-align:center;padding:48px;color:#aaa;font-size:15px;}
+.filter-bar{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;align-items:center;}
+.filter-bar select,.filter-bar input{padding:7px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px;font-family:inherit;}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+th.sortable{cursor:pointer;user-select:none;}
+th.sortable:hover{background:#eceef5;}
+th.sort-asc::after{content:' ▲';font-size:9px;opacity:.7;}
+th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
+
+/* ── Toast ── */
+.toast-container{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
+.toast{background:#fff;border-radius:10px;padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:13px;display:flex;align-items:center;gap:10px;pointer-events:all;animation:toastIn .3s ease;min-width:220px;max-width:380px;border-right:4px solid #ccc;font-family:inherit;}
+.toast.success{border-right-color:#27ae60;}.toast.error{border-right-color:#e74c3c;}.toast.warning{border-right-color:#f39c12;}.toast.info{border-right-color:#1a237e;}
+.toast-close{margin-right:auto;background:none;border:none;cursor:pointer;color:#aaa;font-size:18px;line-height:1;padding:0 0 0 4px;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:none;}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-14px);}}
+/* ── Skeleton ── */
+.skel{background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;display:inline-block;height:14px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+/* ── Bottom-sheet ── */
+.bs-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;align-items:flex-end;justify-content:center;}
+.bs-overlay.open{display:flex;animation:bsFadeIn .2s ease;}
+.bs{background:#fff;border-radius:20px 20px 0 0;padding:28px 20px 32px;width:100%;max-width:480px;animation:bsUp .3s cubic-bezier(.34,1.56,.64,1);}
+.bs h4{font-size:16px;font-weight:700;color:#333;margin-bottom:8px;text-align:center;}
+.bs p{font-size:14px;color:#666;text-align:center;margin-bottom:24px;line-height:1.6;}
+.bs-actions{display:flex;flex-direction:column;gap:10px;}
+@keyframes bsFadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes bsUp{from{transform:translateY(100%);}to{transform:none;}}
+/* ── Countdown chips ── */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.chip-late{background:#fdecea;color:#c62828;}.chip-today{background:#fff8e1;color:#f57f17;animation:chipPulse 2s infinite;}
+.chip-tmrw{background:#fff3e0;color:#e65100;}.chip-soon{background:#e3f2fd;color:#1565c0;}
+.chip-ok{background:#e8f5e9;color:#2e7d32;font-weight:400;}.chip-none{background:#f5f5f5;color:#aaa;}
+@keyframes chipPulse{0%,100%{opacity:1;}50%{opacity:.65;}}
+/* ── Badge animations ── */
+.badge-high{background:#fdecea;color:#c62828;animation:badgePulse 2.5s ease-in-out infinite;}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,0);}50%{box-shadow:0 0 0 3px rgba(198,40,40,.15);}}
+/* ── Kanban ── */
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:16px;}
+.kanban-col{background:#f5f6fa;border-radius:10px;padding:12px;}
+.kanban-col-head{font-size:13px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;}
+.kanban-cnt{font-size:11px;padding:2px 8px;border-radius:10px;}
+.kanban-card{background:#fff;border-radius:8px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);cursor:pointer;transition:transform .15s,box-shadow .15s;border-right:3px solid #ddd;}
+.kanban-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12);}
+.kanban-card.k-high{border-right-color:#c62828;}.kanban-card.k-med{border-right-color:#f57f17;}.kanban-card.k-low{border-right-color:#2e7d32;}
+.kanban-card-name{font-size:13px;font-weight:600;color:#333;margin-bottom:6px;}
+.kanban-card-meta{font-size:11px;color:#888;display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+.kanban-empty{text-align:center;color:#aaa;font-size:12px;padding:20px 0;}
+.view-toggle{display:flex;gap:5px;}
+.btn-view{background:#f0f0f0;border:1px solid #ddd;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;display:flex;align-items:center;gap:4px;color:#555;transition:all .15s;}
+.btn-view.active{background:#1a237e;color:#fff;border-color:#1a237e;}
+.btn-view svg{width:13px;height:13px;}
+.btn-top{display:inline-flex;align-items:center;gap:5px;}
+.btn-top svg,.btn-add svg{width:14px;height:14px;}
+.btn-add{display:inline-flex;align-items:center;gap:5px;}
+/* ── Stat count-up ── */
+.stat .n{transition:color .3s;}
+
+@media(max-width:1024px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .filter-bar{flex-wrap:wrap;}
+}
+@media(max-width:640px){
+    .form-grid{grid-template-columns:1fr;}
+    .topbar{padding:10px 16px;flex-wrap:wrap;gap:8px;}
+    .topbar-right{flex-wrap:wrap;gap:6px;}
+    .container{margin:12px auto;padding:0 12px;}
+}
+/* ── Print ─────────────────────────────────────────────────────────────── */
+.print-header{display:none;}
+.btn-print{background:#fff;border:1.5px solid #1a237e;color:#1a237e;padding:7px 13px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:6px;}
+.btn-print:hover{background:#e8eaf6;}
+.btn-print svg{width:14px;height:14px;}
+@media print{
+    @page{size:A4 landscape;margin:12mm 15mm;}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+    body{background:#fff!important;}
+    .topbar,.stats,.toolbar,.filter-bar,.view-toggle,.btn-add,.btn-print,
+    #kanbanView,.bs-overlay,.toast-container,.overlay,
+    .no-print{display:none!important;}
+    .print-header{display:block!important;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #1a237e;}
+    .print-header h2{font-size:15px;color:#1a237e;}
+    .print-header p{font-size:11px;color:#555;margin-top:3px;}
+    .container{max-width:100%!important;padding:0!important;margin:0!important;}
+    .card{box-shadow:none!important;border:none!important;border-radius:0!important;}
+    .table-wrap{overflow:visible!important;}
+    table{min-width:0!important;width:100%!important;table-layout:auto!important;}
+    th,td{font-size:10px!important;padding:5px 6px!important;border:1px solid #ccc!important;white-space:normal!important;}
+    th{background:#e8eaf6!important;color:#1a237e!important;}
+    thead{display:table-header-group;}
+    tr{page-break-inside:avoid;}
+    .badge,.chip{font-size:9px!important;padding:1px 5px!important;}
+    .act,.btn-approve,.btn-reject{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h2>اجتماع تداول</h2>
+  <div class="topbar-right">
+    <span id="topName"></span>
+    <span class="role-badge">موظف</span>
+    <span id="topDept" style="font-size:12px;opacity:.8;"></span>
+    <button class="btn-top" onclick="location.href='/hub.html'"><i data-lucide="home"></i>الرئيسية</button>
+    <button class="btn-top" onclick="openPwdModal()"><i data-lucide="key-round"></i>كلمة المرور</button>
+    <button class="btn-top" onclick="logout()"><i data-lucide="log-out"></i>خروج</button>
+    <span id="_srvDot" title="حالة الخادم"></span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats">
+    <div class="stat" id="stat-all"  onclick="setStatFilter('all')"><div class="n" id="sTotal">0</div><div class="l">إجمالي المواضيع</div></div>
+    <div class="stat" id="stat-new"  onclick="setStatFilter('جديد')"><div class="n" id="sNew">0</div><div class="l">جديدة</div></div>
+    <div class="stat" id="stat-prog" onclick="setStatFilter('قيد التنفيذ')"><div class="n" id="sProg">0</div><div class="l">قيد التنفيذ</div></div>
+    <div class="stat" id="stat-done" onclick="setStatFilter('مكتمل')"><div class="n" id="sDone">0</div><div class="l">مكتملة</div></div>
+  </div>
+
+  <div class="toolbar">
+    <h3>مواضيعي</h3>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="view-toggle">
+        <button class="btn-view active" id="btnViewTable" onclick="toggleView('table')"><i data-lucide="table-2"></i>جدول</button>
+        <button class="btn-view" id="btnViewKanban" onclick="toggleView('kanban')"><i data-lucide="layout-dashboard"></i>كانبان</button>
+      </div>
+      <button class="btn-print" onclick="printPage()"><i data-lucide="printer"></i> طباعة</button>
+      <button class="btn-print" style="border-color:#1565c0;color:#1565c0;" onclick="exportExcel()"><i data-lucide="upload"></i> تصدير Excel</button>
+      <button class="btn-add" onclick="openAddModal()"><i data-lucide="plus"></i>إضافة موضوع</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="print-header">
+      <h2>اجتماع تداول — مواضيعي</h2>
+      <p id="printMeta"></p>
+    </div>
+    <div class="filter-bar">
+      <select id="filterStatus" onchange="clearStatFilter();renderTasks()">
+        <option value="">كل الحالات</option>
+        <option>جديد</option>
+        <option>قيد التنفيذ</option>
+        <option>مكتمل</option>
+      </select>
+      <select id="filterPriority" onchange="renderTasks()">
+        <option value="">كل الأولويات</option>
+        <option>عالية</option>
+        <option>متوسطة</option>
+        <option>منخفضة</option>
+      </select>
+      <label style="font-size:12px;color:#888;margin:0 2px 0 4px;">من</label>
+      <input type="date" id="filterDateFrom" onchange="renderTasks()" style="min-width:130px;">
+      <label style="font-size:12px;color:#888;margin:0 2px 0 4px;">إلى</label>
+      <input type="date" id="filterDateTo" onchange="renderTasks()" style="min-width:130px;">
+      <input type="text" id="filterSearch" placeholder="بحث..." oninput="renderTasks()" style="flex:1;min-width:140px;">
+    </div>
+    <div class="table-wrap">
+    <table style="table-layout:fixed;min-width:920px;">
+      <thead>
+        <tr>
+          <th style="width:38px">#</th>
+          <th class="sortable" id="th-name" onclick="setSort('name')">الموضوع</th>
+          <th style="width:170px">الوصف</th>
+          <th class="sortable" style="width:74px" id="th-priority" onclick="setSort('priority')">الأولوية</th>
+          <th class="sortable" style="width:90px" id="th-status" onclick="setSort('status')">الحالة</th>
+          <th class="sortable" style="width:92px" id="th-startDate" onclick="setSort('startDate')">تاريخ البدء</th>
+          <th class="sortable" style="width:92px" id="th-dueDate" onclick="setSort('dueDate')">الاستحقاق</th>
+          <th style="width:54px">المدة</th>
+          <th style="width:72px">التعليقات</th>
+        </tr>
+      </thead>
+      <tbody id="taskBody">
+        <tr><td colspan="8" class="empty">لا توجد مواضيع</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div id="kanbanView" style="display:none;"></div>
+  </div>
+</div>
+
+<div id="toastCont" class="toast-container"></div>
+<div class="bs-overlay" id="bsOverlay">
+  <div class="bs">
+    <h4 id="bsTitle"></h4><p id="bsMsg"></p>
+    <div class="bs-actions">
+      <button class="btn btn-danger" id="bsYes" style="width:100%;padding:13px;font-size:15px;">تأكيد</button>
+      <button class="btn btn-secondary" id="bsNo" style="width:100%;padding:13px;">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="overlay" id="pwdModal">
+  <div class="modal" style="width:420px;">
+    <div class="modal-head"><h3>تغيير كلمة المرور</h3><button class="btn-close" onclick="closeModal('pwdModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px;"><label>كلمة المرور الحالية</label><input type="password" id="pwdCurrent"></div>
+      <div class="form-group" style="margin-bottom:14px;"><label>كلمة المرور الجديدة</label><input type="password" id="pwdNew"></div>
+      <div class="form-group"><label>تأكيد كلمة المرور الجديدة</label><input type="password" id="pwdConfirm"></div>
+      <div id="pwdError" style="background:#ffebee;color:#c62828;border-radius:6px;padding:10px;font-size:13px;margin-top:10px;display:none;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('pwdModal')"><i data-lucide="x" style="width:14px;height:14px;"></i> إلغاء</button>
+      <button class="btn btn-primary" onclick="changePassword()"><i data-lucide="save" style="width:14px;height:14px;"></i> حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Task Modal -->
+<div class="overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">إضافة موضوع</h3>
+      <button class="btn-close" onclick="closeModal('taskModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>اسم الموضوع *</label>
+          <input type="text" id="fName">
+        </div>
+        <div class="form-group full">
+          <label>الوصف</label>
+          <textarea id="fDesc" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>الأولوية</label>
+          <select id="fPriority">
+            <option>عالية</option>
+            <option selected>متوسطة</option>
+            <option>منخفضة</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>تاريخ البدء *</label>
+          <input type="date" id="fStart">
+        </div>
+        <div class="form-group">
+          <label>تاريخ الاستحقاق</label>
+          <input type="date" id="fDue">
+        </div>
+      </div>
+      <!-- Request change section (edit mode only) -->
+      <div id="changeSection" style="display:none;margin-top:18px;">
+        <p style="font-size:13px;color:#888;margin-bottom:10px;">⚠️ تعديل الموضوع يتطلب موافقة المدير. اختر الحقل الذي تريد تغييره:</p>
+        <div class="change-form">
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>الحقل</label>
+            <select id="changeField" onchange="updateChangeInput()">
+              <option value="status">الحالة</option>
+              <option value="priority">الأولوية</option>
+              <option value="suggestedDueDate">التاريخ المقترح</option>
+              <option value="description">الوصف</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>القيمة الجديدة</label>
+            <div id="changeValueWrap"></div>
+          </div>
+          <button class="btn btn-warning btn-sm" onclick="submitChange()"><i data-lucide="send" style="width:13px;height:13px;"></i> إرسال للاعتماد</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('taskModal')"><i data-lucide="x" style="width:14px;height:14px;"></i> إلغاء</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveTask()"><i data-lucide="save" style="width:14px;height:14px;"></i> حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Detail Modal -->
+<div class="overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="detailTitle"></h3>
+      <button class="btn-close" onclick="closeModal('detailModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="detailInfo" style="margin-bottom:20px;"></div>
+      <div id="pendingChangesSection" style="display:none;margin-bottom:16px;">
+        <p style="font-size:13px;color:#f57f17;font-weight:600;margin-bottom:6px;">⏳ تغييرات بانتظار الاعتماد:</p>
+        <div id="pendingChangesList"></div>
+      </div>
+      <hr style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong style="font-size:14px;">التعليقات</strong>
+        <button class="btn btn-primary btn-sm" onclick="openAddComment()">+ إضافة تعليق</button>
+      </div>
+      <div class="guidance-list" id="guidanceList"></div>
+
+      <!-- Add comment form -->
+      <div id="commentForm" style="display:none;margin-top:14px;">
+        <textarea id="commentText" placeholder="اكتب تعليقك..." rows="3" style="width:100%;margin-bottom:8px;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;"></textarea>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="submitComment()">إرسال</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('commentForm').style.display='none'">إلغاء</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" id="detailFoot">
+      <button class="btn btn-secondary" onclick="closeModal('detailModal')">إغلاق</button>
+      <button class="btn btn-warning" onclick="openEditMode()">طلب تعديل</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+let tasks = [];
+let sortCol = null, sortDir = 'asc';
+let currentTask = null, activeStatFilter = null, viewMode = 'table';
+const user = JSON.parse(sessionStorage.getItem('user') || 'null');
+const token = sessionStorage.getItem('token');
+
+if (!user || !token || user.role !== 'employee') {
+    location.href = '/';
+}
+
+// ── Connection monitor ────────────────────────────────────────────────────────
+function showConnectionWarning() {
+    const el = document.getElementById('_srvDot');
+    if (el) { el.classList.remove('up'); el.classList.add('down'); }
+}
+function hideConnectionWarning() {
+    const el = document.getElementById('_srvDot');
+    if (el) { el.classList.remove('down'); el.classList.add('up'); }
+}
+hideConnectionWarning(); // page loaded = server was up; start green, ping will correct if needed
+(function ping() {
+    fetch('/api/ping', {cache:'no-store'})
+        .then(r => r.ok ? hideConnectionWarning() : showConnectionWarning())
+        .catch(() => showConnectionWarning())
+        .finally(() => setTimeout(ping, 3000));
+})();
+
+function authHeaders() {
+    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+}
+
+async function api(method, path, body) {
+    let res;
+    try {
+        res = await fetch(API + path, {
+            method, headers: authHeaders(),
+            body: body ? JSON.stringify(body) : undefined
+        });
+    } catch(e) {
+        throw e;
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        const err = new Error(data.error || 'خطأ');
+        err.status = res.status;
+        throw err;
+    }
+    return data;
+}
+
+// ── init ──────────────────────────────────────────────────────────────────────
+
+let _loading = false;
+async function safeLoad() {
+    if (_loading) return;
+    _loading = true;
+    try { await loadTasks(); } finally { _loading = false; }
+}
+
+let _lastHeartbeat = Date.now();
+setInterval(() => { if (Date.now() - _lastHeartbeat > 12000) showConnectionWarning(); }, 3000);
+
+function connectSSE() {
+    const es = new EventSource('/api/events');
+    es.onopen    = () => { _lastHeartbeat = Date.now(); hideConnectionWarning(); };
+    es.onmessage = () => { _lastHeartbeat = Date.now(); safeLoad(); };
+    es.addEventListener('ping', () => { _lastHeartbeat = Date.now(); hideConnectionWarning(); });
+    es.onerror   = () => { es.close(); showConnectionWarning(); setTimeout(connectSSE, 5000); };
+}
+
+async function init() {
+    document.getElementById('topName').textContent = user.name;
+    const depts = await api('GET', '/departments');
+    const dept = depts.find(d => d.id === user.deptId);
+    document.getElementById('topDept').textContent = dept ? dept.name : '';
+    showSkeleton();
+    await loadTasks();
+    connectSSE();
+    setInterval(safeLoad, 8000);
+    lucide.createIcons();
+}
+
+async function loadTasks() {
+    tasks = await api('GET', '/tasks/my');
+    renderTasks();
+    updateStats();
+}
+
+function updateStats() {
+    countUp(document.getElementById('sTotal'), tasks.length);
+    countUp(document.getElementById('sNew'),   tasks.filter(t => t.status === 'جديد').length);
+    countUp(document.getElementById('sProg'),  tasks.filter(t => t.status === 'قيد التنفيذ').length);
+    countUp(document.getElementById('sDone'),  tasks.filter(t => t.status === 'مكتمل').length);
+}
+
+function clearStatFilter() {
+    activeStatFilter = null;
+    ['all','new','prog','done'].forEach(id => document.getElementById('stat-'+id).classList.remove('active-filter'));
+}
+
+function setStatFilter(key) {
+    activeStatFilter = activeStatFilter === key ? null : key;
+    ['all','new','prog','done'].forEach(id => document.getElementById('stat-'+id).classList.remove('active-filter'));
+    const keyToId = { 'all':'all', 'جديد':'new', 'قيد التنفيذ':'prog', 'مكتمل':'done' };
+    if (activeStatFilter && keyToId[activeStatFilter]) document.getElementById('stat-'+keyToId[activeStatFilter]).classList.add('active-filter');
+    renderTasks();
+}
+
+const SORT_COLS_TASK = ['name','priority','status','startDate','dueDate'];
+const PRIO_RANK = {'عالية':3,'متوسطة':2,'منخفضة':1};
+function setSort(col) {
+    if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortCol = col; sortDir = 'asc'; }
+    renderTasks();
+}
+function updateSortIndicators() {
+    SORT_COLS_TASK.forEach(c => {
+        const el = document.getElementById('th-' + c);
+        if (!el) return;
+        el.classList.remove('sort-asc','sort-desc');
+        if (c === sortCol) el.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    });
+}
+
+function renderTasks() {
+    const status   = document.getElementById('filterStatus').value;
+    const priority = document.getElementById('filterPriority').value;
+    const dateFrom = document.getElementById('filterDateFrom').value;
+    const dateTo   = document.getElementById('filterDateTo').value;
+    const search   = document.getElementById('filterSearch').value.toLowerCase();
+
+    const statStatus = (activeStatFilter && activeStatFilter !== 'all') ? activeStatFilter : null;
+
+    let list = tasks.filter(t => {
+        const effectiveStatus = statStatus || status;
+        if (effectiveStatus && t.status !== effectiveStatus) return false;
+        if (priority && t.priority !== priority) return false;
+        if (search   && !t.name.toLowerCase().includes(search)
+                     && !(t.description||'').toLowerCase().includes(search)
+                     && !(t.assignedTo||t.createdBy||'').toLowerCase().includes(search)) return false;
+        if (dateFrom && t.dueDate && t.dueDate < dateFrom) return false;
+        if (dateTo   && t.dueDate && t.dueDate > dateTo)   return false;
+        return true;
+    });
+
+    updateSortIndicators();
+    if (sortCol) list.sort((a,b) => {
+        let va, vb;
+        if (sortCol==='name')       { va=a.name||''; vb=b.name||''; }
+        else if (sortCol==='priority')   { va=PRIO_RANK[a.priority]||0; vb=PRIO_RANK[b.priority]||0; }
+        else if (sortCol==='status')     { va=a.status||''; vb=b.status||''; }
+        else if (sortCol==='startDate')  { va=a.startDate||''; vb=b.startDate||''; }
+        else if (sortCol==='dueDate')    { va=a.dueDate||''; vb=b.dueDate||''; }
+        else return 0;
+        if (typeof va==='number') return sortDir==='asc'?va-vb:vb-va;
+        return sortDir==='asc'?va.localeCompare(vb,'ar'):vb.localeCompare(va,'ar');
+    });
+
+    if (viewMode === 'kanban') {
+        document.querySelector('.table-wrap').style.display = 'none';
+        document.getElementById('kanbanView').style.display = '';
+        document.getElementById('kanbanView').innerHTML = renderKanban(list);
+        lucide.createIcons();
+        return;
+    }
+    document.querySelector('.table-wrap').style.display = '';
+    document.getElementById('kanbanView').style.display = 'none';
+
+    const tbody = document.getElementById('taskBody');
+    if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty">لا توجد مواضيع</td></tr>';
+        return;
+    }
+    tbody.innerHTML = list.map((t, i) => {
+        const isNew = t.isNewForEmployee;
+        const isRejected = t.approved === -1;
+        const isPending  = t.approved === 0;
+        const myPending = t.guidances.filter(g => !g.approved && g.added_by_role === 'employee').length;
+        const hasPendingChanges = t.pendingChanges.length > 0;
+        const rowClass = isRejected ? 'rejected-row' : (isNew ? 'new-row' : '');
+        return `<tr class="${rowClass}" onclick="openDetail('${t.id}')" style="cursor:pointer;">
+            <td>${i + 1}${isNew ? '<span class="new-indicator">جديد</span>' : ''}</td>
+            <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><strong>${t.name}</strong>
+                ${isRejected ? '<span style="background:#fdecea;color:#c62828;font-size:11px;padding:2px 7px;border-radius:10px;margin-right:6px;">مرفوض</span>' : ''}
+                ${isPending  ? '<span style="background:#f3e5f5;color:#6a1b9a;font-size:11px;padding:2px 7px;border-radius:10px;margin-right:6px;">بانتظار الاعتماد</span>' : ''}
+                ${hasPendingChanges && !isRejected && !isPending ? '<span class="pending-dot" title="يوجد تغيير بانتظار الاعتماد"></span>' : ''}
+            </td>
+            <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666;">${t.description||'-'}</td>
+            <td>${priorityBadge(t.priority)}</td>
+            <td>${statusBadge(t.status)}</td>
+            <td>${t.startDate || '-'}</td>
+            <td>${dueDateChip(t.dueDate)}</td>
+            <td>${delayBadge(t)}</td>
+            <td>${t.guidances.length}${myPending ? ` <span style="color:#f57f17;font-size:11px;">(${myPending} بانتظار)</span>` : ''}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ── UI utilities ─────────────────────────────────────────────────────────────
+
+const SVG = {
+    check:  '<path d="M20 6 9 17l-5-5"/>',
+    x:      '<path d="M18 6 6 18M6 6l12 12"/>',
+    trash:  '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    send:   '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+    save:   '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+};
+function ico(name, size=14) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;">${SVG[name]||''}</svg>`;
+}
+
+function toast(msg, type='info', dur=3500) {
+    const c = document.getElementById('toastCont');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icon = {success:'check-circle',error:'x-circle',warning:'alert-triangle',info:'info'}[type]||'info';
+    t.innerHTML = `<i data-lucide="${icon}" style="width:16px;height:16px;flex-shrink:0;"></i><span>${msg}</span><button class="toast-close" onclick="this.closest('.toast').remove()">×</button>`;
+    c.appendChild(t);
+    lucide.createIcons({nodes:[t]});
+    setTimeout(() => { t.style.animation='toastOut .3s ease forwards'; setTimeout(()=>t.remove(),300); }, dur);
+}
+
+function showConfirm(title, msg, onYes) {
+    document.getElementById('bsTitle').textContent = title;
+    document.getElementById('bsMsg').textContent = msg;
+    document.getElementById('bsYes').onclick = () => { document.getElementById('bsOverlay').classList.remove('open'); onYes(); };
+    document.getElementById('bsNo').onclick = () => document.getElementById('bsOverlay').classList.remove('open');
+    document.getElementById('bsOverlay').classList.add('open');
+}
+
+function countUp(el, target, dur=500) {
+    const start = parseInt(el.textContent) || 0;
+    if (start === target) return;
+    const steps = Math.max(1, Math.round(dur / 16));
+    const inc = (target - start) / steps;
+    let cur = start, step = 0;
+    const iv = setInterval(() => {
+        step++;
+        cur += inc;
+        el.textContent = Math.round(step >= steps ? target : cur);
+        if (step >= steps) clearInterval(iv);
+    }, 16);
+}
+
+function dueDateChip(dueDate) {
+    if (!dueDate) return '<span class="chip chip-none">—</span>';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const due = new Date(dueDate + 'T00:00:00');
+    const diff = Math.round((due - today) / 86400000);
+    if (diff < 0)  return `<span class="chip chip-late">متأخر ${Math.abs(diff)} يوم</span>`;
+    if (diff === 0) return `<span class="chip chip-today">اليوم</span>`;
+    if (diff === 1) return `<span class="chip chip-tmrw">غداً</span>`;
+    if (diff <= 7)  return `<span class="chip chip-soon">${diff} أيام</span>`;
+    return `<span class="chip chip-ok">${dueDate}</span>`;
+}
+
+function toggleView(mode) {
+    viewMode = mode;
+    document.getElementById('btnViewTable').classList.toggle('active', mode==='table');
+    document.getElementById('btnViewKanban').classList.toggle('active', mode==='kanban');
+    renderTasks();
+}
+
+function renderKanban(list) {
+    const cols = [{key:'جديد',color:'#1565c0'},{key:'قيد التنفيذ',color:'#e65100'},{key:'مكتمل',color:'#2e7d32'}];
+    const pc = {'عالية':'k-high','متوسطة':'k-med','منخفضة':'k-low'};
+    return `<div class="kanban">${cols.map(col => {
+        const cards = list.filter(t => t.status === col.key);
+        return `<div class="kanban-col">
+            <div class="kanban-col-head">
+                <span style="color:${col.color};">${col.key}</span>
+                <span class="kanban-cnt" style="background:${col.color}22;color:${col.color};">${cards.length}</span>
+            </div>
+            ${cards.length ? cards.map(t => `
+                <div class="kanban-card ${pc[t.priority]||'k-med'}" onclick="openDetail('${t.id}')">
+                    <div class="kanban-card-name">${t.name}</div>
+                    <div class="kanban-card-meta">${priorityBadge(t.priority)} ${dueDateChip(t.dueDate)}</div>
+                </div>`).join('') : '<div class="kanban-empty">لا توجد مواضيع</div>'}
+        </div>`;
+    }).join('')}</div>`;
+}
+
+function showSkeleton() {
+    document.getElementById('taskBody').innerHTML = Array(5).fill(0).map(() =>
+        `<tr>${Array(9).fill(0).map((_,i) => `<td><span class="skel" style="width:${[30,70,50,40,45,45,45,30,25][i]}%;"></span></td>`).join('')}</tr>`
+    ).join('');
+}
+
+function delayBadge(t) {
+    if (!t.startDate) return '-';
+    const diff = Math.floor((new Date() - new Date(t.startDate)) / 86400000);
+    return `<span style="font-size:12px;color:#555;">${diff} يوم</span>`;
+}
+function priorityBadge(p) {
+    const map = { 'عالية': 'badge-high', 'متوسطة': 'badge-med', 'منخفضة': 'badge-low' };
+    return `<span class="badge ${map[p] || 'badge-med'}">${p}</span>`;
+}
+
+function statusBadge(s) {
+    const map = { 'جديد': 'badge-new', 'قيد التنفيذ': 'badge-prog', 'مكتمل': 'badge-done' };
+    return `<span class="badge ${map[s] || 'badge-new'}">${s}</span>`;
+}
+
+// ── Add Task ──────────────────────────────────────────────────────────────────
+
+function openAddModal() {
+    document.getElementById('editId').value = '';
+    document.getElementById('modalTitle').textContent = 'إضافة موضوع';
+    document.getElementById('fName').value = '';
+    document.getElementById('fDesc').value = '';
+    document.getElementById('fPriority').value = 'متوسطة';
+    document.getElementById('fStart').value = '';
+    document.getElementById('fDue').value = '';
+    document.getElementById('changeSection').style.display = 'none';
+    document.getElementById('saveBtn').style.display = 'inline-block';
+    document.getElementById('taskModal').classList.add('open');
+}
+
+async function saveTask() {
+    let name = document.getElementById('fName').value.trim();
+    if (!name) return toast('اسم الموضوع مطلوب', 'error');
+    if (!document.getElementById('fStart').value) return toast('تاريخ البدء مطلوب', 'error');
+    while (true) {
+        try {
+            await api('POST', '/tasks', {
+                name,
+                description: document.getElementById('fDesc').value.trim(),
+                priority:    document.getElementById('fPriority').value,
+                startDate:   document.getElementById('fStart').value,
+                dueDate:     document.getElementById('fDue').value,
+                deptId:      user.deptId
+            });
+            closeModal('taskModal');
+            await loadTasks();
+            toast('تم إضافة الموضوع', 'success');
+            break;
+        } catch(e) {
+            if (e.status === 409) {
+                const newName = prompt(e.message + '\n\nأدخل اسمًا مختلفًا للموضوع:', name);
+                if (!newName) break;
+                name = newName.trim();
+                if (!name) break;
+                document.getElementById('fName').value = name;
+            } else {
+                toast(e.message, 'error');
+                break;
+            }
+        }
+    }
+}
+
+// ── Task Detail ───────────────────────────────────────────────────────────────
+
+async function openDetail(id) {
+    currentTask = tasks.find(t => t.id === id);
+    if (!currentTask) return;
+
+    // mark seen
+    if (currentTask.isNewForEmployee) {
+        await api('PATCH', `/tasks/${id}/seen`);
+        currentTask.isNewForEmployee = false;
+        renderTasks();
+    }
+
+    renderDetail();
+    document.getElementById('detailModal').classList.add('open');
+}
+
+function renderDetail() {
+    const t = currentTask;
+    document.getElementById('detailTitle').textContent = t.name;
+
+    document.getElementById('detailInfo').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;">
+            <div><span style="color:#888;">الأولوية:</span> ${priorityBadge(t.priority)}</div>
+            <div><span style="color:#888;">الحالة:</span> ${statusBadge(t.status)}</div>
+            <div><span style="color:#888;">تاريخ البدء:</span> ${t.startDate || '-'}</div>
+            <div><span style="color:#888;">المدة:</span> ${delayBadge(t)}</div>
+            <div><span style="color:#888;">تاريخ الاستحقاق:</span> ${t.dueDate || '-'}</div>
+            <div><span style="color:#888;">تاريخ مقترح:</span> ${t.suggestedDueDate || '-'}</div>
+            <div style="grid-column:1/-1;"><span style="color:#888;">الوصف:</span> ${t.description || '-'}</div>
+            ${t.assignedTo ? `<div style="grid-column:1/-1;"><span style="color:#888;">مُحال من المدير إلى:</span> ${t.assignedTo}</div>` : ''}
+        </div>`;
+
+    // pending changes
+    const pSection = document.getElementById('pendingChangesSection');
+    if (t.pendingChanges.length) {
+        pSection.style.display = 'block';
+        document.getElementById('pendingChangesList').innerHTML = t.pendingChanges.map(c => `
+            <div style="background:#fffde7;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:13px;">
+                <strong>${fieldLabel(c.field)}:</strong> ${c.old_value} ← <span style="color:#e65100;">${c.new_value}</span>
+                <span style="color:#aaa;font-size:11px;margin-right:8px;">${formatDate(c.requested_at)}</span>
+            </div>`).join('');
+    } else {
+        pSection.style.display = 'none';
+    }
+
+    // guidances
+    const gl = document.getElementById('guidanceList');
+    if (!t.guidances.length) {
+        gl.innerHTML = '<p style="color:#aaa;font-size:13px;">لا توجد تعليقات بعد</p>';
+    } else {
+        gl.innerHTML = t.guidances.map(g => {
+            const isMine = g.added_by === user.name;
+            const isPending = !g.approved && isMine;
+            return `<div class="guidance-item${isPending ? ' pending' : ''}${isMine ? ' mine' : ''}">
+                <div class="guidance-meta">
+                    <span>${g.added_by} ${roleLabel(g.added_by_role)}</span>
+                    <span>${formatDate(g.timestamp)}</span>
+                </div>
+                <div class="guidance-text">${g.text}</div>
+                ${isPending ? '<div class="pending-label">⏳ بانتظار اعتماد المدير</div>' : ''}
+            </div>`;
+        }).join('');
+    }
+
+    document.getElementById('commentForm').style.display = 'none';
+
+    const foot = document.getElementById('detailFoot');
+    const hasDeleteRequest = t.pendingChanges.some(c => c.field === 'delete');
+    if (t.approved === 0) {
+        foot.innerHTML = `
+            <button class="btn btn-secondary" onclick="closeModal('detailModal')">إغلاق</button>
+            <span style="font-size:13px;color:#888;">بانتظار اعتماد المدير</span>`;
+    } else if (t.approved === -1) {
+        foot.innerHTML = `
+            <button class="btn btn-secondary" onclick="closeModal('detailModal')">إغلاق</button>
+            <span style="font-size:13px;color:#c62828;">تم رفض الموضوع من المدير</span>`;
+    } else {
+        foot.innerHTML = `
+            <button class="btn btn-secondary" onclick="closeModal('detailModal')">إغلاق</button>
+            ${hasDeleteRequest
+                ? '<span style="font-size:13px;color:#c62828;">طلب الحذف بانتظار المدير</span>'
+                : '<button class="btn btn-danger" onclick="requestDelete()">طلب حذف</button>'}
+            <button class="btn btn-warning" onclick="openEditMode()">طلب تعديل</button>`;
+    }
+}
+
+async function requestDelete() {
+    showConfirm('طلب حذف الموضوع', 'سيتم إرسال طلب الحذف للمدير للاعتماد.', async () => {
+        try {
+            await api('POST', `/tasks/${currentTask.id}/request-delete`);
+            closeModal('detailModal');
+            await loadTasks();
+            toast('تم إرسال طلب الحذف للمدير', 'info');
+        } catch(e) { toast(e.message, 'error'); }
+    });
+}
+
+function updateChangeInput() {
+    const field = document.getElementById('changeField').value;
+    const wrap  = document.getElementById('changeValueWrap');
+    const t     = currentTask || {};
+    if (field === 'status') {
+        wrap.innerHTML = `<select id="changeValueInput">
+            <option${t.status==='جديد'?' selected':''}>جديد</option>
+            <option${t.status==='قيد التنفيذ'?' selected':''}>قيد التنفيذ</option>
+            <option${t.status==='مكتمل'?' selected':''}>مكتمل</option>
+        </select>`;
+    } else if (field === 'priority') {
+        wrap.innerHTML = `<select id="changeValueInput">
+            <option${t.priority==='عالية'?' selected':''}>عالية</option>
+            <option${t.priority==='متوسطة'?' selected':''}>متوسطة</option>
+            <option${t.priority==='منخفضة'?' selected':''}>منخفضة</option>
+        </select>`;
+    } else if (field === 'suggestedDueDate') {
+        wrap.innerHTML = `<input type="date" id="changeValueInput" value="${t.suggestedDueDate||''}">`;
+    } else {
+        wrap.innerHTML = `<textarea id="changeValueInput" rows="3">${t.description||''}</textarea>`;
+    }
+}
+
+function openEditMode() {
+    closeModal('detailModal');
+    document.getElementById('editId').value = currentTask.id;
+    document.getElementById('modalTitle').textContent = 'طلب تعديل — ' + currentTask.name;
+    document.getElementById('fName').value = currentTask.name;
+    document.getElementById('fDesc').value = currentTask.description || '';
+    document.getElementById('fPriority').value = currentTask.priority;
+    document.getElementById('fDue').value = currentTask.dueDate || '';
+    document.getElementById('changeField').value = 'status';
+    updateChangeInput();
+    document.getElementById('changeSection').style.display = 'block';
+    document.getElementById('saveBtn').style.display = 'none';
+    document.getElementById('taskModal').classList.add('open');
+}
+
+async function submitChange() {
+    const field    = document.getElementById('changeField').value;
+    const input    = document.getElementById('changeValueInput');
+    const newValue = input ? input.value.trim() : '';
+    if (!newValue) return toast('أدخل القيمة الجديدة', 'error');
+    try {
+        await api('POST', `/tasks/${currentTask.id}/request-change`, { field, newValue });
+        closeModal('taskModal');
+        await loadTasks();
+        toast('تم إرسال طلب التعديل للمدير', 'info');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+// ── Comments ──────────────────────────────────────────────────────────────────
+
+function openAddComment() {
+    document.getElementById('commentForm').style.display = 'block';
+    document.getElementById('commentText').value = '';
+    document.getElementById('commentText').focus();
+}
+
+async function submitComment() {
+    const text = document.getElementById('commentText').value.trim();
+    if (!text) return;
+    try {
+        await api('POST', `/tasks/${currentTask.id}/guidances`, { text });
+        tasks = await api('GET', '/tasks/my');
+        currentTask = tasks.find(t => t.id === currentTask.id);
+        renderDetail();
+        renderTasks();
+    } catch(e) { alert(e.message); }
+}
+
+// ── Excel Export ──────────────────────────────────────────────────────────────
+
+function exportExcel() {
+    if (!tasks.length) return toast('لا توجد مواضيع للتصدير', 'warning');
+    const rows = [['#', 'الموضوع', 'الوصف', 'الأولوية', 'الحالة', 'تاريخ البدء', 'تاريخ الاستحقاق', 'التاريخ المقترح', 'عدد التعليقات']];
+    tasks.forEach((t, i) => rows.push([
+        i + 1, t.name, t.description || '', t.priority, t.status,
+        t.startDate || '', t.dueDate || '', t.suggestedDueDate || '', t.guidances.length
+    ]));
+    downloadCSV(rows, `مواضيعي_${today()}`);
+}
+
+function downloadCSV(rows, filename) {
+    const bom = '﻿';
+    const csv = bom + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = filename + '.csv';
+    a.click();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function fieldLabel(f) {
+    return { status: 'الحالة', description: 'الوصف', priority: 'الأولوية', suggestedDueDate: 'التاريخ المقترح' }[f] || f;
+}
+function roleLabel(r) {
+    return { manager: '(مدير)', deputy: '(وكيل)', employee: '' }[r] || '';
+}
+function formatDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' });
+}
+function today() { return new Date().toISOString().slice(0, 10); }
+
+function openPwdModal(){
+    ['pwdCurrent','pwdNew','pwdConfirm'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('pwdError').style.display='none';
+    document.getElementById('pwdModal').classList.add('open');
+}
+
+async function changePassword(){
+    const current=document.getElementById('pwdCurrent').value;
+    const newPwd=document.getElementById('pwdNew').value;
+    const confirm=document.getElementById('pwdConfirm').value;
+    const errEl=document.getElementById('pwdError');
+    errEl.style.display='none';
+    if(!current||!newPwd) return showPwdError('يرجى ملء جميع الحقول');
+    if(newPwd!==confirm) return showPwdError('كلمة المرور الجديدة غير متطابقة');
+    if(newPwd.length<6) return showPwdError('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل');
+    try{
+        await api('POST','/auth/change-password',{currentPassword:current,newPassword:newPwd});
+        closeModal('pwdModal');
+        toast('تم تغيير كلمة المرور بنجاح', 'success');
+    }catch(e){showPwdError(e.message);}
+}
+function showPwdError(msg){const el=document.getElementById('pwdError');el.textContent=msg;el.style.display='block';}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function logout() {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    location.href = '/';
+}
+
+function printPage() {
+    const count = document.querySelectorAll('#taskBody tr').length;
+    document.getElementById('printMeta').textContent =
+        'عدد المواضيع: ' + count + '   —   ' +
+        new Date().toLocaleDateString('ar-SA', {year:'numeric',month:'long',day:'numeric'});
+    window.print();
+}
+
+init();
+lucide.createIcons();
+</script>
+</body>
+</html>

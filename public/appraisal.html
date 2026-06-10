@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متابعة الأداء</title>
+<script src="/vendor/lucide.min.js"></script>
+<script src="/vendor/xlsx.full.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#fdf8f0;color:#1a1a2e;min-height:100vh;}
+.topbar{background:linear-gradient(135deg,#bf360c,#e64a19);color:#fff;padding:13px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.topbar h2{font-size:17px;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap;}
+.btn-top{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 13px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;}
+.btn-top:hover{background:rgba(255,255,255,.25);}
+.role-badge{background:rgba(255,255,255,.2);padding:2px 9px;border-radius:20px;font-size:11px;}
+.content{max-width:1300px;margin:0 auto;padding:16px 14px;}
+/* Cycle bar */
+.cycle-bar{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:14px 16px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.cycle-bar select{padding:8px 12px;border:1.5px solid #d0d0d0;border-radius:7px;font-family:inherit;font-size:13px;min-width:200px;}
+.cycle-bar select:focus{outline:none;border-color:#e64a19;}
+.cs-open{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#e8f5e9;color:#1b5e20;}
+.cs-closed{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f5f5f5;color:#666;}
+.btn-o{background:linear-gradient(135deg,#bf360c,#e64a19);color:#fff;border:none;padding:8px 16px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;}
+.btn-o:hover{opacity:.9;}
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
+.stat-card{background:#fff;border-radius:9px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center;border-top:3px solid #e64a19;}
+.stat-num{font-size:24px;font-weight:700;color:#e64a19;}
+.stat-lbl{font-size:11px;color:#888;margin-top:2px;}
+/* Tabs */
+.tabs{display:flex;gap:2px;border-bottom:2px solid #ffe0b2;margin-bottom:16px;}
+.tab{padding:9px 16px;cursor:pointer;font-size:13px;font-weight:600;color:#666;border-bottom:3px solid transparent;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;white-space:nowrap;}
+.tab.active{color:#bf360c;border-bottom-color:#bf360c;}
+/* Card */
+.card{background:#fff;border-radius:11px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:16px;margin-bottom:16px;}
+.card-title{font-size:15px;font-weight:700;color:#bf360c;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+/* Filters */
+.filter-bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:12px;}
+.filter-bar select,.filter-bar input{padding:7px 10px;border:1.5px solid #d0d0d0;border-radius:7px;font-family:inherit;font-size:13px;}
+.filter-bar select:focus,.filter-bar input:focus{outline:none;border-color:#e64a19;}
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#fff3e0;padding:8px 10px;text-align:right;font-weight:700;color:#bf360c;border-bottom:2px solid #ffe0b2;white-space:nowrap;}
+td{padding:7px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+tr:hover td{background:#fff8f2;}
+.empty{text-align:center;color:#aaa;padding:32px 0;font-size:13px;}
+/* Bands */
+.band{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.b5{background:#d3f9d8;color:#2b8a3e;}
+.b4{background:#e8f5e9;color:#2f9e44;}
+.b3{background:#e3f2fd;color:#1971c2;}
+.b2{background:#fff3e0;color:#d9480f;}
+.b1{background:#ffebee;color:#c92a2a;}
+/* Actions */
+.act{background:none;border:none;cursor:pointer;padding:3px 7px;border-radius:5px;font-size:12px;font-family:inherit;}
+.act-e{background:#fff3e0;color:#bf360c;}.act-e:hover{background:#ffe0b2;}
+.act-d{background:#f5f5f5;color:#666;}.act-d:hover{background:#e0e0e0;}
+/* Dashboard */
+.agency-box{background:linear-gradient(135deg,#bf360c,#e64a19);color:#fff;border-radius:11px;padding:18px 20px;margin-bottom:16px;}
+.agency-name{font-size:18px;font-weight:700;margin-bottom:4px;}
+.agency-meta{font-size:13px;opacity:.85;}
+.agency-stats{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:13px;}
+.agency-stat{background:rgba(255,255,255,.15);padding:8px 14px;border-radius:8px;}
+.agency-stat strong{font-size:18px;display:block;}
+.dist-bar{display:flex;border-radius:8px;overflow:hidden;height:32px;margin:10px 0 6px;}
+.dist-bar div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;transition:width .3s;}
+.dist-labels{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;}
+.dept-card{border:1.5px solid #ffe0b2;border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.dept-card-hdr{background:#fff3e0;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.dept-card-hdr h4{font-size:14px;font-weight:700;color:#bf360c;}
+.dept-card-body{padding:0;}
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:13px;padding:24px 22px;width:680px;max-width:95vw;max-height:92vh;overflow-y:auto;}
+.modal h3{font-size:15px;color:#bf360c;margin-bottom:16px;}
+.fr{margin-bottom:11px;}
+.fr label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:4px;}
+.fr input,.fr select{width:100%;padding:8px 11px;border:1.5px solid #d0d0d0;border-radius:7px;font-family:inherit;font-size:13px;}
+.fr input:focus,.fr select:focus{outline:none;border-color:#e64a19;}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mf{display:flex;gap:9px;margin-top:14px;}
+.btn-s{flex:1;padding:9px;background:linear-gradient(135deg,#bf360c,#e64a19);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
+.btn-s:hover{opacity:.9;}
+.btn-c{flex:1;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;}
+/* Scoring modal specifics */
+.emp-header{background:#fff3e0;border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:13px;}
+.emp-header strong{font-size:16px;display:block;color:#bf360c;margin-bottom:4px;}
+.weight-bar-wrap{background:#f0f0f0;border-radius:20px;height:10px;margin:6px 0 4px;overflow:hidden;}
+.weight-bar{height:10px;border-radius:20px;transition:width .3s,background .3s;}
+.w-alert{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:10px;}
+.w-ok  {background:#e8f5e9;color:#1b5e20;}
+.w-warn{background:#fff3e0;color:#e65100;}
+.w-over{background:#ffebee;color:#c62828;}
+.obj-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;}
+.obj-tbl th{background:#fff3e0;padding:6px 8px;text-align:right;font-weight:700;color:#bf360c;border-bottom:2px solid #ffe0b2;}
+.obj-tbl td{padding:5px 6px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+.obj-tbl input{width:100%;padding:4px 7px;border:1.5px solid #e0e0e0;border-radius:5px;font-family:inherit;font-size:12px;}
+.obj-tbl input:focus{outline:none;border-color:#e64a19;}
+.btn-add-obj{background:#fff3e0;color:#bf360c;border:none;border-radius:6px;padding:5px 13px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;margin-top:6px;}
+.btn-add-obj:hover{background:#ffe0b2;}
+.btn-rm{background:none;border:none;color:#c62828;cursor:pointer;font-size:16px;padding:0 4px;}
+.avg-display{background:#f0f7f0;border:1.5px solid #c8e6c9;border-radius:8px;padding:10px 14px;text-align:center;margin:10px 0;}
+.avg-display .val{font-size:28px;font-weight:700;color:#1b5e20;}
+.impact-box{border-radius:8px;padding:9px 12px;font-size:12px;margin-top:8px;}
+@media(max-width:640px){.f2{grid-template-columns:1fr;}}
+th.sortable{cursor:pointer;user-select:none;}
+th.sortable:hover{background:#ffe8d6;}
+th.sort-asc::after{content:' ▲';font-size:9px;opacity:.7;}
+th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
+/* ── Print ─────────────────────────────────────────────────────────────── */
+.print-header{display:none;}
+.btn-print{background:#fff;border:1.5px solid #bf360c;color:#bf360c;padding:7px 13px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:6px;}
+.btn-print:hover{background:#fbe9e7;}
+.btn-print svg{width:14px;height:14px;}
+.btn-export{background:#fff;border:1.5px solid #2e7d32;color:#2e7d32;padding:7px 13px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:6px;}
+.btn-export:hover{background:#e8f5e9;}
+.btn-export svg{width:14px;height:14px;}
+@media print{
+    @page{size:A4 portrait;margin:12mm 15mm;}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+    body{background:#fff!important;}
+    .topbar,.cycle-bar,.tabs,.filter-bar,.btn-print,.btn-export,
+    #btnNewCycle,#btnToggleCycle,#btnAddEmp,#btnSettings,
+    #tabDashboard,.bs-overlay,.toast-container,.overlay,.no-print,
+    #actColH,td:last-child{display:none!important;}
+    .print-header{display:block!important;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #bf360c;}
+    .print-header h2{font-size:15px;color:#bf360c;}
+    .print-header p{font-size:11px;color:#555;margin-top:3px;}
+    .content{max-width:100%!important;padding:0!important;}
+    .card{box-shadow:none!important;border:none!important;border-radius:0!important;}
+    table{width:100%!important;}
+    th,td{font-size:10px!important;padding:5px 6px!important;border:1px solid #ccc!important;}
+    th{background:#fff3e0!important;color:#bf360c!important;}
+    thead{display:table-header-group;}
+    tr{page-break-inside:avoid;}
+    .band{font-size:9px!important;padding:1px 5px!important;}
+    .act{display:none!important;}
+}
+/* Icons */
+.btn-top i,.btn-o i,.btn-add i,.act i,
+.btn-top svg,.btn-o svg,.btn-add svg,.act svg{width:14px;height:14px;flex-shrink:0;vertical-align:middle;}
+/* Toast */
+.toast-container{position:fixed;bottom:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:9px;font-size:13px;min-width:220px;max-width:340px;box-shadow:0 4px 14px rgba(0,0,0,.15);animation:toastIn .3s ease;background:#fff;border:1.5px solid #eee;color:#333;}
+.toast.success{background:#f0faf0;border-color:#a5d6a7;color:#1b5e20;}
+.toast.error{background:#fff5f5;border-color:#ef9a9a;color:#b71c1c;}
+.toast.warning{background:#fffde7;border-color:#ffe082;color:#e65100;}
+.toast.info{background:#e3f2fd;border-color:#90caf9;color:#0d47a1;}
+.toast-close{margin-right:auto;background:none;border:none;cursor:pointer;font-size:16px;color:inherit;opacity:.6;padding:0 2px;line-height:1;}
+.toast-close:hover{opacity:1;}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;}}
+/* Skeleton */
+.skel{display:inline-block;height:12px;border-radius:6px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+/* Bottom-sheet */
+.bs-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;align-items:flex-end;justify-content:center;}
+.bs-overlay.open{display:flex;}
+.bs-box{background:#fff;border-radius:16px 16px 0 0;padding:22px 20px 28px;width:100%;max-width:480px;box-shadow:0 -4px 24px rgba(0,0,0,.15);}
+.bs-title{font-size:15px;font-weight:700;color:#bf360c;margin-bottom:6px;}
+.bs-msg{font-size:13px;color:#555;margin-bottom:18px;}
+.bs-actions{display:flex;gap:10px;}
+.btn-s-bs{flex:1;padding:10px;background:linear-gradient(135deg,#bf360c,#e64a19);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
+.btn-c-bs{flex:1;padding:10px;background:#f0f0f0;border:none;border-radius:9px;font-size:13px;font-family:inherit;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h2>متابعة الأداء</h2>
+  <div class="topbar-right">
+    <span id="topName"></span>
+    <span class="role-badge" id="topRole"></span>
+    <span id="topDept" style="font-size:11px;opacity:.8;"></span>
+    <button class="btn-top" id="btnSettings" style="display:none;" onclick="openSettings()"><i data-lucide="settings"></i> الإعدادات</button>
+    <button class="btn-top" onclick="location.href='/hub.html'"><i data-lucide="home"></i> الرئيسية</button>
+    <button class="btn-top" onclick="logout()"><i data-lucide="log-out"></i> خروج</button>
+  </div>
+</div>
+
+<div class="content">
+  <!-- Cycle bar -->
+  <div class="cycle-bar">
+    <select id="cycleSelect" onchange="onCycleChange()">
+      <option value="">— اختر دورة التقييم —</option>
+    </select>
+    <span id="cycleBadge"></span>
+    <button class="btn-o" id="btnNewCycle" style="display:none;" onclick="openCycleModal()"><i data-lucide="plus-circle"></i> دورة جديدة</button>
+    <button class="btn-o" id="btnToggleCycle" style="display:none;" onclick="toggleCycle()"></button>
+    <button class="btn-o" id="btnAddEmp" style="display:none;" onclick="openEntryModal()"><i data-lucide="user-plus"></i> إضافة موظف</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('staff',this)">الموظفون</button>
+    <button class="tab" onclick="switchTab('dashboard',this)">لوحة المعلومات</button>
+  </div>
+
+  <!-- STAFF TAB -->
+  <div id="tabStaff">
+    <div class="card">
+      <div class="print-header">
+        <h2 id="printTitle">متابعة الأداء</h2>
+        <p id="printMeta"></p>
+      </div>
+      <div class="filter-bar">
+        <select id="fDept" onchange="renderStaff()"><option value="">جميع الإدارات</option></select>
+        <input type="text" id="fSrch" placeholder="بحث بالاسم..." oninput="renderStaff()" style="min-width:140px;">
+        <button class="btn-print" onclick="printPage()" style="margin-right:auto;"><i data-lucide="printer"></i> طباعة</button>
+        <button class="btn-export" onclick="exportXLSX()"><i data-lucide="upload"></i> تصدير</button>
+      </div>
+      <div id="staffProgress" style="font-size:12px;color:#888;margin-bottom:8px;"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>#</th>
+            <th class="sortable" id="deptColH" onclick="setStaffSort('dept')">الإدارة</th>
+            <th class="sortable" id="th-sname" onclick="setStaffSort('name')">الاسم</th>
+            <th class="sortable" id="th-stitle" onclick="setStaffSort('title')">المسمى الوظيفي</th>
+            <th class="sortable" id="th-sgrade" onclick="setStaffSort('grade')">الدرجة</th>
+            <th style="text-align:center;">الأهداف</th>
+            <th style="text-align:center;" title="عدد المعاملات الحالية">معاملات</th>
+            <th style="text-align:center;" title="عدد المواضيع المسندة">مواضيع</th>
+            <th class="sortable" style="text-align:center;" id="th-savg" onclick="setStaffSort('avg')">المعدل</th>
+            <th style="text-align:center;">التصنيف</th>
+            <th id="actColH"></th>
+          </tr></thead>
+          <tbody id="staffBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="tabDashboard" style="display:none;">
+    <div id="dashContent"><p class="empty" style="padding:40px;">اختر دورة تقييم أولاً</p></div>
+  </div>
+</div>
+
+<div id="toastCont" class="toast-container"></div>
+<div class="bs-overlay" id="bsOverlay">
+  <div class="bs-box">
+    <div class="bs-title" id="bsTitle"></div>
+    <div class="bs-msg" id="bsMsg"></div>
+    <div class="bs-actions">
+      <button class="btn-s-bs" id="bsYes">تأكيد</button>
+      <button class="btn-c-bs" id="bsNo">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CYCLE MODAL ══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="cycleOv" onclick="if(event.target===this)closeOv('cycleOv')">
+<div class="modal" style="width:380px;">
+  <h3>دورة تقييم جديدة</h3>
+  <div class="fr"><label>اسم الدورة</label><input type="text" id="fCName" placeholder="مثال: تقييم الأداء السنوي 2025"></div>
+  <div class="fr"><label>السنة</label><input type="number" id="fCYear" min="2020" max="2040"></div>
+  <div class="mf">
+    <button class="btn-s" onclick="saveCycle()"><i data-lucide="save"></i> إنشاء</button>
+    <button class="btn-c" onclick="closeOv('cycleOv')"><i data-lucide="x"></i> إلغاء</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ ENTRY MODAL (add employee to cycle) ══════════════════════════════════ -->
+<div class="overlay" id="entryOv" onclick="if(event.target===this)closeOv('entryOv')">
+<div class="modal">
+  <h3 id="eMTitle">إضافة موظف للتقييم</h3>
+  <input type="hidden" id="fEId">
+  <div class="fr" id="empSelRow">
+    <label>الموظف</label>
+    <select id="fEntryEmp" onchange="onEntryEmpChange()"><option value="">— اختر موظفاً —</option></select>
+  </div>
+  <div class="f2">
+    <div class="fr"><label>المسمى الوظيفي</label><input type="text" id="fETitle"></div>
+    <div class="fr"><label>الدرجة</label><input type="text" id="fEGrade"></div>
+  </div>
+  <div style="font-size:13px;font-weight:700;color:#bf360c;margin:14px 0 8px;">الأهداف والمؤشرات</div>
+  <table class="obj-tbl">
+    <thead><tr>
+      <th>الهدف / المؤشر</th><th>المستهدف</th>
+      <th style="width:65px;">الوزن%</th>
+      <th style="width:65px;">الدرجة<br><small style="font-weight:400;font-size:10px;">(1–5)</small></th>
+      <th style="width:30px;"></th>
+    </tr></thead>
+    <tbody id="objBody"></tbody>
+  </table>
+  <div id="weightSum" style="font-size:12px;font-weight:700;margin:5px 0 8px;"></div>
+  <button class="btn-add-obj" onclick="addObjRow()">+ إضافة هدف</button>
+  <div class="avg-display" id="liveAvg" style="display:none;">
+    <div class="val" id="liveAvgVal">—</div>
+    <div style="font-size:12px;color:#666;margin-top:2px;">المعدل المرجّح</div>
+  </div>
+  <div class="mf">
+    <button class="btn-s" onclick="saveEntry()"><i data-lucide="save"></i> حفظ</button>
+    <button class="btn-c" onclick="closeOv('entryOv')"><i data-lucide="x"></i> إلغاء</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ SCORING MODAL ════════════════════════════════════════════════════════ -->
+<div class="overlay" id="scoreOv" onclick="if(event.target===this)closeOv('scoreOv')">
+<div class="modal">
+  <h3>تقييم الموظف</h3>
+  <div class="emp-header" id="scoreEmpHdr"></div>
+  <!-- Weight progress -->
+  <div class="weight-bar-wrap"><div class="weight-bar" id="wBar"></div></div>
+  <div class="w-alert" id="wAlert"></div>
+  <table class="obj-tbl">
+    <thead><tr>
+      <th>#</th><th>الهدف / المؤشر</th><th>المستهدف</th>
+      <th style="width:60px;">الوزن%</th>
+      <th style="width:70px;">الدرجة<br><small style="font-weight:400;font-size:10px;">(1–5)</small></th>
+      <th style="width:70px;">المرجّحة</th>
+    </tr></thead>
+    <tbody id="scoreBody"></tbody>
+  </table>
+  <div class="avg-display">
+    <div class="val" id="scoreAvgVal">—</div>
+    <div style="font-size:12px;color:#666;margin-top:2px;">المعدل المرجّح</div>
+    <div id="scoreBandBadge" style="margin-top:6px;"></div>
+  </div>
+  <div id="agencyImpact"></div>
+  <div class="mf">
+    <button class="btn-s" onclick="saveScore()"><i data-lucide="save"></i> حفظ التقييم</button>
+    <button class="btn-c" onclick="closeOv('scoreOv')"><i data-lucide="x"></i> إغلاق</button>
+  </div>
+</div>
+</div>
+
+<!-- Settings Modal -->
+<div class="overlay" id="settingsOv" onclick="if(event.target===this)closeSettings()">
+<div style="background:#fff;border-radius:14px;padding:32px 28px;width:420px;max-width:95vw;max-height:90vh;overflow-y:auto;">
+  <h3 style="color:#e65100;margin-bottom:20px;">⚙ إعدادات التقييم</h3>
+  <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">المعدل المستهدف للجهة (1–5)</label>
+  <input type="number" id="stTargetAvg" min="1" max="5" step="0.1" style="width:100%;padding:9px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:16px;">
+  <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">نسب توزيع الفئات (%) — المجموع يجب أن يكون 100</label>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px;">
+    <div style="font-size:11px;text-align:center;color:#c92a2a;">غير مرضي</div>
+    <div style="font-size:11px;text-align:center;color:#d9480f;">بحاجة تطوير</div>
+    <div style="font-size:11px;text-align:center;color:#1971c2;">وافق</div>
+    <div style="font-size:11px;text-align:center;color:#2f9e44;">تخطى</div>
+    <div style="font-size:11px;text-align:center;color:#2b8a3e;">مثالي</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px;">
+    <input type="number" id="st1" min="0" max="100" style="padding:7px;border:2px solid #e0e0e0;border-radius:6px;text-align:center;font-size:13px;font-family:inherit;" oninput="updateStTotal()">
+    <input type="number" id="st2" min="0" max="100" style="padding:7px;border:2px solid #e0e0e0;border-radius:6px;text-align:center;font-size:13px;font-family:inherit;" oninput="updateStTotal()">
+    <input type="number" id="st3" min="0" max="100" style="padding:7px;border:2px solid #e0e0e0;border-radius:6px;text-align:center;font-size:13px;font-family:inherit;" oninput="updateStTotal()">
+    <input type="number" id="st4" min="0" max="100" style="padding:7px;border:2px solid #e0e0e0;border-radius:6px;text-align:center;font-size:13px;font-family:inherit;" oninput="updateStTotal()">
+    <input type="number" id="st5" min="0" max="100" style="padding:7px;border:2px solid #e0e0e0;border-radius:6px;text-align:center;font-size:13px;font-family:inherit;" oninput="updateStTotal()">
+  </div>
+  <div id="stTotal" style="font-size:12px;margin-bottom:16px;text-align:center;"></div>
+  <div style="display:flex;gap:10px;">
+    <button onclick="saveSettings()" style="flex:1;padding:10px;background:linear-gradient(135deg,#e65100,#f57c00);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;">حفظ</button>
+    <button onclick="closeSettings()" style="flex:1;padding:10px;background:#f0f0f0;border:none;border-radius:8px;font-size:14px;font-family:inherit;cursor:pointer;">إلغاء</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ── Icon helpers ──────────────────────────────────────────────────────────────
+const SVG={
+  check:  '<path d="M20 6 9 17l-5-5"/>',
+  x:      '<path d="M18 6 6 18M6 6l12 12"/>',
+  trash:  '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  star:   '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+};
+function ico(name,size=14){
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;">${SVG[name]||''}</svg>`;
+}
+
+function toast(msg,type='info',dur=3500){
+  const c=document.getElementById('toastCont');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  const icon={success:'check-circle',error:'x-circle',warning:'alert-triangle',info:'info'}[type]||'info';
+  t.innerHTML=`<i data-lucide="${icon}" style="width:16px;height:16px;flex-shrink:0;"></i><span>${msg}</span><button class="toast-close" onclick="this.closest('.toast').remove()">×</button>`;
+  c.appendChild(t);
+  lucide.createIcons({nodes:[t]});
+  setTimeout(()=>{t.style.animation='toastOut .3s ease forwards';setTimeout(()=>t.remove(),300);},dur);
+}
+
+function showConfirm(title,msg,onYes){
+  document.getElementById('bsTitle').textContent=title;
+  document.getElementById('bsMsg').textContent=msg;
+  document.getElementById('bsYes').onclick=()=>{document.getElementById('bsOverlay').classList.remove('open');onYes();};
+  document.getElementById('bsNo').onclick=()=>document.getElementById('bsOverlay').classList.remove('open');
+  document.getElementById('bsOverlay').classList.add('open');
+}
+
+function showSkeleton(){
+  document.getElementById('staffBody').innerHTML=Array(5).fill(0).map(()=>
+    `<tr>${Array(11).fill(0).map((_,i)=>`<td><span class="skel" style="width:${[20,50,60,50,40,45,30,30,30,40,30][i]}%;"></span></td>`).join('')}</tr>`
+  ).join('');
+}
+
+const API='/api';
+let apprSettings={ targetAvg:3.5, bandTargets:[5,10,70,10,5] };
+let curUser=null, allCycles=[], allEntries=[], allEmps=[], allDepts=[], workload={tasks:{},transactions:{}};
+let curCycleId=null, scoreEntryId=null, objRows=[];
+let staffSortCol=null, staffSortDir='asc';
+
+// ── KPI Templates ─────────────────────────────────────────────────────────────
+const GM_KPIS=[
+  {name:'تطوير وتنفيذ خطة الإدارة السنوية',        target:'90%',weight:30,score:''},
+  {name:'إنجاز المبادرات والأهداف الاستراتيجية',   target:'85%',weight:30,score:''},
+  {name:'تطوير كفاءات الفريق والأداء المؤسسي',    target:'80%',weight:20,score:''},
+  {name:'جودة التقارير والتواصل المؤسسي',          target:'85%',weight:20,score:''}
+];
+const STAFF_KPIS=[
+  {name:'إنجاز المهام والمشاريع في الوقت المحدد', target:'90%',weight:30,score:''},
+  {name:'جودة المخرجات والتقارير المُنجزة',        target:'85%',weight:25,score:''},
+  {name:'المشاركة في برامج التطوير والتدريب',      target:'80%',weight:25,score:''},
+  {name:'التعاون وروح الفريق والمبادرة',           target:'75%',weight:20,score:''}
+];
+
+// ── Bands ─────────────────────────────────────────────────────────────────────
+const BAND_NAMES=['','غير مرضي','بحاجة إلى تطوير','وافق التوقعات','تخطى التوقعات','مثالي'];
+const BAND_COLORS=['','#c92a2a','#d9480f','#1971c2','#2f9e44','#2b8a3e'];
+const BAND_CSS=['','b1','b2','b3','b4','b5'];
+function getBandNum(avg){return avg===null?null:Math.min(5,Math.max(1,Math.round(avg)));}
+
+function getAvg(entry){
+  const objs=entry.objectives||[];
+  if(!objs.length) return null;
+  let wS=0,wT=0;
+  objs.forEach(o=>{
+    const sc=parseFloat(o.score),wt=parseFloat(o.weight);
+    if(!isNaN(sc)&&!isNaN(wt)&&wt>0){wS+=sc*wt;wT+=wt;}
+  });
+  return wT>0?wS/wT:null;
+}
+
+function bandBadge(avg){
+  const b=getBandNum(avg);
+  if(!b) return '<span style="font-size:11px;color:#aaa;">لم يُقيَّم</span>';
+  return `<span class="band ${BAND_CSS[b]}">${BAND_NAMES[b]}</span>`;
+}
+
+// ── Settings (API) ────────────────────────────────────────────────────────────
+function getTarget(){return parseFloat(apprSettings.targetAvg)||3.5;}
+function getDist(){return apprSettings.bandTargets||[5,10,70,10,5];}
+
+function openSettings(){
+  const s=apprSettings;
+  document.getElementById('stTargetAvg').value=s.targetAvg||3.5;
+  const bt=s.bandTargets||[5,10,70,10,5];
+  [1,2,3,4,5].forEach(i=>document.getElementById('st'+i).value=bt[i-1]||0);
+  updateStTotal();
+  document.getElementById('settingsOv').classList.add('open');
+}
+function closeSettings(){document.getElementById('settingsOv').classList.remove('open');}
+function updateStTotal(){
+  const sum=[1,2,3,4,5].reduce((s,i)=>s+(parseInt(document.getElementById('st'+i).value)||0),0);
+  const el=document.getElementById('stTotal');
+  el.textContent='المجموع: '+sum+'%';
+  el.style.color=sum===100?'#2e7d32':'#c92a2a';
+}
+async function saveSettings(){
+  const sum=[1,2,3,4,5].reduce((s,i)=>s+(parseInt(document.getElementById('st'+i).value)||0),0);
+  if(sum!==100){toast('مجموع نسب الفئات يجب أن يكون 100%','error');return;}
+  const targetAvg=parseFloat(document.getElementById('stTargetAvg').value);
+  const bandTargets=[1,2,3,4,5].map(i=>parseInt(document.getElementById('st'+i).value)||0);
+  try{
+    await api('/appraisals/settings',{method:'PUT',body:JSON.stringify({targetAvg,bandTargets})});
+    apprSettings={targetAvg,bandTargets};
+    closeSettings();
+    toast('تم حفظ الإعدادات','success');
+    if(curCycleId) renderDashboard();
+  }catch(e){toast(e.message,'error');}
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function tok(){return sessionStorage.getItem('token');}
+function getUser(){return JSON.parse(sessionStorage.getItem('user')||'null');}
+function logout(){sessionStorage.removeItem('token');sessionStorage.removeItem('user');location.href='/';}
+function isManager(){return ['manager','deputy','admin'].includes(curUser.role);}
+function isPowerUser(){return ['deputy','admin'].includes(curUser.role);}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+function deptName(id){const d=allDepts.find(d=>d.id===id);return d?d.name:'';}
+
+async function api(ep,opts={}){
+  const r=await fetch(API+ep,{...opts,headers:{'Authorization':'Bearer '+tok(),'Content-Type':'application/json',...(opts.headers||{})}});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||'خطأ');
+  return d;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tabStaff').style.display=tab==='staff'?'':'none';
+  document.getElementById('tabDashboard').style.display=tab==='dashboard'?'':'none';
+  if(tab==='dashboard') renderDashboard();
+}
+
+// ── Cycle Bar ─────────────────────────────────────────────────────────────────
+async function onCycleChange(){
+  curCycleId=document.getElementById('cycleSelect').value||null;
+  const cyc=allCycles.find(c=>c.id===curCycleId);
+  const badge=document.getElementById('cycleBadge');
+  const btnT=document.getElementById('btnToggleCycle');
+  const btnA=document.getElementById('btnAddEmp');
+  if(cyc){
+    const open=cyc.status==='open';
+    badge.innerHTML=`<span class="${open?'cs-open':'cs-closed'}">${open?'مفتوحة':'مغلقة'}</span>`;
+    if(isManager()){
+      btnT.style.display=''; btnT.textContent=open?'إغلاق الدورة':'إعادة فتح الدورة';
+      btnA.style.display=open?'':'none';
+    }
+  } else {
+    badge.innerHTML='';
+    if(isManager()){btnT.style.display='none';btnA.style.display='none';}
+  }
+  if(curCycleId){
+    allEntries=await api(`/appraisals/entries?cycleId=${curCycleId}`);
+    try{workload=await api('/appraisals/workload'+(cyc&&cyc.year?'?year='+cyc.year:''));}catch(e){workload={tasks:{},transactions:{}};}
+  } else {
+    allEntries=[];
+    workload={tasks:{},transactions:{}};
+  }
+  renderStaff();
+  const active=document.querySelector('.tab.active')?.dataset?.tab;
+  if(document.getElementById('tabDashboard').style.display!=='none') renderDashboard();
+}
+
+async function toggleCycle(){
+  if(!curCycleId) return;
+  const cyc=allCycles.find(c=>c.id===curCycleId);
+  const action=cyc.status==='open'?'close':'reopen';
+  try{await api(`/appraisals/cycles/${curCycleId}/${action}`,{method:'PATCH'});await loadCycles();await onCycleChange();toast('تم تحديث حالة الدورة','success');}
+  catch(e){toast(e.message,'error');}
+}
+
+// ── Staff Table ───────────────────────────────────────────────────────────────
+function setStaffSort(col){
+  if(staffSortCol===col) staffSortDir=staffSortDir==='asc'?'desc':'asc';
+  else{staffSortCol=col;staffSortDir='asc';}
+  renderStaff();
+}
+function updateStaffSortInd(){
+  const idMap={dept:'deptColH',name:'th-sname',title:'th-stitle',grade:'th-sgrade',avg:'th-savg'};
+  Object.entries(idMap).forEach(([c,id])=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.classList.remove('sort-asc','sort-desc');
+    if(c===staffSortCol) el.classList.add(staffSortDir==='asc'?'sort-asc':'sort-desc');
+  });
+}
+function renderStaff(){
+  const df=document.getElementById('fDept').value;
+  const sr=document.getElementById('fSrch').value.trim().toLowerCase();
+  const showDept=isPowerUser();
+  document.getElementById('deptColH').style.display=showDept?'':'none';
+  document.getElementById('actColH').textContent=isManager()?'إجراء':'';
+  let rows=allEntries;
+  if(df) rows=rows.filter(e=>e.dept_id==df);
+  if(sr) rows=rows.filter(e=>e.employee_name.toLowerCase().includes(sr));
+  updateStaffSortInd();
+  if(staffSortCol) rows=rows.slice().sort((a,b)=>{
+    let va,vb;
+    if(staffSortCol==='dept')  {va=a.dept_name||'';vb=b.dept_name||'';}
+    else if(staffSortCol==='name')  {va=a.employee_name||'';vb=b.employee_name||'';}
+    else if(staffSortCol==='title') {va=a.title||'';vb=b.title||'';}
+    else if(staffSortCol==='grade') {va=a.grade||'';vb=b.grade||'';}
+    else if(staffSortCol==='avg')   {va=getAvg(a)??-1;vb=getAvg(b)??-1;}
+    else return 0;
+    if(typeof va==='number') return staffSortDir==='asc'?va-vb:vb-va;
+    return staffSortDir==='asc'?va.localeCompare(vb,'ar'):vb.localeCompare(va,'ar');
+  });
+  const scored=rows.filter(e=>getAvg(e)!==null).length;
+  document.getElementById('staffProgress').textContent=curCycleId?`مُقيَّم: ${scored} / ${rows.length}`:' ';
+  const tb=document.getElementById('staffBody');
+  if(!rows.length){
+    tb.innerHTML=`<tr><td colspan="11" class="empty">${curCycleId?'لا يوجد موظفون في هذه الدورة':'اختر دورة أولاً'}</td></tr>`;
+    return;
+  }
+  tb.innerHTML=rows.map((e,i)=>{
+    const avg=getAvg(e);
+    const avgStr=avg!==null?avg.toFixed(2):'—';
+    const sc=e.objectives.filter(o=>o.score!==null&&o.score!=='').length;
+    const txCount=(workload.transactions||{})[e.employee_name]||0;
+    const tskCount=(workload.tasks||{})[e.employee_name]||0;
+    return `<tr>
+      <td>${i+1}</td>
+      <td style="display:${showDept?'':'none'};font-size:11px;color:#888;">${e.dept_name||''}</td>
+      <td style="font-weight:600;">${e.employee_name}</td>
+      <td style="font-size:11px;color:#666;">${e.title||'—'}</td>
+      <td style="font-size:11px;color:#666;">${e.grade||'—'}</td>
+      <td style="text-align:center;font-size:12px;">${e.objectives.length} هدف (${sc} مقيَّم)</td>
+      <td style="text-align:center;font-weight:700;color:${txCount?'#1565c0':'#bbb'};">${txCount||'—'}</td>
+      <td style="text-align:center;font-weight:700;color:${tskCount?'#2e7d32':'#bbb'};">${tskCount||'—'}</td>
+      <td style="text-align:center;">
+        ${avg!==null?`<strong style="color:#1b5e20;">${avgStr}</strong> <span style="color:#f59f00;">★</span>`:'—'}
+      </td>
+      <td style="text-align:center;">${bandBadge(avg)}</td>
+      <td style="white-space:nowrap;">
+        ${isManager()?`
+          <button class="act act-e" onclick="openScoreModal('${e.id}')">${ico('star')} تقييم</button>
+          <button class="act act-e" onclick="openEntryModal('${e.id}')" style="background:#e3f2fd;color:#1565c0;">${ico('pencil')} تعديل</button>
+          <button class="act act-d" onclick="delEntry('${e.id}')">${ico('trash')} حذف</button>
+        `:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const dc=document.getElementById('dashContent');
+  if(!curCycleId){dc.innerHTML='<p class="empty" style="padding:40px;">اختر دورة تقييم أولاً</p>';return;}
+  const cyc=allCycles.find(c=>c.id===curCycleId);
+  const target=getTarget(), dist=getDist();
+  const avgs=allEntries.map(e=>getAvg(e)).filter(a=>a!==null);
+  const agAvg=avgs.length?avgs.reduce((s,a)=>s+a,0)/avgs.length:null;
+  const gap=agAvg!==null?agAvg-target:null;
+  const gapStr=gap!==null?(gap>=0?'+':'')+gap.toFixed(2):'—';
+  const gapCls=gap===null?'':gap>0.05?'color:#c62828':Math.abs(gap)<=0.05?'color:#2e7d32':'color:#1565c0';
+  // Band distribution
+  const bandCounts=[0,0,0,0,0,0];
+  allEntries.forEach(e=>{const a=getAvg(e);if(a!==null){const b=getBandNum(a);bandCounts[b]++;}});
+  const total=allEntries.length||1;
+  const pcts=[1,2,3,4,5].map(b=>Math.round(bandCounts[b]/allEntries.length*100)||0);
+  const barSegs=[1,2,3,4,5].map((b,i)=>
+    pcts[i]?`<div style="width:${pcts[i]}%;background:${BAND_COLORS[b]};min-width:${pcts[i]?'24':'0'}px;" title="${BAND_NAMES[b]} ${pcts[i]}%">${pcts[i]}%</div>`:''
+  ).join('');
+  const distLabels=[1,2,3,4,5].map((b,i)=>
+    `<span style="color:${BAND_COLORS[b]};font-size:12px;">${BAND_NAMES[b]}: ${pcts[i]}% (هدف: ${dist[i-1]||0}%)</span>`
+  ).join('');
+  // Department cards
+  const deptCards=allDepts.map(dept=>{
+    const de=allEntries.filter(e=>e.dept_id===dept.id);
+    if(!de.length) return '';
+    const davgs=de.map(e=>getAvg(e)).filter(a=>a!==null);
+    const davg=davgs.length?davgs.reduce((s,a)=>s+a,0)/davgs.length:null;
+    const bcs=[0,0,0,0,0,0];
+    de.forEach(e=>{const a=getAvg(e);if(a!==null) bcs[getBandNum(a)]++;});
+    const bandPills=[1,2,3,4,5].map(b=>bcs[b]?`<span class="band ${BAND_CSS[b]}" style="font-size:10px;">${BAND_NAMES[b]}: ${bcs[b]}</span>`:'').filter(Boolean).join(' ');
+    const empRows=de.map((e,i)=>{
+      const avg=getAvg(e);
+      return `<tr>
+        <td style="padding:5px 10px;">${i+1}</td>
+        <td style="padding:5px 10px;font-weight:600;">${e.employee_name}</td>
+        <td style="padding:5px 10px;font-size:11px;color:#666;">${e.title||'—'}</td>
+        <td style="padding:5px 10px;text-align:center;">${e.objectives.length}</td>
+        <td style="padding:5px 10px;text-align:center;font-weight:700;">${avg!==null?avg.toFixed(2):'—'}</td>
+        <td style="padding:5px 10px;text-align:center;">${bandBadge(avg)}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="dept-card">
+      <div class="dept-card-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
+        <h4>${dept.name}</h4>
+        <div style="display:flex;gap:10px;align-items:center;font-size:12px;">
+          ${bandPills}
+          <strong style="font-size:14px;color:#bf360c;">${davg!==null?davg.toFixed(2):'—'}</strong>
+          <span style="color:#aaa;">▲</span>
+        </div>
+      </div>
+      <div class="dept-card-body">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr>
+            <th style="background:#fff3e0;padding:5px 10px;text-align:right;color:#bf360c;border-bottom:2px solid #ffe0b2;">#</th>
+            <th style="background:#fff3e0;padding:5px 10px;text-align:right;color:#bf360c;border-bottom:2px solid #ffe0b2;">الاسم</th>
+            <th style="background:#fff3e0;padding:5px 10px;text-align:right;color:#bf360c;border-bottom:2px solid #ffe0b2;">المسمى</th>
+            <th style="background:#fff3e0;padding:5px 10px;text-align:center;color:#bf360c;border-bottom:2px solid #ffe0b2;">الأهداف</th>
+            <th style="background:#fff3e0;padding:5px 10px;text-align:center;color:#bf360c;border-bottom:2px solid #ffe0b2;">المعدل</th>
+            <th style="background:#fff3e0;padding:5px 10px;text-align:center;color:#bf360c;border-bottom:2px solid #ffe0b2;">التصنيف</th>
+          </tr></thead>
+          <tbody>${empRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+  dc.innerHTML=`
+    <div class="agency-box">
+      <div class="agency-name">${cyc.name} — ${cyc.year}</div>
+      <div class="agency-meta">${allEntries.length} موظف &nbsp;•&nbsp; ${avgs.length} مقيَّم &nbsp;•&nbsp; ${allEntries.length-avgs.length} لم يُقيَّم</div>
+      <div class="agency-stats">
+        <div class="agency-stat"><strong>${target.toFixed(1)}</strong>الهدف</div>
+        <div class="agency-stat"><strong>${agAvg!==null?agAvg.toFixed(2):'—'}</strong>الفعلي</div>
+        <div class="agency-stat"><strong style="${gapCls}">${gapStr}</strong>الفرق</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">التوزيع التصنيفي</div>
+      <div class="dist-bar">${barSegs||'<div style="width:100%;background:#eee;"></div>'}</div>
+      <div class="dist-labels">${distLabels}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">الإدارات</div>
+      ${deptCards||'<p class="empty">لا توجد بيانات</p>'}
+    </div>`;
+}
+
+// ── Cycle Modal ───────────────────────────────────────────────────────────────
+function openCycleModal(){
+  document.getElementById('fCName').value='';
+  document.getElementById('fCYear').value=new Date().getFullYear();
+  document.getElementById('cycleOv').classList.add('open');
+}
+async function saveCycle(){
+  const name=document.getElementById('fCName').value.trim();
+  const year=parseInt(document.getElementById('fCYear').value);
+  if(!name||!year){toast('يرجى تعبئة الحقول','warning');return;}
+  try{
+    const res=await api('/appraisals/cycles',{method:'POST',body:JSON.stringify({name,year})});
+    closeOv('cycleOv'); await loadCycles();
+    document.getElementById('cycleSelect').value=res.id;
+    curCycleId=res.id; await onCycleChange();
+    toast('تم إنشاء الدورة','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ── Entry Modal ───────────────────────────────────────────────────────────────
+function openEntryModal(entryId){
+  const entry=entryId?allEntries.find(e=>e.id===entryId):null;
+  document.getElementById('eMTitle').textContent=entry?'تعديل بيانات الموظف':'إضافة موظف للتقييم';
+  document.getElementById('fEId').value=entry?entry.id:'';
+  document.getElementById('empSelRow').style.display=entry?'none':'';
+  if(!entry){
+    const used=allEntries.map(e=>e.employee_id);
+    const sel=document.getElementById('fEntryEmp');
+    sel.innerHTML='<option value="">— اختر موظفاً —</option>'+
+      allEmps.filter(e=>!used.includes(e.id)).map(e=>
+        `<option value="${e.id}" data-name="${e.name}" data-dept="${e.dept_id}" data-role="${e.role}" data-title="${e.title||''}" data-grade="${e.grade||''}">${e.name}</option>`
+      ).join('');
+  }
+  document.getElementById('fETitle').value=entry?entry.title||'':'';
+  document.getElementById('fEGrade').value=entry?entry.grade||'':'';
+  objRows=entry?JSON.parse(JSON.stringify(entry.objectives||[])):[];
+  renderObjRows();
+  document.getElementById('entryOv').classList.add('open');
+}
+
+function onEntryEmpChange(){
+  const opt=document.getElementById('fEntryEmp').selectedOptions[0];
+  if(!opt||!opt.value) return;
+  document.getElementById('fETitle').value=opt.dataset.title||'';
+  document.getElementById('fEGrade').value=opt.dataset.grade||'';
+  // Auto-populate KPIs if empty
+  if(!objRows.length){
+    const isGM=opt.dataset.role==='manager';
+    objRows=(isGM?GM_KPIS:STAFF_KPIS).map(k=>({...k,score:''}));
+    renderObjRows();
+  }
+}
+
+function addObjRow(){
+  if(objRows.length>=8){toast('الحد الأقصى 8 أهداف','warning');return;}
+  objRows.push({name:'',target:'',weight:'',score:''});
+  renderObjRows();
+}
+
+function renderObjRows(){
+  const tb=document.getElementById('objBody');
+  tb.innerHTML=objRows.map((o,i)=>`<tr>
+    <td><input type="text" value="${esc(o.name)}" placeholder="اسم الهدف" oninput="objF(${i},'name',this.value)"></td>
+    <td><input type="text" value="${esc(o.target)}" placeholder="85%" oninput="objF(${i},'target',this.value)"></td>
+    <td><input type="number" value="${o.weight}" placeholder="30" min="1" max="100" oninput="objF(${i},'weight',this.value);updateWeightSum()"></td>
+    <td><input type="number" value="${o.score}" placeholder="—" min="1" max="5" step="0.5" oninput="objF(${i},'score',this.value)"></td>
+    <td><button class="btn-rm" onclick="removeObj(${i})">×</button></td>
+  </tr>`).join('');
+  updateWeightSum();
+}
+
+function objF(i,f,v){objRows[i][f]=v;}
+function removeObj(i){objRows.splice(i,1);renderObjRows();}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function updateWeightSum(){
+  const tot=objRows.reduce((s,o)=>s+(parseFloat(o.weight)||0),0);
+  const el=document.getElementById('weightSum');
+  if(tot===100) el.innerHTML=`<span style="color:#1b5e20;">مجموع الأوزان: ${tot}% ✓</span>`;
+  else if(tot>100) el.innerHTML=`<span style="color:#c62828;">مجموع الأوزان: ${tot}% — يتجاوز 100%</span>`;
+  else el.innerHTML=`<span style="color:#e65100;">مجموع الأوزان: ${tot}% (المتبقي: ${(100-tot).toFixed(0)}%)</span>`;
+}
+
+async function saveEntry(){
+  const entryId=document.getElementById('fEId').value;
+  const title=document.getElementById('fETitle').value.trim();
+  const grade=document.getElementById('fEGrade').value.trim();
+  const objectives=objRows.map(o=>({...o}));
+  if(entryId){
+    try{
+      await api(`/appraisals/entries/${entryId}`,{method:'PUT',body:JSON.stringify({title,grade,objectives})});
+      closeOv('entryOv'); allEntries=await api(`/appraisals/entries?cycleId=${curCycleId}`); renderStaff();
+      toast('تم تحديث البيانات','success');
+    }catch(e){toast(e.message,'error');}
+  } else {
+    const sel=document.getElementById('fEntryEmp');
+    const opt=sel.selectedOptions[0];
+    if(!sel.value){toast('يرجى اختيار موظف','warning');return;}
+    try{
+      await api('/appraisals/entries',{method:'POST',body:JSON.stringify({
+        cycleId:curCycleId, employeeId:sel.value, employeeName:opt.dataset.name,
+        deptId:parseInt(opt.dataset.dept), title, grade, objectives
+      })});
+      closeOv('entryOv'); allEntries=await api(`/appraisals/entries?cycleId=${curCycleId}`); renderStaff();
+      toast('تم إضافة الموظف','success');
+    }catch(e){toast(e.message,'error');}
+  }
+}
+
+async function delEntry(id){
+  showConfirm('حذف الموظف','هل تريد حذف هذا الموظف من دورة التقييم؟',async()=>{
+    try{await api(`/appraisals/entries/${id}`,{method:'DELETE'});allEntries=await api(`/appraisals/entries?cycleId=${curCycleId}`);renderStaff();toast('تم الحذف','success');}
+    catch(e){toast(e.message,'error');}
+  });
+}
+
+// ── Scoring Modal ─────────────────────────────────────────────────────────────
+let scoreObjs=[];
+
+function openScoreModal(entryId){
+  const entry=allEntries.find(e=>e.id===entryId);
+  if(!entry) return;
+  scoreEntryId=entryId;
+  scoreObjs=JSON.parse(JSON.stringify(entry.objectives||[]));
+  // Auto-populate KPIs if empty
+  if(!scoreObjs.length){
+    const emp=allEmps.find(e=>e.id===entry.employee_id);
+    const isGM=emp?.role==='manager';
+    scoreObjs=(isGM?GM_KPIS:STAFF_KPIS).map(k=>({...k,score:''}));
+  }
+  document.getElementById('scoreEmpHdr').innerHTML=`
+    <strong>${entry.employee_name}</strong>
+    <span>${entry.title||'—'} &nbsp;|&nbsp; درجة: ${entry.grade||'—'} &nbsp;|&nbsp; ${deptName(entry.dept_id)}</span>`;
+  renderScoreRows();
+  document.getElementById('scoreOv').classList.add('open');
+}
+
+function renderScoreRows(){
+  updateWeightBar();
+  const tb=document.getElementById('scoreBody');
+  tb.innerHTML=scoreObjs.map((o,i)=>{
+    const sc=parseFloat(o.score), wt=parseFloat(o.weight);
+    const ws=(!isNaN(sc)&&!isNaN(wt)&&wt>0)?(sc*wt/100).toFixed(2):'—';
+    return `<tr>
+      <td>${i+1}</td>
+      <td style="font-weight:600;">${esc(o.name)}</td>
+      <td style="color:#888;font-size:11px;">${esc(o.target)}</td>
+      <td style="text-align:center;">${o.weight||'—'}</td>
+      <td><input type="number" value="${o.score}" placeholder="—" min="1" max="5" step="0.5"
+          style="width:60px;padding:4px 6px;border:1.5px solid #e0e0e0;border-radius:5px;font-family:inherit;font-size:12px;text-align:center;"
+          oninput="scoreF(${i},this.value)"></td>
+      <td style="text-align:center;font-weight:700;color:#2e7d32;">${ws}</td>
+    </tr>`;
+  }).join('');
+  updateScoreAvg();
+}
+
+function scoreF(i,v){scoreObjs[i].score=v;updateScoreAvg();updateWeightBar();}
+
+function updateWeightBar(){
+  const tot=scoreObjs.reduce((s,o)=>s+(parseFloat(o.weight)||0),0);
+  const bar=document.getElementById('wBar');
+  const al=document.getElementById('wAlert');
+  bar.style.width=Math.min(100,tot)+'%';
+  if(tot===100){bar.style.background='#2f9e44';al.className='w-alert w-ok';al.textContent=`مجموع الأوزان: ${tot}% ✓`;}
+  else if(tot>100){bar.style.background='#e03131';al.className='w-alert w-over';al.textContent=`مجموع الأوزان: ${tot}% — يتجاوز 100%`;}
+  else{bar.style.background='#f59f00';al.className='w-alert w-warn';al.textContent=`مجموع الأوزان: ${tot}% (المتبقي: ${(100-tot).toFixed(0)}%)`;}
+}
+
+function updateScoreAvg(){
+  let wS=0,wT=0;
+  scoreObjs.forEach(o=>{
+    const sc=parseFloat(o.score),wt=parseFloat(o.weight);
+    if(!isNaN(sc)&&!isNaN(wt)&&wt>0){wS+=sc*wt;wT+=wt;}
+  });
+  const avg=wT>0?wS/wT:null;
+  const avEl=document.getElementById('scoreAvgVal');
+  const bbEl=document.getElementById('scoreBandBadge');
+  avEl.textContent=avg!==null?avg.toFixed(2):'—';
+  bbEl.innerHTML=bandBadge(avg);
+  // Agency impact
+  updateAgencyImpact(avg);
+}
+
+function updateAgencyImpact(empAvg){
+  const el=document.getElementById('agencyImpact');
+  const others=allEntries.filter(e=>e.id!==scoreEntryId).map(e=>getAvg(e)).filter(a=>a!==null);
+  const all=empAvg!==null?[...others,empAvg]:others;
+  if(!all.length){el.innerHTML='';return;}
+  const agAvg=all.reduce((s,a)=>s+a,0)/all.length;
+  const target=getTarget();
+  const gap=agAvg-target;
+  const over=gap>0.05;
+  const gapStr=(gap>=0?'+':'')+gap.toFixed(2);
+  const bg=over?'#fff9db':Math.abs(gap)<=0.05?'#ebfbee':'#e8f4f9';
+  const border=over?'#ffe066':Math.abs(gap)<=0.05?'#b2f2bb':'#c5dff8';
+  const gc=over?'#d9480f':Math.abs(gap)<=0.05?'#2f9e44':'#1971c2';
+  el.innerHTML=`<div class="impact-box" style="background:${bg};border:1px solid ${border};">
+    <span style="color:#666;font-size:12px;">المعدل المتوقع للوكالة بعد الحفظ: </span>
+    <strong style="color:#1b5e20;font-size:15px;">${agAvg.toFixed(2)}</strong>
+    <span style="color:#999;font-size:12px;"> (هدف: ${target.toFixed(1)})</span>
+    <span style="font-weight:700;color:${gc};font-size:13px;"> ${gapStr}</span>
+    ${over?'<span style="color:#d9480f;font-size:12px;"> ⚠️ يتجاوز الهدف</span>':''}
+  </div>`;
+}
+
+async function saveScore(){
+  const tot=scoreObjs.reduce((s,o)=>s+(parseFloat(o.weight)||0),0);
+  const doSave=async()=>{
+    const entry=allEntries.find(e=>e.id===scoreEntryId);
+    try{
+      await api(`/appraisals/entries/${scoreEntryId}`,{method:'PUT',body:JSON.stringify({title:entry.title||'',grade:entry.grade||'',objectives:scoreObjs})});
+      closeOv('scoreOv'); allEntries=await api(`/appraisals/entries?cycleId=${curCycleId}`);
+      renderStaff(); toast('تم حفظ التقييم','success');
+      if(document.getElementById('tabDashboard').style.display!=='none') renderDashboard();
+    }catch(e){toast(e.message,'error');}
+  };
+  if(tot>0&&Math.abs(tot-100)>0.5){
+    showConfirm('تأكيد الحفظ',`مجموع الأوزان ${tot}% وليس 100%. هل تريد الحفظ رغم ذلك؟`,doSave);
+  } else {
+    await doSave();
+  }
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadCycles(){
+  allCycles=await api('/appraisals/cycles');
+  const sel=document.getElementById('cycleSelect');
+  const prev=sel.value;
+  sel.innerHTML='<option value="">— اختر دورة التقييم —</option>'+
+    allCycles.map(c=>`<option value="${c.id}"${c.id===prev?' selected':''}>${c.name} (${c.year})</option>`).join('');
+}
+
+window.onload=async()=>{
+  curUser=getUser();
+  if(!curUser||!tok()){location.href='/';return;}
+  document.getElementById('topName').textContent=curUser.name;
+  document.getElementById('topRole').textContent={manager:'مدير',deputy:'وكيل',admin:'مشرف',employee:'موظف'}[curUser.role]||curUser.role;
+  document.getElementById('btnNewCycle').style.display=isManager()?'':'none';
+  document.getElementById('actColH').textContent=isManager()?'إجراء':'';
+  if(isPowerUser()) document.getElementById('btnSettings').style.display='';
+  showSkeleton();
+  try{
+    allDepts=await api('/departments');
+    const dept=allDepts.find(d=>d.id===curUser.deptId);
+    document.getElementById('topDept').textContent=dept?dept.name:'';
+    const fDept=document.getElementById('fDept');
+    allDepts.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=d.name;fDept.appendChild(o);});
+  }catch(e){}
+  try{apprSettings=await api('/appraisals/settings');}catch(e){}
+  await loadCycles();
+  const ep=['deputy','admin'].includes(curUser.role)?'/employees/all':`/employees/dept/${curUser.deptId}`;
+  try{allEmps=await api(ep);}catch(e){allEmps=[];}
+  renderStaff();
+  lucide.createIcons();
+};
+function exportXLSX() {
+  const df = document.getElementById('fDept').value;
+  const sr = document.getElementById('fSrch').value.trim().toLowerCase();
+  let rows = allEntries;
+  if (df) rows = rows.filter(e => e.dept_id == df);
+  if (sr) rows = rows.filter(e => e.employee_name.toLowerCase().includes(sr));
+  const cyc = allCycles.find(c => c.id === curCycleId);
+  const data = [['#','الإدارة','الاسم','المسمى الوظيفي','الدرجة','عدد الأهداف','المقيَّم','المعاملات','المهام','المعدل','الفئة']];
+  rows.forEach((e, i) => {
+    const avg = getAvg(e);
+    const b = getBandNum(avg);
+    const sc = e.objectives.filter(o => o.score !== null && o.score !== '').length;
+    const txCount = (workload.transactions || {})[e.employee_name] || 0;
+    const tskCount = (workload.tasks || {})[e.employee_name] || 0;
+    data.push([
+      i + 1,
+      e.dept_name || '',
+      e.employee_name,
+      e.title || '',
+      e.grade || '',
+      e.objectives.length,
+      sc,
+      txCount || 0,
+      tskCount || 0,
+      avg !== null ? parseFloat(avg.toFixed(2)) : '',
+      b ? BAND_NAMES[b] : ''
+    ]);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'متابعة الأداء');
+  const fileName = 'متابعة_الأداء' + (cyc ? '_' + cyc.name + '_' + cyc.year : '') + '.xlsx';
+  XLSX.writeFile(wb, fileName);
+}
+
+function printPage() {
+    const cyc = allCycles.find(c => c.id === curCycleId);
+    const df = document.getElementById('fDept').value;
+    const dept = df ? allDepts.find(d => d.id == df) : null;
+    document.getElementById('printTitle').textContent =
+        'متابعة الأداء' + (cyc ? ' — ' + cyc.name + ' (' + cyc.year + ')' : '') + (dept ? ' — ' + dept.name : '');
+    document.getElementById('printMeta').textContent =
+        'عدد الموظفين: ' + document.querySelectorAll('#staffBody tr').length + '   —   ' +
+        new Date().toLocaleDateString('ar-SA', {year:'numeric',month:'long',day:'numeric'});
+    window.print();
+}
+
+lucide.createIcons();
+</script>
+</body>
+</html>

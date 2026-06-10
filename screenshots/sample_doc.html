@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #1a1a1a; background: #fff; }
+
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 22mm 20mm 18mm 20mm; }
+
+  /* Cover strip */
+  .doc-header { background: #1a237e; color: #fff; padding: 28px 32px 22px; border-radius: 4px; margin-bottom: 36px; }
+  .doc-header .org { font-size: 9pt; letter-spacing: 1.5px; text-transform: uppercase; opacity: .7; margin-bottom: 6px; }
+  .doc-header h1 { font-size: 22pt; font-weight: 700; margin-bottom: 4px; }
+  .doc-header .sub { font-size: 11pt; opacity: .8; }
+  .doc-header .meta { margin-top: 16px; font-size: 9pt; opacity: .6; display: flex; gap: 28px; }
+
+  /* Section headings */
+  h2 { font-size: 15pt; font-weight: 700; color: #1a237e; border-bottom: 2.5px solid #1a237e;
+       padding-bottom: 5px; margin: 32px 0 14px; }
+  h3 { font-size: 11.5pt; font-weight: 700; color: #333; margin: 20px 0 8px; }
+  h4 { font-size: 10.5pt; font-weight: 600; color: #555; margin: 14px 0 6px; }
+
+  p { line-height: 1.7; margin-bottom: 8px; color: #2c2c2c; }
+
+  /* Screenshot */
+  .screenshot { margin: 16px 0 8px; }
+  .screenshot img { width: 100%; border: 1px solid #ddd; border-radius: 4px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,.1); display: block; }
+  .screenshot .caption { font-size: 9pt; color: #666; margin-top: 5px; font-style: italic; text-align: center; }
+
+  /* Role grid */
+  .role-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+  .role-card { border: 1.5px solid #e0e0e0; border-radius: 6px; padding: 12px; }
+  .role-card .badge { display: inline-block; padding: 2px 10px; border-radius: 20px;
+                       font-size: 9pt; font-weight: 600; margin-bottom: 6px; }
+  .role-card p { font-size: 9.5pt; color: #555; margin: 0; line-height: 1.5; }
+  .badge-admin    { background: #ede7f6; color: #4a148c; }
+  .badge-deputy   { background: #e8eaf6; color: #1a237e; }
+  .badge-manager  { background: #e3f2fd; color: #0d47a1; }
+  .badge-employee { background: #e8f5e9; color: #1b5e20; }
+
+  /* Feature list */
+  .feature-list { margin: 10px 0 10px 18px; }
+  .feature-list li { margin-bottom: 5px; line-height: 1.6; font-size: 10.5pt; }
+
+  /* Tech stack table */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 10pt; }
+  th { background: #1a237e; color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #f5f7ff; }
+
+  /* Info box */
+  .info-box { background: #e8eaf6; border-left: 4px solid #1a237e; padding: 12px 16px;
+              border-radius: 0 6px 6px 0; margin: 14px 0; font-size: 10pt; line-height: 1.6; }
+
+  /* Flow steps */
+  .flow { display: flex; gap: 0; margin: 14px 0; flex-wrap: wrap; }
+  .flow-step { background: #f5f7ff; border: 1.5px solid #c5cae9; padding: 9px 14px;
+               font-size: 9.5pt; border-radius: 4px; position: relative; flex: 1; min-width: 100px; text-align: center; }
+  .flow-step + .flow-step::before { content: '→'; position: absolute; left: -12px; top: 50%;
+                                     transform: translateY(-50%); color: #1a237e; font-size: 12pt; }
+  .flow-step strong { display: block; font-size: 8.5pt; color: #1a237e; margin-bottom: 2px; }
+
+  .page-break { page-break-before: always; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 12px 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Document Header -->
+  <div class="doc-header">
+    <div class="org">Saudi Water Authority — Internal Platform Documentation</div>
+    <h1>Tadawul Platform</h1>
+    <div class="sub">Technical &amp; UX Reference — Task Management System</div>
+    <div class="meta">
+      <span>Version: 1.0</span>
+      <span>Date: May 2026</span>
+      <span>Audience: Development Team</span>
+      <span>Status: Draft Sample</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SECTION 1 — OVERVIEW
+  ═══════════════════════════════════════════════ -->
+  <h2>1. System Overview</h2>
+
+  <p>
+    The <strong>Task Management System</strong> (اجتماع تداول) is the core workflow module of the Tadawul platform.
+    It enables cross-departmental task creation, assignment, tracking, and approval — all within a role-based
+    access model that reflects the organizational hierarchy of the Saudi Water Authority.
+  </p>
+
+  <h3>1.1 User Roles</h3>
+  <div class="role-grid">
+    <div class="role-card">
+      <span class="badge badge-admin">Admin / مشرف</span>
+      <p>Full visibility across all departments. Can create, edit, delete and approve any task.</p>
+    </div>
+    <div class="role-card">
+      <span class="badge badge-deputy">Deputy / وكيل</span>
+      <p>Cross-department read/write. Creates tasks, approves change requests, exports reports.</p>
+    </div>
+    <div class="role-card">
+      <span class="badge badge-manager">Manager / مدير</span>
+      <p>Department-scoped. Manages own department's tasks, approves employee submissions.</p>
+    </div>
+    <div class="role-card">
+      <span class="badge badge-employee">Employee / موظف</span>
+      <p>Personal task view. Updates status on assigned tasks, adds comments, submits change requests.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SECTION 2 — UX WALKTHROUGH
+  ═══════════════════════════════════════════════ -->
+  <h2>2. UX Walkthrough</h2>
+
+  <h3>2.1 Landing / Hub Page</h3>
+  <p>
+    After login, all users land on a unified hub page that surfaces the systems they are authorised to access.
+    The hub adapts to the user's role — an employee sees only the systems relevant to them,
+    while an admin sees all five. The topbar shows the user's name, role, last login time, and server status indicator.
+  </p>
+
+  <div class="screenshot">
+    <img src="hub.png" alt="Hub landing page">
+    <div class="caption">Figure 1 — Hub landing page (Admin view, showing all 5 systems)</div>
+  </div>
+
+  <h3>2.2 Deputy / Admin View</h3>
+  <p>
+    The deputy/admin dashboard provides a <strong>full cross-department view</strong>. Key elements:
+  </p>
+  <ul class="feature-list">
+    <li><strong>Department tabs</strong> — filter tasks by department with live counts per tab.</li>
+    <li><strong>KPI cards</strong> — at-a-glance counts for pending approval, high priority, in-progress, and completed tasks.</li>
+    <li><strong>Approval queue</strong> — dedicated panel showing tasks awaiting sign-off, separated from the main list.</li>
+    <li><strong>Stopwatch widget</strong> — floating meeting timer (draggable) for use during weekly review sessions.</li>
+    <li><strong>Export</strong> — one-click Excel export of the current filtered view.</li>
+    <li><strong>Kanban / Table toggle</strong> — switch between tabular and board-style task views.</li>
+  </ul>
+
+  <div class="screenshot">
+    <img src="deputy_tasks.png" alt="Deputy task dashboard">
+    <div class="caption">Figure 2 — Deputy/Admin task dashboard showing cross-department tasks, KPI cards, and the approval queue</div>
+  </div>
+
+  <h3>2.3 Task Creation</h3>
+  <p>
+    Tasks are created via a modal dialog accessible to managers, deputies, and admins.
+    Fields include title, description, target department, assignee, priority, start date, and due date.
+    On save, the task is immediately visible to the assigned employee and the department manager,
+    with a real-time push notification via Server-Sent Events (SSE).
+  </p>
+
+  <div class="screenshot">
+    <img src="deputy_add_task.png" alt="Add task modal">
+    <div class="caption">Figure 3 — Task creation modal (Deputy view)</div>
+  </div>
+
+  <h3>2.4 Manager View</h3>
+  <p>
+    Managers see tasks scoped to their department only. The interface includes an approval queue for
+    employee-submitted change requests (status updates, due date adjustments) and a full task list
+    with filters for status, priority, assignee, and date range.
+  </p>
+
+  <div class="screenshot">
+    <img src="manager_tasks.png" alt="Manager task view">
+    <div class="caption">Figure 4 — Manager task dashboard (department-scoped)</div>
+  </div>
+
+  <h3>2.5 Employee View</h3>
+  <p>
+    Employees see only tasks assigned to them. They can update task status (with manager approval required
+    for certain transitions), add comments/guidance entries, and submit change requests for due dates.
+    The interface intentionally omits cross-department visibility and administrative controls.
+  </p>
+
+  <div class="screenshot">
+    <img src="employee_tasks.png" alt="Employee task view">
+    <div class="caption">Figure 5 — Employee task view (personal tasks only)</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SECTION 3 — BUSINESS LOGIC
+  ═══════════════════════════════════════════════ -->
+  <h2>3. Key Business Rules</h2>
+
+  <h3>3.1 Task Status Workflow</h3>
+  <div class="flow">
+    <div class="flow-step"><strong>جديد</strong>New</div>
+    <div class="flow-step"><strong>قيد التنفيذ</strong>In Progress</div>
+    <div class="flow-step"><strong>مكتملة</strong>Completed</div>
+  </div>
+  <p>
+    Status transitions by employees generate change requests that appear in the manager's approval queue.
+    Deputies and admins can transition any task directly without approval.
+  </p>
+
+  <h3>3.2 Change Request Approval</h3>
+  <ul class="feature-list">
+    <li>Employees submit requests to change status or due date — these do <em>not</em> apply immediately.</li>
+    <li>The request appears in the manager's and deputy's approval panel.</li>
+    <li>On approval, the change is applied and the employee is notified via real-time SSE push.</li>
+    <li>On rejection, the task remains unchanged and the request is marked declined.</li>
+  </ul>
+
+  <h3>3.3 Real-Time Synchronisation</h3>
+  <div class="info-box">
+    All connected clients receive live updates when any task is created, modified, or approved.
+    This is implemented via <strong>Server-Sent Events (SSE)</strong> — an open HTTP stream from the server
+    that pushes a broadcast signal whenever the data changes. Clients respond by silently re-fetching
+    their data in the background. No manual refresh is needed.
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SECTION 4 — TECHNICAL ARCHITECTURE
+  ═══════════════════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2>4. Technical Architecture</h2>
+
+  <h3>4.1 Current Stack</h3>
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+    <tr><td>Runtime</td><td>Node.js 20 + Express 5</td><td>HTTP server, REST API, SSE endpoint</td></tr>
+    <tr><td>Database</td><td>SQLite (better-sqlite3)</td><td>All persistent data — tasks, users, departments, history</td></tr>
+    <tr><td>Authentication</td><td>JWT (jsonwebtoken, bcryptjs)</td><td>Stateless session tokens, 8-hour expiry, role embedded in token</td></tr>
+    <tr><td>Real-time</td><td>Server-Sent Events (SSE)</td><td>One-way server-to-client broadcast on data changes</td></tr>
+    <tr><td>Frontend</td><td>Vanilla HTML/CSS/JS</td><td>Static files served by Express; no framework, no build step</td></tr>
+    <tr><td>Icons</td><td>Lucide (CDN)</td><td>Consistent icon set across all pages</td></tr>
+    <tr><td>Export</td><td>SheetJS (XLSX, CDN)</td><td>Client-side Excel generation from filtered task data</td></tr>
+  </table>
+
+  <h3>4.2 Data Model — Tasks</h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+    <tr><td>id</td><td>TEXT (UUID)</td><td>Primary key</td></tr>
+    <tr><td>name</td><td>TEXT</td><td>Task title</td></tr>
+    <tr><td>description</td><td>TEXT</td><td>Optional detail</td></tr>
+    <tr><td>priority</td><td>TEXT</td><td>عالية / متوسطة / منخفضة</td></tr>
+    <tr><td>status</td><td>TEXT</td><td>جديد / قيد التنفيذ / مكتملة</td></tr>
+    <tr><td>dept_id</td><td>INTEGER</td><td>FK → departments</td></tr>
+    <tr><td>assigned_to</td><td>TEXT</td><td>FK → employees</td></tr>
+    <tr><td>created_by / role</td><td>TEXT</td><td>Creator identity + role at creation time</td></tr>
+    <tr><td>start_date / due_date</td><td>TEXT (ISO)</td><td>Date range</td></tr>
+    <tr><td>approved</td><td>INTEGER</td><td>1 = live, 0 = pending deputy approval</td></tr>
+    <tr><td>created_at</td><td>TEXT (ISO)</td><td>Server timestamp</td></tr>
+  </table>
+
+  <h3>4.3 API Endpoints — Tasks</h3>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Access</th><th>Description</th></tr>
+    <tr><td>GET</td><td>/api/tasks/all</td><td>Deputy, Admin</td><td>All tasks, all departments</td></tr>
+    <tr><td>GET</td><td>/api/tasks/dept/:id</td><td>Manager</td><td>Tasks for own department</td></tr>
+    <tr><td>GET</td><td>/api/tasks/my</td><td>Employee</td><td>Tasks assigned to calling user</td></tr>
+    <tr><td>POST</td><td>/api/tasks</td><td>Manager+</td><td>Create task</td></tr>
+    <tr><td>PATCH</td><td>/api/tasks/:id</td><td>Manager+</td><td>Update task fields directly</td></tr>
+    <tr><td>POST</td><td>/api/tasks/:id/changes</td><td>Employee</td><td>Submit change request</td></tr>
+    <tr><td>PATCH</td><td>/api/tasks/changes/:id</td><td>Manager+</td><td>Approve / reject change request</td></tr>
+    <tr><td>DELETE</td><td>/api/tasks/:id</td><td>Deputy, Admin</td><td>Delete task</td></tr>
+  </table>
+
+  <h3>4.4 Authentication Flow</h3>
+  <div class="flow">
+    <div class="flow-step"><strong>Login</strong>POST /api/auth/login</div>
+    <div class="flow-step"><strong>JWT issued</strong>Role + ID embedded</div>
+    <div class="flow-step"><strong>Stored</strong>sessionStorage (tab-scoped)</div>
+    <div class="flow-step"><strong>API calls</strong>Bearer header on every request</div>
+    <div class="flow-step"><strong>Middleware</strong>Validates + injects req.user</div>
+  </div>
+
+  <h3>4.5 Real-Time Architecture</h3>
+  <p>
+    A single <code>/api/events</code> SSE endpoint maintains an open connection to every active browser tab.
+    On any write operation (task create/update/delete/approve), the server calls <code>broadcast()</code>
+    which sends a lightweight signal to all connected clients. Each client re-fetches only its own data slice.
+    A server-side heartbeat (every 5 seconds) keeps connections alive and allows clients to detect
+    server unavailability via a 12-second silence threshold.
+  </p>
+
+  <div class="info-box">
+    <strong>Server status indicator:</strong> A coloured dot in every page's topbar reflects live connectivity —
+    green (server up), red (server unreachable). State is driven by a 3-second HTTP ping and the SSE heartbeat,
+    with no user action required to reconnect after a server restart.
+  </div>
+
+</div>
+</body>
+</html>

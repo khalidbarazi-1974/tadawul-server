@@ -1,0 +1,5 @@
+node_modules/
+database/tadawul.db
+database/tadawul.db-shm
+database/tadawul.db-wal
+.env

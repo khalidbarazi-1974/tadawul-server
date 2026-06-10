@@ -1,0 +1,27 @@
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'tadawul-secret-2026';
+
+function authenticate(req, res, next) {
+    const header = req.headers.authorization;
+    if (!header) return res.status(401).json({ error: 'غير مصرح' });
+
+    const token = header.split(' ')[1];
+    try {
+        req.user = jwt.verify(token, JWT_SECRET);
+        next();
+    } catch {
+        res.status(401).json({ error: 'جلسة منتهية، يرجى تسجيل الدخول مجدداً' });
+    }
+}
+
+function requireRole(...roles) {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'غير مسموح' });
+        }
+        next();
+    };
+}
+
+module.exports = { authenticate, requireRole, JWT_SECRET };
