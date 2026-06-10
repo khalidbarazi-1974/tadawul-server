@@ -484,7 +484,7 @@ async function init(){
         api('GET','/departments'),
         api('GET','/tasks/all'),
         api('GET','/tasks/pending'),
-        api('GET','/employees')
+        api('GET','/employees').catch(()=>[])
     ]);
     // Populate dept select in task form
     const fDept = document.getElementById('fDept');
