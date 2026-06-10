@@ -724,8 +724,22 @@ function openEntryModal(entryId){
   if(!entry){
     const used=allEntries.map(e=>e.employee_id);
     const sel=document.getElementById('fEntryEmp');
+    const DEPT_ORDER=[4,0,1,2,3];
+    const sortedEmps=allEmps.slice().sort((a,b)=>{
+      const da=DEPT_ORDER.indexOf(Number(a.dept_id)),db=DEPT_ORDER.indexOf(Number(b.dept_id));
+      if(da!==db) return da-db;
+      if(Number(a.dept_id)===4){
+        const pin=id=>id==='U291590'?0:id==='U292409'?1:2;
+        const pa=pin(a.id),pb=pin(b.id);
+        if(pa!==pb) return pa-pb;
+      } else {
+        const ra=a.role==='manager'?0:1,rb=b.role==='manager'?0:1;
+        if(ra!==rb) return ra-rb;
+      }
+      return a.id<b.id?-1:a.id>b.id?1:0;
+    });
     sel.innerHTML='<option value="">— اختر موظفاً —</option>'+
-      allEmps.filter(e=>!used.includes(e.id)).map(e=>
+      sortedEmps.filter(e=>!used.includes(e.id)).map(e=>
         `<option value="${e.id}" data-name="${e.name}" data-dept="${e.dept_id}" data-role="${e.role}" data-title="${e.title||''}" data-grade="${e.grade||''}">${e.name}</option>`
       ).join('');
   }
