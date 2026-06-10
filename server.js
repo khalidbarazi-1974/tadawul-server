@@ -34,7 +34,6 @@ app.use('/api/employees',   require('./routes/employees'));
 app.use('/api/leaves',      require('./routes/leaves'));
 app.use('/api/appraisals',    require('./routes/appraisals'));
 app.use('/api/transactions', require('./routes/transactions'));
-app.use('/api/admin/import-db', require('./routes/dbimport'));
 
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
