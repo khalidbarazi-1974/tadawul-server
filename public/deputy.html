@@ -341,7 +341,8 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
       <div class="form-grid">
         <div class="form-group full"><label>اسم الموضوع *</label><input type="text" id="fName"></div>
         <div class="form-group full"><label>الوصف</label><textarea id="fDesc" rows="3"></textarea></div>
-        <div class="form-group"><label>الإدارة</label><select id="fDept"></select></div>
+        <div class="form-group"><label>الإدارة</label><select id="fDept" onchange="onDeptChange()"></select></div>
+        <div class="form-group"><label>الإسناد</label><select id="fAssign"><option value="">— بدون إسناد —</option></select></div>
         <div class="form-group"><label>الأولوية</label><select id="fPriority"><option>عالية</option><option selected>متوسطة</option><option>منخفضة</option></select></div>
         <div class="form-group"><label>الحالة</label><select id="fStatus"><option>جديد</option><option>قيد التنفيذ</option><option>مكتمل</option></select></div>
         <div class="form-group"><label>تاريخ البدء *</label><input type="date" id="fStart"></div>
@@ -407,6 +408,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
 <script>
 const API = '/api';
 let allTasks = [], depts = [], pending = {changes:[],comments:[],pendingTasks:[]}, currentDeptId = -1, currentTask = null, activeStatFilter = null, viewMode = 'table';
+let allEmps = [];
 let sortCol = null, sortDir = 'asc';
 let pendingTaskMap = {};
 const user = JSON.parse(sessionStorage.getItem('user') || 'null');
@@ -478,10 +480,11 @@ async function init(){
     document.getElementById('filterDateTo').value = '';
     document.getElementById('filterSearch').value = '';
     showSkeleton();
-    [depts, allTasks, pending] = await Promise.all([
+    [depts, allTasks, pending, allEmps] = await Promise.all([
         api('GET','/departments'),
         api('GET','/tasks/all'),
-        api('GET','/tasks/pending')
+        api('GET','/tasks/pending'),
+        api('GET','/employees')
     ]);
     // Populate dept select in task form
     const fDept = document.getElementById('fDept');
@@ -692,6 +695,28 @@ async function reload(){
 
 // ── Add/Edit Task ─────────────────────────────────────────────────────────────
 
+function sortedDeptEmps(deptId){
+    return allEmps.filter(e=>e.dept_id==deptId).slice().sort((a,b)=>{
+        if(Number(deptId)===4){
+            const pin=id=>id==='U291590'?0:id==='U292409'?1:2;
+            const pa=pin(a.id),pb=pin(b.id);
+            if(pa!==pb) return pa-pb;
+        } else {
+            const ra=a.role==='manager'?0:1,rb=b.role==='manager'?0:1;
+            if(ra!==rb) return ra-rb;
+        }
+        return a.id<b.id?-1:a.id>b.id?1:0;
+    });
+}
+function populateAssign(deptId, selectedName=''){
+    const sel=document.getElementById('fAssign');
+    sel.innerHTML='<option value="">— بدون إسناد —</option>'+
+        sortedDeptEmps(deptId).map(e=>`<option value="${e.name}"${e.name===selectedName?' selected':''}>${e.name}</option>`).join('');
+}
+function onDeptChange(){
+    populateAssign(document.getElementById('fDept').value);
+}
+
 function openAddModal(){
     document.getElementById('editId').value='';
     document.getElementById('modalTitle').textContent='إضافة موضوع';
@@ -703,6 +728,7 @@ function openAddModal(){
     document.getElementById('fStart').disabled=false;
     document.getElementById('fDue').value='';
     document.getElementById('fDept').value= currentDeptId===-1 ? depts[0]?.id : currentDeptId;
+    populateAssign(document.getElementById('fDept').value);
     document.getElementById('deleteBtn').style.display='none';
     document.getElementById('taskModal').classList.add('open');
 }
@@ -720,6 +746,7 @@ function openEdit(){
     document.getElementById('fStart').disabled=true;
     document.getElementById('fDue').value=t.dueDate||'';
     document.getElementById('fDept').value=t.dept_id;
+    populateAssign(t.dept_id, t.assignedTo||'');
     document.getElementById('deleteBtn').style.display='inline-block';
     document.getElementById('taskModal').classList.add('open');
 }
@@ -730,7 +757,7 @@ async function saveTask(){
     if(!name) return toast('اسم الموضوع مطلوب','error');
     if(!id && !document.getElementById('fStart').value) return toast('تاريخ البدء مطلوب','error');
     while(true){
-        const body={name,description:document.getElementById('fDesc').value.trim(),priority:document.getElementById('fPriority').value,status:document.getElementById('fStatus').value,startDate:id?undefined:document.getElementById('fStart').value,dueDate:document.getElementById('fDue').value,deptId:parseInt(document.getElementById('fDept').value)};
+        const body={name,description:document.getElementById('fDesc').value.trim(),priority:document.getElementById('fPriority').value,status:document.getElementById('fStatus').value,startDate:id?undefined:document.getElementById('fStart').value,dueDate:document.getElementById('fDue').value,deptId:parseInt(document.getElementById('fDept').value),assignedTo:document.getElementById('fAssign').value||null};
         try{
             if(id){ await api('PUT',`/tasks/${id}`,body); }
             else   { await api('POST','/tasks',body); }
