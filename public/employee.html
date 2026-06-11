@@ -605,7 +605,7 @@ function renderTasks() {
             <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666;">${t.description||'-'}</td>
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
-            <td>${t.startDate || '-'}</td>
+            <td style="text-align:center;color:#666;font-size:12px;">${t.startDate||'-'}</td>
             <td>${dueDateChip(t.dueDate)}</td>
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
             <td>${delayBadge(t)}</td>
