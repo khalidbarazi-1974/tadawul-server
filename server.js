@@ -16,24 +16,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 app.get('/api/ping', (req, res) => res.json({ ok: true, ts: Date.now() }));
 
-// TEMPORARY — remove after DB restore
-app.post('/admin/restore-db', express.raw({ type: 'application/octet-stream', limit: '100mb' }), (req, res) => {
-    if (req.headers['x-restore-secret'] !== (process.env.RESTORE_SECRET || 'tadawul-restore-2026')) {
-        return res.status(403).json({ error: 'forbidden' });
-    }
-    const fs = require('fs');
-    const db = require('./database/db');
-    const dbPath = path.join(__dirname, 'database', 'tadawul.db');
-    const tmp = dbPath + '.incoming';
-    fs.writeFileSync(tmp, req.body);
-    db.close();
-    fs.renameSync(tmp, dbPath);
-    try { fs.unlinkSync(dbPath + '-shm'); } catch(e) {}
-    try { fs.unlinkSync(dbPath + '-wal'); } catch(e) {}
-    res.json({ ok: true, bytes: req.body.length });
-    setTimeout(() => process.exit(0), 300);
-});
-
 app.get('/api/events', (req, res) => {
     res.setHeader('Content-Type',      'text/event-stream');
     res.setHeader('Cache-Control',     'no-cache');
