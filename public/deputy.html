@@ -822,6 +822,7 @@ function renderDetail(){
             <div><span style="color:#888;">الحالة:</span> ${statusBadge(t.status)}</div>
             <div><span style="color:#888;">تاريخ البدء:</span> ${t.startDate||'-'}</div>
             <div><span style="color:#888;">الاستحقاق:</span> ${t.dueDate||'-'}</div>
+            <div><span style="color:#888;">تاريخ الإنشاء:</span> ${t.createdAt?t.createdAt.slice(0,10):'-'}</div>
             <div><span style="color:#888;">المدة:</span> ${delayBadge(t)}</div>
             <div><span style="color:#888;">المسؤول:</span> ${t.assignedTo||'-'}</div>
             <div><span style="color:#888;">أنشئ بواسطة:</span> ${t.createdBy} ${roleLabel(t.createdByRole)}</div>

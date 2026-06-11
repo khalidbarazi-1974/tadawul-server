@@ -796,6 +796,7 @@ function renderDetail() {
             <div><span style="color:#888;">تاريخ البدء:</span> ${t.startDate || '-'}</div>
             <div><span style="color:#888;">المدة:</span> ${delayBadge(t)}</div>
             <div><span style="color:#888;">تاريخ الاستحقاق:</span> ${t.dueDate || '-'}</div>
+            <div><span style="color:#888;">تاريخ الإنشاء:</span> ${t.createdAt?t.createdAt.slice(0,10):'-'}</div>
             <div><span style="color:#888;">تاريخ مقترح:</span> ${t.suggestedDueDate || '-'}</div>
             <div style="grid-column:1/-1;"><span style="color:#888;">الوصف:</span> ${t.description || '-'}</div>
             ${t.assignedTo ? `<div style="grid-column:1/-1;"><span style="color:#888;">مُحال من المدير إلى:</span> ${t.assignedTo}</div>` : ''}
