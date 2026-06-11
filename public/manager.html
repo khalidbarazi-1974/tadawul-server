@@ -780,7 +780,16 @@ async function deleteTask() {
 
 function openPendingDetail(task){
     if(!task) return;
-    currentTask={ ...task, guidances:task.guidances||[] };
+    currentTask={
+        ...task,
+        guidances:     task.guidances||[],
+        startDate:     task.start_date      || task.startDate,
+        dueDate:       task.due_date        || task.dueDate,
+        assignedTo:    task.assigned_to     || task.assignedTo     || '-',
+        createdBy:     task.created_by      || task.createdBy      || '-',
+        createdByRole: task.created_by_role || task.createdByRole  || '',
+        createdAt:     task.created_at      || task.createdAt,
+    };
     renderDetail();
     document.getElementById('detailModal').classList.add('open');
 }
@@ -810,7 +819,7 @@ function renderDetail() {
             <div><span style="color:#888;">تاريخ الإنشاء:</span> ${t.createdAt?t.createdAt.slice(0,10):'-'}</div>
             <div><span style="color:#888;">التاريخ المقترح:</span> ${t.suggestedDueDate||'-'}</div>
             <div><span style="color:#888;">المسؤول:</span> ${t.assignedTo||'-'}</div>
-            <div><span style="color:#888;">أنشئ بواسطة:</span> ${t.createdBy} ${roleLabel(t.createdByRole)}</div>
+            <div><span style="color:#888;">أنشئ بواسطة:</span> ${t.createdBy||'-'} ${roleLabel(t.createdByRole)}</div>
             <div style="grid-column:1/-1;"><span style="color:#888;">الوصف:</span> ${t.description||'-'}</div>
         </div>`;
 
