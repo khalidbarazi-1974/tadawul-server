@@ -271,6 +271,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           <th class="sortable" style="width:90px" id="th-status" onclick="setSort('status')">الحالة</th>
           <th class="sortable" style="width:92px" id="th-startDate" onclick="setSort('startDate')">تاريخ البدء</th>
           <th class="sortable" style="width:92px" id="th-dueDate" onclick="setSort('dueDate')">الاستحقاق</th>
+          <th class="sortable" style="width:92px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
           <th style="width:54px">المدة</th>
           <th style="width:72px">التعليقات</th>
         </tr>
@@ -521,7 +522,7 @@ function setStatFilter(key) {
     renderTasks();
 }
 
-const SORT_COLS_TASK = ['name','priority','status','startDate','dueDate'];
+const SORT_COLS_TASK = ['name','priority','status','startDate','dueDate','createdAt'];
 const PRIO_RANK = {'عالية':3,'متوسطة':2,'منخفضة':1};
 function setSort(col) {
     if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
@@ -566,6 +567,7 @@ function renderTasks() {
         else if (sortCol==='status')     { va=a.status||''; vb=b.status||''; }
         else if (sortCol==='startDate')  { va=a.startDate||''; vb=b.startDate||''; }
         else if (sortCol==='dueDate')    { va=a.dueDate||''; vb=b.dueDate||''; }
+        else if (sortCol==='createdAt')  { va=a.createdAt||''; vb=b.createdAt||''; }
         else return 0;
         if (typeof va==='number') return sortDir==='asc'?va-vb:vb-va;
         return sortDir==='asc'?va.localeCompare(vb,'ar'):vb.localeCompare(va,'ar');
@@ -605,6 +607,7 @@ function renderTasks() {
             <td>${statusBadge(t.status)}</td>
             <td>${t.startDate || '-'}</td>
             <td>${dueDateChip(t.dueDate)}</td>
+            <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
             <td>${delayBadge(t)}</td>
             <td>${t.guidances.length}${myPending ? ` <span style="color:#f57f17;font-size:11px;">(${myPending} بانتظار)</span>` : ''}</td>
         </tr>`;

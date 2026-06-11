@@ -284,6 +284,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
               <th class="sortable" style="width:115px" id="th-assignedTo" onclick="setSort('assignedTo')">المسؤول</th>
               <th class="sortable" style="width:92px" id="th-startDate" onclick="setSort('startDate')">تاريخ البدء</th>
               <th class="sortable" style="width:92px" id="th-dueDate" onclick="setSort('dueDate')">الاستحقاق</th>
+              <th class="sortable" style="width:92px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
               <th style="width:54px">المدة</th>
               <th style="width:66px">تعليقات</th>
             </tr>
@@ -544,7 +545,7 @@ function updateStats() {
     countUp(document.getElementById('sComments'), pending.comments.length);
 }
 
-const SORT_COLS_TASK = ['name','priority','status','assignedTo','startDate','dueDate'];
+const SORT_COLS_TASK = ['name','priority','status','assignedTo','startDate','dueDate','createdAt'];
 const PRIO_RANK = {'عالية':3,'متوسطة':2,'منخفضة':1};
 function setSort(col) {
     if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
@@ -594,6 +595,7 @@ function renderTasks() {
         else if (sortCol==='assignedTo')  { va=a.assignedTo||''; vb=b.assignedTo||''; }
         else if (sortCol==='startDate')   { va=a.startDate||''; vb=b.startDate||''; }
         else if (sortCol==='dueDate')     { va=a.dueDate||''; vb=b.dueDate||''; }
+        else if (sortCol==='createdAt')   { va=a.createdAt||''; vb=b.createdAt||''; }
         else return 0;
         if (typeof va==='number') return sortDir==='asc'?va-vb:vb-va;
         return sortDir==='asc'?va.localeCompare(vb,'ar'):vb.localeCompare(va,'ar');
@@ -627,6 +629,7 @@ function renderTasks() {
             <td>${t.assignedTo || '-'}</td>
             <td>${t.startDate || '-'}</td>
             <td>${dueDateChip(t.dueDate)}</td>
+            <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
             <td>${delayBadge(t)}</td>
             <td>${t.guidances.length}${pendingComments ? `<span style="color:#e74c3c;font-size:11px;"> (${pendingComments}⏳)</span>` : ''}</td>
         </tr>`;
