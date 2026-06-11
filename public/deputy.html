@@ -804,9 +804,16 @@ async function openDetail(id){
 
 function openPendingDetail(task){
     if(!task) return;
-    // Build a minimal task object compatible with renderDetail
-    const deptMap={}; depts.forEach(d=>deptMap[d.id]=d.name);
-    currentTask={ ...task, guidances:task.guidances||[], dept_id:task.dept_id };
+    currentTask={
+        ...task,
+        guidances:     task.guidances||[],
+        startDate:     task.start_date     || task.startDate,
+        dueDate:       task.due_date       || task.dueDate,
+        assignedTo:    task.assigned_to    || task.assignedTo    || '-',
+        createdBy:     task.created_by     || task.createdBy     || '-',
+        createdByRole: task.created_by_role|| task.createdByRole || '',
+        createdAt:     task.created_at     || task.createdAt,
+    };
     renderDetail();
     document.getElementById('detailModal').classList.add('open');
 }
