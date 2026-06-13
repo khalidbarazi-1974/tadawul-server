@@ -139,7 +139,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 /* Bento Grid System */
 .apps-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   width: 100%;
 }
@@ -161,13 +161,8 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Bento Sizing Logic */
-.card-meetings { grid-column: span 3; }
-.card-tasks    { grid-column: span 3; }
-.card-letters  { grid-column: span 2; }
-.card-trans    { grid-column: span 2; }
-.card-appr     { grid-column: span 2; }
-.card-leaves   { grid-column: span 6; }
+/* All cards equal size — 3 per row */
+.app-card { grid-column: span 1; }
 
 /* Micro-interactions & Glow on Hover */
 .app-card::before {
@@ -289,13 +284,8 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 .btn-pwd-cancel:hover { background: rgba(255,255,255,0.1); }
 
 /* Responsive Grid Overrides */
-@media(max-width:1024px){
-  .card-tasks, .card-letters { grid-column: span 3; }
-  .card-trans, .card-appr, .card-leaves, .card-meetings { grid-column: span 2; }
-}
 @media(max-width:768px) {
   .apps-grid { grid-template-columns: 1fr; gap: 16px; }
-  .card-tasks, .card-letters, .card-trans, .card-appr, .card-leaves, .card-meetings { grid-column: span 1; }
   .topbar { padding: 14px 20px; }
   .user-chip { display: none; }
   .greeting h2 { font-size: 26px; }
