@@ -107,6 +107,8 @@ tr:hover td{background:#fffbeb;}
 .btn-primary:hover{opacity:.9;}
 .btn-secondary{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;}
 .btn-secondary:hover{background:#e2e8f0;}
+.btn-word{background:#1e6ab4;color:#fff;}
+.btn-word:hover{background:#175da0;}
 
 /* ── Wizard steps indicator ── */
 .steps{display:flex;align-items:center;gap:0;margin-bottom:20px;}
@@ -165,7 +167,7 @@ tr:hover td{background:#fffbeb;}
     </select>
     <input type="date" placeholder="من">
     <input type="date" placeholder="إلى">
-    <input type="text" placeholder="بحث في الموضوع..." style="min-width:200px;">
+    <input id="searchInput" type="text" placeholder="بحث في الموضوع والقرارات والأجندة..." style="min-width:220px;" oninput="filterTable()">
     <button class="btn-new" onclick="document.getElementById('step1Ov').classList.add('open')">
       <i class="fa-solid fa-plus"></i> اجتماع جديد
     </button>
@@ -188,7 +190,7 @@ tr:hover td{background:#fffbeb;}
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr data-search="WK-001 أسبوعي متابعة مؤشرات الأداء للربع الأول قاعة الاجتماعات A مراجعة محضر الاجتماع السابق استعراض مؤشرات الأداء مناقشة التحديات التشغيلية اعتماد محضر الاجتماع السابق تكليف إدارة تميز الأداء">
           <td>1</td>
           <td><span class="num-badge">WK-001</span></td>
           <td><span class="badge-type t-wk">أسبوعي</span></td>
@@ -199,7 +201,7 @@ tr:hover td{background:#fffbeb;}
           <td style="text-align:center;">7</td>
           <td><button class="btn-view" onclick="document.getElementById('detailOv').classList.add('open')">عرض</button></td>
         </tr>
-        <tr>
+        <tr data-search="MN-003 شهري مراجعة التقارير الشهرية للإدارات قاعة الاجتماعات B استعراض نتائج التقارير الشهرية مناقشة الانحرافات عن الخطة اعتماد تقرير الأداء الشهري">
           <td>2</td>
           <td><span class="num-badge">MN-003</span></td>
           <td><span class="badge-type t-mn">شهري</span></td>
@@ -210,7 +212,7 @@ tr:hover td{background:#fffbeb;}
           <td style="text-align:center;">12</td>
           <td><button class="btn-view">عرض</button></td>
         </tr>
-        <tr>
+        <tr data-search="QR-001 ربع سنوي اجتماع مراجعة الخطة التشغيلية Q2 قاعة الوكيل مراجعة إنجازات الربع الأول مناقشة أهداف الربع الثاني الموافقة على تعديل مؤشرات الأداء">
           <td>3</td>
           <td><span class="num-badge">QR-001</span></td>
           <td><span class="badge-type t-qr">ربع سنوي</span></td>
@@ -221,7 +223,7 @@ tr:hover td{background:#fffbeb;}
           <td style="text-align:center;">9</td>
           <td><button class="btn-view">عرض</button></td>
         </tr>
-        <tr>
+        <tr data-search="NM-005 عادي اجتماع تنسيق مع وزارة البيئة مقر الوزارة التنسيق بشأن مشاريع المياه مناقشة اتفاقيات التعاون تكليف الفريق بإعداد مذكرة تفاهم">
           <td>4</td>
           <td><span class="num-badge">NM-005</span></td>
           <td><span class="badge-type t-nm">عادي</span></td>
@@ -232,7 +234,7 @@ tr:hover td{background:#fffbeb;}
           <td style="text-align:center;">5</td>
           <td><button class="btn-view">عرض</button></td>
         </tr>
-        <tr>
+        <tr data-search="SA-001 نصف سنوي مراجعة الأهداف الاستراتيجية للنصف الأول قاعة الاجتماعات A تقييم الأهداف الاستراتيجية مراجعة مؤشرات الأداء الرئيسية اعتماد تقرير منتصف العام تعديل الأهداف للنصف الثاني">
           <td>5</td>
           <td><span class="num-badge">SA-001</span></td>
           <td><span class="badge-type t-sa">نصف سنوي</span></td>
@@ -560,6 +562,7 @@ tr:hover td{background:#fffbeb;}
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="document.getElementById('detailOv').classList.remove('open')">إغلاق</button>
+      <button class="btn btn-word"><i class="fa-solid fa-file-word"></i> تصدير المحضر</button>
       <button class="btn btn-primary"><i class="fa-solid fa-pen"></i> تعديل</button>
     </div>
   </div>
@@ -580,6 +583,14 @@ document.querySelectorAll('.att-tab').forEach(tab => {
     tab.classList.add('active');
   });
 });
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  document.querySelectorAll('tbody tr[data-search]').forEach(row => {
+    row.style.display = (!q || row.dataset.search.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+
 lucide.createIcons();
 </script>
 </body>

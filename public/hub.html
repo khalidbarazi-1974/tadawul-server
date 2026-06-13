@@ -162,12 +162,12 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 }
 
 /* Bento Sizing Logic */
+.card-meetings { grid-column: span 3; }
 .card-tasks    { grid-column: span 3; }
-.card-letters  { grid-column: span 3; }
+.card-letters  { grid-column: span 2; }
 .card-trans    { grid-column: span 2; }
 .card-appr     { grid-column: span 2; }
-.card-leaves   { grid-column: span 2; }
-.card-meetings { grid-column: span 2; }
+.card-leaves   { grid-column: span 6; }
 
 /* Micro-interactions & Glow on Hover */
 .app-card::before {
@@ -343,6 +343,19 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 
   <div class="apps-grid" id="gridContainer">
 
+    <div class="app-card card-meetings" onclick="location.href='/meetings.html'">
+      <div class="card-header-meta">
+        <div class="app-icon icon-meetings">
+          <i data-lucide="users"></i>
+        </div>
+        <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
+      </div>
+      <div>
+        <div class="app-title">الاجتماعات</div>
+        <div class="app-desc">تنظيم الاجتماعات وتوثيق محاضرها وتتبع قرارات وبنود الأعمال المتولدة عنها.</div>
+      </div>
+    </div>
+
     <div class="app-card card-tasks" onclick="goTasks()">
       <div class="card-header-meta">
         <div class="app-icon icon-tasks">
@@ -408,18 +421,6 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
       </div>
     </div>
 
-    <div class="app-card card-meetings" onclick="location.href='/meetings.html'">
-      <div class="card-header-meta">
-        <div class="app-icon icon-meetings">
-          <i data-lucide="users"></i>
-        </div>
-        <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
-      </div>
-      <div>
-        <div class="app-title">الاجتماعات</div>
-        <div class="app-desc">تنظيم الاجتماعات وتوثيق محاضرها وتتبع قرارات وبنود الأعمال المتولدة عنها.</div>
-      </div>
-    </div>
 
   </div>
 </div>
