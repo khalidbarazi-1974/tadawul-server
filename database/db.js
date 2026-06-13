@@ -131,6 +131,86 @@ db.exec(`
         updated_by     TEXT,
         updated_at     TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS contacts_external (
+        id         TEXT PRIMARY KEY,
+        name       TEXT NOT NULL,
+        title      TEXT DEFAULT '',
+        org        TEXT DEFAULT '',
+        sector     TEXT DEFAULT '',
+        city       TEXT DEFAULT '',
+        mobile     TEXT DEFAULT '',
+        email      TEXT DEFAULT '',
+        notes      TEXT DEFAULT '',
+        created_by TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS contacts_internal (
+        id          TEXT PRIMARY KEY,
+        name        TEXT NOT NULL,
+        employee_id TEXT DEFAULT '',
+        title       TEXT DEFAULT '',
+        grade       TEXT DEFAULT '',
+        sector      TEXT DEFAULT '',
+        dept        TEXT DEFAULT '',
+        mobile      TEXT DEFAULT '',
+        extension   TEXT DEFAULT '',
+        email       TEXT DEFAULT '',
+        notes       TEXT DEFAULT '',
+        created_by  TEXT NOT NULL,
+        created_at  TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS meetings (
+        id                TEXT PRIMARY KEY,
+        meeting_number    TEXT NOT NULL UNIQUE,
+        type              TEXT NOT NULL,
+        subject           TEXT NOT NULL,
+        date              TEXT NOT NULL,
+        time              TEXT DEFAULT '',
+        location          TEXT DEFAULT '',
+        next_meeting_date TEXT DEFAULT '',
+        created_by        TEXT NOT NULL,
+        created_at        TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS meeting_attendees (
+        id         TEXT PRIMARY KEY,
+        meeting_id TEXT NOT NULL,
+        kind       TEXT NOT NULL,
+        ref_id     TEXT DEFAULT '',
+        name       TEXT NOT NULL,
+        title      TEXT DEFAULT '',
+        org        TEXT DEFAULT '',
+        FOREIGN KEY (meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS meeting_agenda (
+        id         TEXT PRIMARY KEY,
+        meeting_id TEXT NOT NULL,
+        order_num  INTEGER NOT NULL,
+        text       TEXT NOT NULL,
+        FOREIGN KEY (meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS meeting_decisions (
+        id         TEXT PRIMARY KEY,
+        meeting_id TEXT NOT NULL,
+        order_num  INTEGER NOT NULL,
+        text       TEXT NOT NULL,
+        FOREIGN KEY (meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS meeting_actions (
+        id          TEXT PRIMARY KEY,
+        meeting_id  TEXT NOT NULL,
+        description TEXT NOT NULL,
+        owner_name  TEXT DEFAULT '',
+        due_date    TEXT DEFAULT '',
+        status      TEXT DEFAULT 'pending',
+        FOREIGN KEY (meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
+    );
 `);
 
 // Migrations for existing DBs
