@@ -20,6 +20,7 @@
   --c-trans: #14b8a6;
   --c-appr: #f97316;
   --c-leaves: #22c55e;
+  --c-meetings: #d97706;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -166,6 +167,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 .card-trans    { grid-column: span 2; }
 .card-appr     { grid-column: span 2; }
 .card-leaves   { grid-column: span 2; }
+.card-meetings { grid-column: span 2; }
 
 /* Micro-interactions & Glow on Hover */
 .app-card::before {
@@ -189,6 +191,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 .card-trans:hover { box-shadow: 0 20px 40px -15px rgba(20, 184, 166, 0.15); }
 .card-appr:hover { box-shadow: 0 20px 40px -15px rgba(249, 115, 22, 0.15); }
 .card-leaves:hover { box-shadow: 0 20px 40px -15px rgba(34, 197, 94, 0.15); }
+.card-meetings:hover { box-shadow: 0 20px 40px -15px rgba(217, 119, 6, 0.15); }
 
 /* Modern Icon Layout */
 .card-header-meta {
@@ -216,6 +219,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 .icon-trans   { background: var(--c-trans); }   .icon-trans::after   { background: var(--c-trans); }
 .icon-appr    { background: var(--c-appr); }    .icon-appr::after    { background: var(--c-appr); }
 .icon-leaves  { background: var(--c-leaves); }  .icon-leaves::after  { background: var(--c-leaves); }
+.icon-meetings{ background: var(--c-meetings); } .icon-meetings::after{ background: var(--c-meetings); }
 
 .app-icon i { width: 24px; height: 24px; z-index: 2; }
 
@@ -287,11 +291,11 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 /* Responsive Grid Overrides */
 @media(max-width:1024px){
   .card-tasks, .card-letters { grid-column: span 3; }
-  .card-trans, .card-appr, .card-leaves { grid-column: span 2; }
+  .card-trans, .card-appr, .card-leaves, .card-meetings { grid-column: span 2; }
 }
 @media(max-width:768px) {
   .apps-grid { grid-template-columns: 1fr; gap: 16px; }
-  .card-tasks, .card-letters, .card-trans, .card-appr, .card-leaves { grid-column: span 1; }
+  .card-tasks, .card-letters, .card-trans, .card-appr, .card-leaves, .card-meetings { grid-column: span 1; }
   .topbar { padding: 14px 20px; }
   .user-chip { display: none; }
   .greeting h2 { font-size: 26px; }
@@ -347,7 +351,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
         <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
       </div>
       <div>
-        <div class="app-title">اجتماع تداول الاسبوعي</div>
+        <div class="app-title">تداول الاسبوعي</div>
         <div class="app-desc">إدارة المهام ومتابعة تنفيذها واتخاذ القرارات الاستراتيجية بسلاسة.</div>
       </div>
     </div>
@@ -401,6 +405,19 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
       <div>
         <div class="app-title">إدارة الإجازات</div>
         <div class="app-desc">طلبات الإجازات والانتدابات والإجازات الرسمية وتتبع رصيد الموظفين المتبقي.</div>
+      </div>
+    </div>
+
+    <div class="app-card card-meetings" onclick="location.href='/meetings.html'">
+      <div class="card-header-meta">
+        <div class="app-icon icon-meetings">
+          <i data-lucide="users"></i>
+        </div>
+        <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
+      </div>
+      <div>
+        <div class="app-title">الاجتماعات</div>
+        <div class="app-desc">تنظيم الاجتماعات وتوثيق محاضرها وتتبع قرارات وبنود الأعمال المتولدة عنها.</div>
       </div>
     </div>
 

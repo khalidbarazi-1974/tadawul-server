@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الاجتماعات</title>
+<link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/vendor/fonts/cairo.css">
+<script src="/vendor/lucide.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100vh;}
+
+/* ── Topbar ── */
+.topbar{background:linear-gradient(135deg,#b45309 0%,#d97706 100%);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-left i{font-size:20px;opacity:.9;}
+.topbar h2{font-size:17px;font-weight:700;}
+.role-badge{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:12px;}
+.topbar-right{display:flex;align-items:center;gap:10px;font-size:13px;}
+.btn-top{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;gap:6px;}
+.btn-top:hover{background:rgba(255,255,255,.25);}
+
+/* ── Layout ── */
+.page{max-width:1300px;margin:0 auto;padding:20px;}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;}
+.stat{background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07);}
+.stat .n{font-size:24px;font-weight:700;color:#b45309;}
+.stat .l{font-size:11px;color:#888;margin-top:2px;}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.toolbar select,.toolbar input{padding:7px 11px;border:1.5px solid #ddd;border-radius:7px;font-family:inherit;font-size:13px;background:#fff;}
+.toolbar select:focus,.toolbar input:focus{outline:none;border-color:#d97706;}
+.btn-new{background:linear-gradient(135deg,#b45309,#d97706);color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;margin-right:auto;}
+.btn-new:hover{opacity:.9;}
+
+/* ── Table ── */
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.08);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{background:#fef3c7;padding:11px 14px;font-size:12px;color:#92400e;font-weight:700;text-align:right;border-bottom:2px solid #fde68a;}
+td{padding:11px 14px;font-size:13px;color:#333;border-top:1px solid #f5f5f5;vertical-align:middle;}
+tr:hover td{background:#fffbeb;}
+.badge-type{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.t-wk{background:#dbeafe;color:#1d4ed8;}
+.t-mn{background:#d1fae5;color:#065f46;}
+.t-qr{background:#ede9fe;color:#5b21b6;}
+.t-sa{background:#fee2e2;color:#991b1b;}
+.t-an{background:#fef3c7;color:#92400e;}
+.t-nm{background:#f1f5f9;color:#475569;}
+.btn-view{background:#fff7ed;color:#b45309;border:1px solid #fed7aa;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;}
+.btn-view:hover{background:#ffedd5;}
+.empty{text-align:center;color:#aaa;padding:40px;font-size:13px;}
+.num-badge{font-family:monospace;font-size:12px;background:#f1f5f9;padding:2px 8px;border-radius:4px;color:#475569;font-weight:700;}
+
+/* ── Overlay ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;width:720px;max-width:95vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.2);}
+.modal-sm{width:480px;}
+.modal-head{padding:18px 24px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
+.modal-head h3{font-size:16px;color:#b45309;font-weight:700;display:flex;align-items:center;gap:8px;}
+.btn-close{background:none;border:none;font-size:20px;cursor:pointer;color:#999;line-height:1;}
+.modal-body{padding:24px;overflow-y:auto;flex:1;}
+.modal-foot{padding:16px 24px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end;}
+
+/* ── Step 1: Type selector ── */
+.step-label{font-size:12px;color:#92400e;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:6px;}
+.step-label span{background:#b45309;color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.type-card{border:2px solid #e5e7eb;border-radius:10px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;}
+.type-card:hover{border-color:#d97706;background:#fffbeb;}
+.type-card.selected{border-color:#b45309;background:#fff7ed;}
+.type-card .tc-icon{font-size:22px;margin-bottom:6px;}
+.type-card .tc-name{font-size:13px;font-weight:700;color:#333;}
+.type-card .tc-code{font-size:11px;color:#888;font-family:monospace;margin-top:2px;}
+.fr{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.fr label{font-size:13px;font-weight:600;color:#555;}
+.fr input,.fr textarea,.fr select{padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;}
+.fr input:focus,.fr textarea:focus,.fr select:focus{outline:none;border-color:#d97706;}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* ── Step 2 sections ── */
+.section-title{font-size:13px;font-weight:700;color:#b45309;margin:18px 0 10px;padding-bottom:6px;border-bottom:1.5px solid #fde68a;display:flex;align-items:center;gap:7px;}
+.att-tabs{display:flex;gap:0;margin-bottom:12px;border:1.5px solid #e5e7eb;border-radius:8px;overflow:hidden;}
+.att-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;background:#f9fafb;color:#888;border:none;font-family:inherit;}
+.att-tab.active{background:#fff7ed;color:#b45309;}
+.att-list{border:1.5px solid #e5e7eb;border-radius:8px;min-height:80px;padding:10px;}
+.att-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:13px;margin-bottom:4px;background:#f9fafb;}
+.att-item:last-child{margin-bottom:0;}
+.att-remove{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:14px;padding:0 4px;}
+.btn-add-att{background:#fff7ed;color:#b45309;border:1.5px dashed #fcd34d;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;width:100%;margin-top:8px;}
+.agenda-list,.decision-list{display:flex;flex-direction:column;gap:6px;}
+.agenda-item{display:flex;align-items:center;gap:8px;}
+.agenda-item input{flex:1;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px;}
+.btn-add-row{background:#f0fdf4;color:#16a34a;border:1.5px dashed #86efac;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;width:100%;margin-top:6px;}
+.action-table{width:100%;border-collapse:collapse;font-size:13px;}
+.action-table th{background:#f8fafc;padding:8px 10px;font-size:11px;color:#64748b;font-weight:700;text-align:right;border-bottom:1.5px solid #e2e8f0;}
+.action-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9;}
+.action-table input,.action-table select{width:100%;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:12px;}
+
+/* ── Buttons ── */
+.btn{padding:9px 20px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:linear-gradient(135deg,#b45309,#d97706);color:#fff;}
+.btn-primary:hover{opacity:.9;}
+.btn-secondary{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;}
+.btn-secondary:hover{background:#e2e8f0;}
+
+/* ── Wizard steps indicator ── */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:20px;}
+.step{display:flex;align-items:center;gap:6px;font-size:12px;color:#aaa;}
+.step.active{color:#b45309;font-weight:700;}
+.step.done{color:#16a34a;}
+.step-num{width:24px;height:24px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.step-line{flex:1;height:2px;background:#e5e7eb;margin:0 8px;}
+.step-line.done{background:#16a34a;}
+
+@media(max-width:640px){
+  .stats{grid-template-columns:repeat(3,1fr);}
+  .type-grid{grid-template-columns:repeat(2,1fr);}
+  .f2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <i class="fa-solid fa-people-group"></i>
+    <h2>الاجتماعات</h2>
+    <span class="role-badge">وكيل</span>
+  </div>
+  <div class="topbar-right">
+    <span>خالد البرازي</span>
+    <button class="btn-top"><i class="fa-solid fa-house" style="font-size:12px;"></i> الرئيسية</button>
+    <button class="btn-top"><i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i> خروج</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="n">24</div><div class="l">إجمالي الاجتماعات</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">هذا الشهر</div></div>
+    <div class="stat"><div class="n">8</div><div class="l">أسبوعية</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">شهرية</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">ربع سنوية</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">أخرى</div></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <select>
+      <option value="">كل الأنواع</option>
+      <option>أسبوعي — WK</option>
+      <option>شهري — MN</option>
+      <option>ربع سنوي — QR</option>
+      <option>نصف سنوي — SA</option>
+      <option>سنوي — AN</option>
+      <option>عادي — NM</option>
+    </select>
+    <input type="date" placeholder="من">
+    <input type="date" placeholder="إلى">
+    <input type="text" placeholder="بحث في الموضوع..." style="min-width:200px;">
+    <button class="btn-new" onclick="document.getElementById('step1Ov').classList.add('open')">
+      <i class="fa-solid fa-plus"></i> اجتماع جديد
+    </button>
+  </div>
+
+  <!-- Meetings Table -->
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38px;">#</th>
+          <th style="width:110px;">رقم الاجتماع</th>
+          <th style="width:100px;">النوع</th>
+          <th>الموضوع</th>
+          <th style="width:105px;">التاريخ</th>
+          <th style="width:120px;">الوقت</th>
+          <th style="width:130px;">الموقع</th>
+          <th style="width:80px;">الحضور</th>
+          <th style="width:70px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><span class="num-badge">WK-001</span></td>
+          <td><span class="badge-type t-wk">أسبوعي</span></td>
+          <td>متابعة مؤشرات الأداء للربع الأول</td>
+          <td style="font-size:12px;color:#666;">2026-06-02</td>
+          <td style="font-size:12px;color:#666;">10:00 ص</td>
+          <td style="font-size:12px;color:#666;">قاعة الاجتماعات — A</td>
+          <td style="text-align:center;">7</td>
+          <td><button class="btn-view" onclick="document.getElementById('detailOv').classList.add('open')">عرض</button></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><span class="num-badge">MN-003</span></td>
+          <td><span class="badge-type t-mn">شهري</span></td>
+          <td>مراجعة التقارير الشهرية للإدارات</td>
+          <td style="font-size:12px;color:#666;">2026-05-28</td>
+          <td style="font-size:12px;color:#666;">09:00 ص</td>
+          <td style="font-size:12px;color:#666;">قاعة الاجتماعات — B</td>
+          <td style="text-align:center;">12</td>
+          <td><button class="btn-view">عرض</button></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><span class="num-badge">QR-001</span></td>
+          <td><span class="badge-type t-qr">ربع سنوي</span></td>
+          <td>اجتماع مراجعة الخطة التشغيلية Q2</td>
+          <td style="font-size:12px;color:#666;">2026-05-15</td>
+          <td style="font-size:12px;color:#666;">11:00 ص</td>
+          <td style="font-size:12px;color:#666;">قاعة الوكيل</td>
+          <td style="text-align:center;">9</td>
+          <td><button class="btn-view">عرض</button></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><span class="num-badge">NM-005</span></td>
+          <td><span class="badge-type t-nm">عادي</span></td>
+          <td>اجتماع تنسيق مع وزارة البيئة</td>
+          <td style="font-size:12px;color:#666;">2026-05-10</td>
+          <td style="font-size:12px;color:#666;">02:00 م</td>
+          <td style="font-size:12px;color:#666;">مقر الوزارة</td>
+          <td style="text-align:center;">5</td>
+          <td><button class="btn-view">عرض</button></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><span class="num-badge">SA-001</span></td>
+          <td><span class="badge-type t-sa">نصف سنوي</span></td>
+          <td>مراجعة الأهداف الاستراتيجية للنصف الأول</td>
+          <td style="font-size:12px;color:#666;">2026-04-20</td>
+          <td style="font-size:12px;color:#666;">09:30 ص</td>
+          <td style="font-size:12px;color:#666;">قاعة الاجتماعات — A</td>
+          <td style="text-align:center;">15</td>
+          <td><button class="btn-view">عرض</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+
+<!-- ══ STEP 1: Type & Subject ══════════════════════════════════════════════ -->
+<div class="overlay" id="step1Ov">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-people-group"></i> اجتماع جديد</h3>
+      <button class="btn-close" onclick="document.getElementById('step1Ov').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="steps">
+        <div class="step active"><span class="step-num">1</span> نوع الاجتماع</div>
+        <div class="step-line"></div>
+        <div class="step"><span class="step-num">2</span> بيانات الاجتماع</div>
+      </div>
+
+      <div class="step-label"><span>1</span> اختر نوع الاجتماع</div>
+
+      <div class="type-grid">
+        <div class="type-card selected">
+          <div class="tc-icon">📅</div>
+          <div class="tc-name">أسبوعي</div>
+          <div class="tc-code">WK</div>
+        </div>
+        <div class="type-card">
+          <div class="tc-icon">🗓️</div>
+          <div class="tc-name">شهري</div>
+          <div class="tc-code">MN</div>
+        </div>
+        <div class="type-card">
+          <div class="tc-icon">📊</div>
+          <div class="tc-name">ربع سنوي</div>
+          <div class="tc-code">QR</div>
+        </div>
+        <div class="type-card">
+          <div class="tc-icon">📈</div>
+          <div class="tc-name">نصف سنوي</div>
+          <div class="tc-code">SA</div>
+        </div>
+        <div class="type-card">
+          <div class="tc-icon">🏆</div>
+          <div class="tc-name">سنوي</div>
+          <div class="tc-code">AN</div>
+        </div>
+        <div class="type-card">
+          <div class="tc-icon">💬</div>
+          <div class="tc-name">عادي</div>
+          <div class="tc-code">NM</div>
+        </div>
+      </div>
+
+      <div class="fr">
+        <label>موضوع الاجتماع *</label>
+        <input type="text" placeholder="أدخل موضوع الاجتماع...">
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="document.getElementById('step1Ov').classList.remove('open')">إلغاء</button>
+      <button class="btn btn-primary" onclick="document.getElementById('step1Ov').classList.remove('open');document.getElementById('step2Ov').classList.add('open')">
+        التالي <i class="fa-solid fa-arrow-left"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ STEP 2: Meeting Data ════════════════════════════════════════════════ -->
+<div class="overlay" id="step2Ov">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-people-group"></i> بيانات الاجتماع — <span style="font-family:monospace;font-size:13px;background:#fff7ed;padding:2px 8px;border-radius:4px;">WK-009</span></h3>
+      <button class="btn-close" onclick="document.getElementById('step2Ov').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="steps">
+        <div class="step done"><span class="step-num">✓</span> نوع الاجتماع</div>
+        <div class="step-line done"></div>
+        <div class="step active"><span class="step-num">2</span> بيانات الاجتماع</div>
+      </div>
+
+      <!-- Basic Info -->
+      <div class="f2">
+        <div class="fr">
+          <label>الموضوع *</label>
+          <input type="text" value="متابعة مؤشرات الأداء">
+        </div>
+        <div class="fr">
+          <label>الموقع</label>
+          <input type="text" placeholder="قاعة الاجتماعات، مقر الوزارة...">
+        </div>
+        <div class="fr">
+          <label>التاريخ *</label>
+          <input type="date">
+        </div>
+        <div class="fr">
+          <label>الوقت</label>
+          <input type="time">
+        </div>
+      </div>
+
+      <!-- Attendees -->
+      <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
+      <div class="att-tabs">
+        <button class="att-tab active">داخلي (موظفون وزملاء)</button>
+        <button class="att-tab">خارجي (جهات خارجية)</button>
+      </div>
+      <div class="att-list">
+        <div class="att-item">
+          <span>عادل بن عبدالكريم الزهراني <span style="color:#888;font-size:11px;">— وكيل</span></span>
+          <button class="att-remove">×</button>
+        </div>
+        <div class="att-item">
+          <span>خالد بن عبدالله البرازي <span style="color:#888;font-size:11px;">— مشرف</span></span>
+          <button class="att-remove">×</button>
+        </div>
+        <div class="att-item">
+          <span>بدر بن عبدالله الدوسري <span style="color:#888;font-size:11px;">— مدير</span></span>
+          <button class="att-remove">×</button>
+        </div>
+      </div>
+      <button class="btn-add-att"><i class="fa-solid fa-plus"></i> إضافة حاضر</button>
+
+      <!-- Agenda -->
+      <div class="section-title"><i class="fa-solid fa-list-check"></i> جدول الأعمال</div>
+      <div class="agenda-list">
+        <div class="agenda-item">
+          <span style="color:#b45309;font-weight:700;min-width:20px;">1.</span>
+          <input type="text" value="مراجعة محضر الاجتماع السابق">
+          <button class="att-remove">×</button>
+        </div>
+        <div class="agenda-item">
+          <span style="color:#b45309;font-weight:700;min-width:20px;">2.</span>
+          <input type="text" value="استعراض مؤشرات الأداء للأسبوع الماضي">
+          <button class="att-remove">×</button>
+        </div>
+        <div class="agenda-item">
+          <span style="color:#b45309;font-weight:700;min-width:20px;">3.</span>
+          <input type="text" placeholder="أضف بنداً...">
+          <button class="att-remove">×</button>
+        </div>
+      </div>
+      <button class="btn-add-row"><i class="fa-solid fa-plus"></i> إضافة بند</button>
+
+      <!-- Decisions -->
+      <div class="section-title"><i class="fa-solid fa-gavel"></i> القرارات</div>
+      <div class="agenda-list">
+        <div class="agenda-item">
+          <span style="color:#1d4ed8;font-weight:700;min-width:20px;">1.</span>
+          <input type="text" value="اعتماد محضر الاجتماع السابق">
+          <button class="att-remove">×</button>
+        </div>
+        <div class="agenda-item">
+          <span style="color:#1d4ed8;font-weight:700;min-width:20px;">2.</span>
+          <input type="text" placeholder="أضف قراراً...">
+          <button class="att-remove">×</button>
+        </div>
+      </div>
+      <button class="btn-add-row" style="background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;"><i class="fa-solid fa-plus"></i> إضافة قرار</button>
+
+      <!-- Action Items -->
+      <div class="section-title"><i class="fa-solid fa-bolt"></i> بنود العمل</div>
+      <table class="action-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>البند</th>
+            <th style="width:130px;">المسؤول</th>
+            <th style="width:120px;">تاريخ الإنجاز</th>
+            <th style="width:32px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#888;font-size:12px;">1</td>
+            <td><input type="text" value="رفع تقرير مؤشرات الأداء للأسبوع الحالي"></td>
+            <td>
+              <select>
+                <option>بدر الدوسري</option>
+                <option>خالد البرازي</option>
+              </select>
+            </td>
+            <td><input type="date"></td>
+            <td><button class="att-remove">×</button></td>
+          </tr>
+          <tr>
+            <td style="color:#888;font-size:12px;">2</td>
+            <td><input type="text" placeholder="أضف بند عمل..."></td>
+            <td><select><option>— اختر —</option></select></td>
+            <td><input type="date"></td>
+            <td><button class="att-remove">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn-add-row" style="background:#fdf4ff;color:#7e22ce;border-color:#d8b4fe;margin-top:8px;"><i class="fa-solid fa-plus"></i> إضافة بند عمل</button>
+
+      <!-- Next Meeting -->
+      <div class="section-title"><i class="fa-solid fa-calendar-plus"></i> الاجتماع القادم</div>
+      <div class="f2">
+        <div class="fr">
+          <label>التاريخ المتوقع</label>
+          <input type="date">
+        </div>
+        <div class="fr">
+          <label>الوقت المتوقع</label>
+          <input type="time">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="document.getElementById('step2Ov').classList.remove('open');document.getElementById('step1Ov').classList.add('open')">
+        <i class="fa-solid fa-arrow-right"></i> رجوع
+      </button>
+      <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ الاجتماع</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MEETING DETAIL (View) ══════════════════════════════════════════════ -->
+<div class="overlay" id="detailOv">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-people-group"></i> متابعة مؤشرات الأداء للربع الأول — <span style="font-family:monospace;font-size:13px;background:#fff7ed;padding:2px 8px;border-radius:4px;">WK-001</span></h3>
+      <button class="btn-close" onclick="document.getElementById('detailOv').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Info Grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px;">
+        <div style="background:#fff7ed;border-radius:8px;padding:10px 14px;">
+          <div style="font-size:11px;color:#92400e;margin-bottom:3px;">النوع</div>
+          <div style="font-size:13px;font-weight:700;"><span class="badge-type t-wk">أسبوعي</span></div>
+        </div>
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 14px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:3px;">التاريخ</div>
+          <div style="font-size:13px;font-weight:700;">2026-06-02</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 14px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:3px;">الوقت</div>
+          <div style="font-size:13px;font-weight:700;">10:00 ص</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 14px;grid-column:span 2;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:3px;">الموقع</div>
+          <div style="font-size:13px;font-weight:700;">قاعة الاجتماعات — A</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 14px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:3px;">الاجتماع القادم</div>
+          <div style="font-size:13px;font-weight:700;">2026-06-09</div>
+        </div>
+      </div>
+
+      <!-- Attendees -->
+      <div class="section-title"><i class="fa-solid fa-users"></i> الحضور (7)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span style="background:#fff7ed;color:#b45309;border:1px solid #fcd34d;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">عادل الزهراني</span>
+        <span style="background:#fff7ed;color:#b45309;border:1px solid #fcd34d;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">خالد البرازي</span>
+        <span style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">بدر الدوسري</span>
+        <span style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">هاني الحربي</span>
+        <span style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">مشاري الدلبحي</span>
+        <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">محمد الأحمد — شركة الاستشارات</span>
+        <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">سلمى الرشيدي — شركة الاستشارات</span>
+      </div>
+
+      <!-- Agenda -->
+      <div class="section-title"><i class="fa-solid fa-list-check"></i> جدول الأعمال</div>
+      <ol style="padding-right:20px;font-size:13px;line-height:2;">
+        <li>مراجعة محضر الاجتماع السابق</li>
+        <li>استعراض مؤشرات الأداء للأسبوع الماضي</li>
+        <li>مناقشة التحديات التشغيلية</li>
+      </ol>
+
+      <!-- Decisions -->
+      <div class="section-title"><i class="fa-solid fa-gavel"></i> القرارات</div>
+      <ol style="padding-right:20px;font-size:13px;line-height:2;color:#1d4ed8;">
+        <li>اعتماد محضر الاجتماع السابق</li>
+        <li>تكليف إدارة تميز الأداء برفع تقرير تحليلي خلال أسبوع</li>
+      </ol>
+
+      <!-- Action Items -->
+      <div class="section-title"><i class="fa-solid fa-bolt"></i> بنود العمل</div>
+      <table class="action-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>البند</th>
+            <th>المسؤول</th>
+            <th>تاريخ الإنجاز</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#888;font-size:12px;">1</td>
+            <td>رفع تقرير مؤشرات الأداء للأسبوع الحالي</td>
+            <td>بدر الدوسري</td>
+            <td style="font-size:12px;color:#666;">2026-06-05</td>
+          </tr>
+          <tr>
+            <td style="color:#888;font-size:12px;">2</td>
+            <td>مراجعة خطة العمل الفصلية</td>
+            <td>هاني الحربي</td>
+            <td style="font-size:12px;color:#666;">2026-06-08</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="document.getElementById('detailOv').classList.remove('open')">إغلاق</button>
+      <button class="btn btn-primary"><i class="fa-solid fa-pen"></i> تعديل</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Type card selection (demo only)
+document.querySelectorAll('.type-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+  });
+});
+// Attendee tabs (demo only)
+document.querySelectorAll('.att-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.att-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+lucide.createIcons();
+</script>
+</body>
+</html>
