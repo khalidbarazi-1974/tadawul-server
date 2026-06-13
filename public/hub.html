@@ -21,6 +21,7 @@
   --c-appr: #f97316;
   --c-leaves: #22c55e;
   --c-meetings: #d97706;
+  --c-contacts: #6366f1;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -187,6 +188,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 .card-appr:hover { box-shadow: 0 20px 40px -15px rgba(249, 115, 22, 0.15); }
 .card-leaves:hover { box-shadow: 0 20px 40px -15px rgba(34, 197, 94, 0.15); }
 .card-meetings:hover { box-shadow: 0 20px 40px -15px rgba(217, 119, 6, 0.15); }
+.card-contacts:hover { box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.15); }
 
 /* Modern Icon Layout */
 .card-header-meta {
@@ -215,6 +217,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 .icon-appr    { background: var(--c-appr); }    .icon-appr::after    { background: var(--c-appr); }
 .icon-leaves  { background: var(--c-leaves); }  .icon-leaves::after  { background: var(--c-leaves); }
 .icon-meetings{ background: var(--c-meetings); } .icon-meetings::after{ background: var(--c-meetings); }
+.icon-contacts{ background: var(--c-contacts); } .icon-contacts::after{ background: var(--c-contacts); }
 
 .app-icon i { width: 24px; height: 24px; z-index: 2; }
 
@@ -411,6 +414,18 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
       </div>
     </div>
 
+    <div class="app-card card-contacts" onclick="location.href='/contacts.html'">
+      <div class="card-header-meta">
+        <div class="app-icon icon-contacts">
+          <i data-lucide="book-user"></i>
+        </div>
+        <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
+      </div>
+      <div>
+        <div class="app-title">جهات الاتصال</div>
+        <div class="app-desc">إدارة الجهات الخارجية والزملاء من خارج الوكالة لاستخدامها في الاجتماعات والمراسلات.</div>
+      </div>
+    </div>
 
   </div>
 </div>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>جهات الاتصال</title>
+<link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/vendor/fonts/cairo.css">
+<script src="/vendor/lucide.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100vh;}
+
+/* ── Topbar ── */
+.topbar{background:linear-gradient(135deg,#4338ca 0%,#6366f1 100%);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar h2{font-size:17px;font-weight:700;}
+.role-badge{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:12px;}
+.topbar-right{display:flex;align-items:center;gap:10px;font-size:13px;}
+.btn-top{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;gap:6px;}
+.btn-top:hover{background:rgba(255,255,255,.25);}
+
+/* ── Layout ── */
+.page{max-width:1300px;margin:0 auto;padding:20px;}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat{background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07);}
+.stat .n{font-size:24px;font-weight:700;color:#4338ca;}
+.stat .l{font-size:11px;color:#888;margin-top:2px;}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;margin-bottom:18px;background:#fff;border-radius:10px;padding:4px;box-shadow:0 1px 6px rgba(0,0,0,.07);width:fit-content;}
+.tab{padding:8px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;background:none;color:#888;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.tab.active{background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;}
+.tab .count{background:rgba(255,255,255,.25);padding:1px 7px;border-radius:10px;font-size:11px;}
+.tab:not(.active) .count{background:#f1f5f9;color:#64748b;}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.toolbar input,.toolbar select{padding:7px 11px;border:1.5px solid #ddd;border-radius:7px;font-family:inherit;font-size:13px;background:#fff;}
+.toolbar input:focus,.toolbar select:focus{outline:none;border-color:#6366f1;}
+.btn-new{background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;margin-right:auto;}
+.btn-new:hover{opacity:.9;}
+
+/* ── Table ── */
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.08);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{background:#eef2ff;padding:11px 14px;font-size:12px;color:#3730a3;font-weight:700;text-align:right;border-bottom:2px solid #c7d2fe;}
+td{padding:11px 14px;font-size:13px;color:#333;border-top:1px solid #f5f5f5;vertical-align:middle;}
+tr:hover td{background:#f5f3ff;}
+.org-badge{display:inline-block;background:#eef2ff;color:#4338ca;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.dept-badge{display:inline-block;background:#f0fdf4;color:#15803d;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.empty{text-align:center;color:#aaa;padding:60px;font-size:13px;}
+
+/* ── Action Buttons ── */
+.btn-edit{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;margin-left:4px;}
+.btn-edit:hover{background:#e0e7ff;}
+.btn-del{background:#fff1f2;color:#be123c;border:1px solid #fecdd3;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;}
+.btn-del:hover{background:#ffe4e6;}
+
+/* ── Overlay / Modal ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;width:560px;max-width:95vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.2);}
+.modal-head{padding:18px 24px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
+.modal-head h3{font-size:16px;color:#4338ca;font-weight:700;display:flex;align-items:center;gap:8px;}
+.btn-close{background:none;border:none;font-size:20px;cursor:pointer;color:#999;line-height:1;}
+.modal-body{padding:24px;overflow-y:auto;flex:1;}
+.modal-foot{padding:16px 24px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end;}
+
+/* ── Form ── */
+.fr{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.fr label{font-size:13px;font-weight:600;color:#555;}
+.fr input,.fr select,.fr textarea{padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;}
+.fr input:focus,.fr select:focus,.fr textarea:focus{outline:none;border-color:#6366f1;}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.section-sep{font-size:12px;font-weight:700;color:#4338ca;margin:6px 0 14px;padding-bottom:6px;border-bottom:1.5px solid #c7d2fe;display:flex;align-items:center;gap:6px;}
+
+/* ── Buttons ── */
+.btn{padding:9px 20px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;}
+.btn-primary:hover{opacity:.9;}
+.btn-secondary{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;}
+.btn-secondary:hover{background:#e2e8f0;}
+
+/* ── Contact card (grid view) ── */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.contact-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1.5px solid #e5e7eb;transition:all .2s;}
+.contact-card:hover{border-color:#6366f1;box-shadow:0 4px 16px rgba(99,102,241,.12);}
+.cc-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;}
+.cc-avatar.ext{background:linear-gradient(135deg,#0369a1,#0ea5e9);}
+.cc-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.cc-name{font-size:14px;font-weight:700;color:#1e293b;}
+.cc-title{font-size:12px;color:#64748b;margin-top:2px;}
+.cc-body{font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:6px;}
+.cc-row{display:flex;align-items:center;gap:8px;}
+.cc-row i{width:14px;color:#6366f1;flex-shrink:0;}
+.cc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <i class="fa-solid fa-address-book" style="font-size:20px;opacity:.9;"></i>
+    <h2>جهات الاتصال</h2>
+    <span class="role-badge">وكالة الشؤون الاقتصادية</span>
+  </div>
+  <div class="topbar-right">
+    <span id="topbarUser">خالد البرازي</span>
+    <button class="btn-top" onclick="location.href='/hub.html'"><i class="fa-solid fa-grid-2" style="font-size:13px;"></i> الرئيسية</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="n">18</div><div class="l">إجمالي جهات الاتصال</div></div>
+    <div class="stat"><div class="n">7</div><div class="l">جهات خارجية</div></div>
+    <div class="stat"><div class="n">11</div><div class="l">زملاء من خارج الوكالة</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">جهات مستخدمة في اجتماع</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tabExt" onclick="switchTab('ext')">
+      <i class="fa-solid fa-building"></i> جهات خارجية <span class="count">7</span>
+    </button>
+    <button class="tab" id="tabInt" onclick="switchTab('int')">
+      <i class="fa-solid fa-user-tie"></i> زملاء من خارج الوكالة <span class="count">11</span>
+    </button>
+  </div>
+
+  <!-- ══ EXTERNAL PARTIES TAB ══ -->
+  <div id="panelExt">
+    <div class="toolbar">
+      <input type="text" placeholder="بحث بالاسم أو الجهة..." style="min-width:220px;" oninput="filterCards('ext',this.value)">
+      <button class="btn-new" onclick="openAddModal('ext')"><i class="fa-solid fa-plus"></i> إضافة جهة خارجية</button>
+    </div>
+    <div class="contact-grid" id="gridExt">
+
+      <div class="contact-card" data-search-ext="محمد الأحمد شركة الاستشارات المالية استشاري مالي">
+        <div class="cc-header">
+          <div class="cc-avatar ext">م</div>
+          <div>
+            <div class="cc-name">محمد الأحمد</div>
+            <div class="cc-title">استشاري مالي</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-row"><i class="fa-solid fa-building"></i> شركة الاستشارات المالية</div>
+          <div class="cc-row"><i class="fa-solid fa-phone"></i> 0501234567</div>
+          <div class="cc-row"><i class="fa-solid fa-envelope"></i> m.alahmad@consultfin.sa</div>
+        </div>
+        <div class="cc-actions">
+          <button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
+        </div>
+      </div>
+
+      <div class="contact-card" data-search-ext="سلمى الرشيدي شركة الاستشارات المالية محللة أعمال">
+        <div class="cc-header">
+          <div class="cc-avatar ext">س</div>
+          <div>
+            <div class="cc-name">سلمى الرشيدي</div>
+            <div class="cc-title">محللة أعمال</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-row"><i class="fa-solid fa-building"></i> شركة الاستشارات المالية</div>
+          <div class="cc-row"><i class="fa-solid fa-phone"></i> 0559876543</div>
+          <div class="cc-row"><i class="fa-solid fa-envelope"></i> s.alrashidi@consultfin.sa</div>
+        </div>
+        <div class="cc-actions">
+          <button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
+        </div>
+      </div>
+
+      <div class="contact-card" data-search-ext="فهد العتيبي وزارة البيئة والمياه والزراعة مدير إدارة المياه">
+        <div class="cc-header">
+          <div class="cc-avatar ext">ف</div>
+          <div>
+            <div class="cc-name">فهد العتيبي</div>
+            <div class="cc-title">مدير إدارة المياه</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-row"><i class="fa-solid fa-building"></i> وزارة البيئة والمياه والزراعة</div>
+          <div class="cc-row"><i class="fa-solid fa-phone"></i> 0503334455</div>
+          <div class="cc-row"><i class="fa-solid fa-envelope"></i> f.alotaibi@mewa.gov.sa</div>
+        </div>
+        <div class="cc-actions">
+          <button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ INTERNAL COLLEAGUES TAB ══ -->
+  <div id="panelInt" style="display:none;">
+    <div class="toolbar">
+      <input type="text" placeholder="بحث بالاسم أو الإدارة..." style="min-width:220px;" oninput="filterCards('int',this.value)">
+      <select>
+        <option value="">كل القطاعات</option>
+        <option>المياه</option>
+        <option>الصرف الصحي</option>
+        <option>التخطيط والتطوير</option>
+        <option>الموارد البشرية</option>
+        <option>المالية</option>
+      </select>
+      <button class="btn-new" onclick="openAddModal('int')"><i class="fa-solid fa-plus"></i> إضافة زميل</button>
+    </div>
+    <div class="contact-grid" id="gridInt">
+
+      <div class="contact-card" data-search-int="ريم الشمري إدارة المياه مهندسة مدنية">
+        <div class="cc-header">
+          <div class="cc-avatar">ر</div>
+          <div>
+            <div class="cc-name">ريم الشمري</div>
+            <div class="cc-title">مهندسة مدنية</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">إدارة المياه</span></div>
+          <div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي 4210</div>
+          <div class="cc-row"><i class="fa-solid fa-envelope"></i> r.alshamri@swa.gov.sa</div>
+        </div>
+        <div class="cc-actions">
+          <button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
+        </div>
+      </div>
+
+      <div class="contact-card" data-search-int="نايف القحطاني التخطيط والتطوير محلل استراتيجي">
+        <div class="cc-header">
+          <div class="cc-avatar">ن</div>
+          <div>
+            <div class="cc-name">نايف القحطاني</div>
+            <div class="cc-title">محلل استراتيجي</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">التخطيط والتطوير</span></div>
+          <div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي 3105</div>
+          <div class="cc-row"><i class="fa-solid fa-envelope"></i> n.alqahtani@swa.gov.sa</div>
+        </div>
+        <div class="cc-actions">
+          <button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
+        </div>
+      </div>
+
+      <div class="contact-card" data-search-int="لمياء السبيعي الموارد البشرية أخصائية موارد بشرية">
+        <div class="cc-header">
+          <div class="cc-avatar">ل</div>
+          <div>
+            <div class="cc-name">لمياء السبيعي</div>
+            <div class="cc-title">أخصائية موارد بشرية</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">الموارد البشرية</span></div>
+          <div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي 2030</div>
+          <div class="cc-row"><i class="fa-solid fa-envelope"></i> l.alsobiay@swa.gov.sa</div>
+        </div>
+        <div class="cc-actions">
+          <button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══ ADD / EDIT MODAL — EXTERNAL ══ -->
+<div class="overlay" id="modalExt">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-building"></i> <span id="modalExtTitle">إضافة جهة خارجية</span></h3>
+      <button class="btn-close" onclick="closeModal('modalExt')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="section-sep"><i class="fa-solid fa-user"></i> بيانات الشخص</div>
+      <div class="f2">
+        <div class="fr"><label>الاسم الكامل *</label><input type="text" placeholder="محمد أحمد العمري"></div>
+        <div class="fr"><label>المسمى الوظيفي *</label><input type="text" placeholder="مدير مشاريع"></div>
+      </div>
+      <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-building"></i> بيانات الجهة</div>
+      <div class="fr"><label>اسم الجهة / الشركة *</label><input type="text" placeholder="شركة الاستشارات الهندسية"></div>
+      <div class="f2">
+        <div class="fr"><label>القطاع / النوع</label>
+          <select>
+            <option value="">-- اختر --</option>
+            <option>استشارات</option>
+            <option>مقاول</option>
+            <option>جهة حكومية</option>
+            <option>موردّ</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="fr"><label>الموقع / المدينة</label><input type="text" placeholder="الرياض"></div>
+      </div>
+      <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-phone"></i> بيانات التواصل</div>
+      <div class="f2">
+        <div class="fr"><label>الجوال</label><input type="tel" placeholder="05XXXXXXXX"></div>
+        <div class="fr"><label>البريد الإلكتروني</label><input type="email" placeholder="name@org.com"></div>
+      </div>
+      <div class="fr"><label>ملاحظات</label><textarea rows="2" placeholder="أي ملاحظات إضافية..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modalExt')">إلغاء</button>
+      <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ ADD / EDIT MODAL — INTERNAL COLLEAGUE ══ -->
+<div class="overlay" id="modalInt">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-user-tie"></i> <span id="modalIntTitle">إضافة زميل من خارج الوكالة</span></h3>
+      <button class="btn-close" onclick="closeModal('modalInt')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="section-sep"><i class="fa-solid fa-user"></i> بيانات الموظف</div>
+      <div class="f2">
+        <div class="fr"><label>الاسم الكامل *</label><input type="text" placeholder="عبدالله محمد السالم"></div>
+        <div class="fr"><label>الرقم الوظيفي</label><input type="text" placeholder="U3XXXXX" style="direction:ltr;"></div>
+      </div>
+      <div class="f2">
+        <div class="fr"><label>المسمى الوظيفي *</label><input type="text" placeholder="محلل بيانات"></div>
+        <div class="fr"><label>الدرجة الوظيفية</label>
+          <select>
+            <option value="">-- اختر --</option>
+            <option>الفئة الأولى</option>
+            <option>الفئة الثانية</option>
+            <option>الفئة الثالثة</option>
+            <option>الفئة الرابعة</option>
+            <option>الفئة الخامسة</option>
+          </select>
+        </div>
+      </div>
+      <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-sitemap"></i> الإدارة / القطاع</div>
+      <div class="f2">
+        <div class="fr"><label>القطاع الرئيسي *</label>
+          <select>
+            <option value="">-- اختر --</option>
+            <option>المياه</option>
+            <option>الصرف الصحي</option>
+            <option>التخطيط والتطوير</option>
+            <option>الموارد البشرية</option>
+            <option>المالية والمشتريات</option>
+            <option>تقنية المعلومات</option>
+            <option>الشؤون القانونية</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="fr"><label>الإدارة / الوحدة</label><input type="text" placeholder="إدارة تطوير المنظومة"></div>
+      </div>
+      <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-phone"></i> بيانات التواصل</div>
+      <div class="f2">
+        <div class="fr"><label>الجوال</label><input type="tel" placeholder="05XXXXXXXX"></div>
+        <div class="fr"><label>الداخلي</label><input type="text" placeholder="XXXX" style="direction:ltr;"></div>
+      </div>
+      <div class="fr"><label>البريد الإلكتروني</label><input type="email" placeholder="name@swa.gov.sa"></div>
+      <div class="fr"><label>ملاحظات</label><textarea rows="2" placeholder="أي ملاحظات..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modalInt')">إلغاء</button>
+      <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function switchTab(t) {
+  document.getElementById('panelExt').style.display = t === 'ext' ? '' : 'none';
+  document.getElementById('panelInt').style.display = t === 'int' ? '' : 'none';
+  document.getElementById('tabExt').className = 'tab' + (t === 'ext' ? ' active' : '');
+  document.getElementById('tabInt').className = 'tab' + (t === 'int' ? ' active' : '');
+}
+
+function openAddModal(type) {
+  if (type === 'ext') {
+    document.getElementById('modalExtTitle').textContent = 'إضافة جهة خارجية';
+    document.getElementById('modalExt').classList.add('open');
+  } else {
+    document.getElementById('modalIntTitle').textContent = 'إضافة زميل من خارج الوكالة';
+    document.getElementById('modalInt').classList.add('open');
+  }
+}
+
+function openEditModal(type) {
+  if (type === 'ext') {
+    document.getElementById('modalExtTitle').textContent = 'تعديل بيانات الجهة';
+    document.getElementById('modalExt').classList.add('open');
+  } else {
+    document.getElementById('modalIntTitle').textContent = 'تعديل بيانات الزميل';
+    document.getElementById('modalInt').classList.add('open');
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function filterCards(type, q) {
+  const attr = type === 'ext' ? 'data-search-ext' : 'data-search-int';
+  const grid = document.getElementById(type === 'ext' ? 'gridExt' : 'gridInt');
+  grid.querySelectorAll('.contact-card').forEach(card => {
+    const match = !q || (card.getAttribute(attr) || '').toLowerCase().includes(q.toLowerCase());
+    card.style.display = match ? '' : 'none';
+  });
+}
+
+lucide.createIcons();
+</script>
+</body>
+</html>
