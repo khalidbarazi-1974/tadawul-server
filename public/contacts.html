@@ -24,7 +24,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 .page{max-width:1300px;margin:0 auto;padding:20px;}
 
 /* ── Stats ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
 .stat{background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07);}
 .stat .n{font-size:24px;font-weight:700;color:#4338ca;}
 .stat .l{font-size:11px;color:#888;margin-top:2px;}
@@ -84,6 +84,22 @@ tr:hover td{background:#f5f3ff;}
 .btn-secondary{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;}
 .btn-secondary:hover{background:#e2e8f0;}
 
+/* ── View toggle ── */
+.view-toggle{display:flex;gap:4px;background:#f1f5f9;border-radius:8px;padding:3px;}
+.vt-btn{background:none;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;color:#64748b;font-size:13px;line-height:1;}
+.vt-btn.active{background:#fff;color:#4338ca;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+
+/* ── List view ── */
+.list-view{display:none;}
+.list-view.active,.contact-grid.active{display:grid;}
+.contact-grid{display:grid;}
+.contact-grid:not(.active){display:none;}
+.list-card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.08);overflow:hidden;}
+.list-card table{width:100%;border-collapse:collapse;}
+.list-card th{background:#eef2ff;padding:10px 14px;font-size:12px;color:#3730a3;font-weight:700;text-align:right;border-bottom:2px solid #c7d2fe;}
+.list-card td{padding:10px 14px;font-size:13px;color:#333;border-top:1px solid #f5f5f5;vertical-align:middle;}
+.list-card tr:hover td{background:#f5f3ff;}
+
 /* ── Contact card (grid view) ── */
 .contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
 .contact-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1.5px solid #e5e7eb;transition:all .2s;}
@@ -121,7 +137,6 @@ tr:hover td{background:#f5f3ff;}
     <div class="stat"><div class="n">18</div><div class="l">إجمالي جهات الاتصال</div></div>
     <div class="stat"><div class="n">7</div><div class="l">جهات خارجية</div></div>
     <div class="stat"><div class="n">11</div><div class="l">زملاء من خارج الوكالة</div></div>
-    <div class="stat"><div class="n">4</div><div class="l">جهات مستخدمة في اجتماع</div></div>
   </div>
 
   <!-- Tabs -->
@@ -138,9 +153,13 @@ tr:hover td{background:#f5f3ff;}
   <div id="panelExt">
     <div class="toolbar">
       <input type="text" placeholder="بحث بالاسم أو الجهة..." style="min-width:220px;" oninput="filterCards('ext',this.value)">
+      <div class="view-toggle">
+        <button class="vt-btn active" id="vtExtGrid" onclick="setView('ext','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
+        <button class="vt-btn" id="vtExtList" onclick="setView('ext','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
+      </div>
       <button class="btn-new" onclick="openAddModal('ext')"><i class="fa-solid fa-plus"></i> إضافة جهة خارجية</button>
     </div>
-    <div class="contact-grid" id="gridExt">
+    <div class="contact-grid active" id="gridExt">
 
       <div class="contact-card" data-search-ext="محمد الأحمد شركة الاستشارات المالية استشاري مالي">
         <div class="cc-header">
@@ -200,6 +219,45 @@ tr:hover td{background:#f5f3ff;}
       </div>
 
     </div>
+    <!-- List view — External -->
+    <div class="list-view" id="listExt">
+      <div class="list-card">
+        <table>
+          <thead>
+            <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>الجهة</th><th>الجوال</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
+          </thead>
+          <tbody>
+            <tr data-search-ext="محمد الأحمد شركة الاستشارات المالية استشاري مالي">
+              <td style="color:#aaa;font-size:12px;">1</td>
+              <td style="font-weight:600;">محمد الأحمد</td>
+              <td style="color:#64748b;">استشاري مالي</td>
+              <td><span class="org-badge">شركة الاستشارات المالية</span></td>
+              <td style="font-size:12px;">0501234567</td>
+              <td style="font-size:12px;color:#6366f1;">m.alahmad@consultfin.sa</td>
+              <td><button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+            <tr data-search-ext="سلمى الرشيدي شركة الاستشارات المالية محللة أعمال">
+              <td style="color:#aaa;font-size:12px;">2</td>
+              <td style="font-weight:600;">سلمى الرشيدي</td>
+              <td style="color:#64748b;">محللة أعمال</td>
+              <td><span class="org-badge">شركة الاستشارات المالية</span></td>
+              <td style="font-size:12px;">0559876543</td>
+              <td style="font-size:12px;color:#6366f1;">s.alrashidi@consultfin.sa</td>
+              <td><button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+            <tr data-search-ext="فهد العتيبي وزارة البيئة والمياه والزراعة مدير إدارة المياه">
+              <td style="color:#aaa;font-size:12px;">3</td>
+              <td style="font-weight:600;">فهد العتيبي</td>
+              <td style="color:#64748b;">مدير إدارة المياه</td>
+              <td><span class="org-badge">وزارة البيئة والمياه والزراعة</span></td>
+              <td style="font-size:12px;">0503334455</td>
+              <td style="font-size:12px;color:#6366f1;">f.alotaibi@mewa.gov.sa</td>
+              <td><button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- ══ INTERNAL COLLEAGUES TAB ══ -->
@@ -214,9 +272,13 @@ tr:hover td{background:#f5f3ff;}
         <option>الموارد البشرية</option>
         <option>المالية</option>
       </select>
+      <div class="view-toggle">
+        <button class="vt-btn active" id="vtIntGrid" onclick="setView('int','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
+        <button class="vt-btn" id="vtIntList" onclick="setView('int','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
+      </div>
       <button class="btn-new" onclick="openAddModal('int')"><i class="fa-solid fa-plus"></i> إضافة زميل</button>
     </div>
-    <div class="contact-grid" id="gridInt">
+    <div class="contact-grid active" id="gridInt">
 
       <div class="contact-card" data-search-int="ريم الشمري إدارة المياه مهندسة مدنية">
         <div class="cc-header">
@@ -275,6 +337,48 @@ tr:hover td{background:#f5f3ff;}
         </div>
       </div>
 
+    </div>
+    <!-- List view — Internal -->
+    <div class="list-view" id="listInt">
+      <div class="list-card">
+        <table>
+          <thead>
+            <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>القطاع / الإدارة</th><th>الجوال</th><th>الداخلي</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
+          </thead>
+          <tbody>
+            <tr data-search-int="ريم الشمري إدارة المياه مهندسة مدنية">
+              <td style="color:#aaa;font-size:12px;">1</td>
+              <td style="font-weight:600;">ريم الشمري</td>
+              <td style="color:#64748b;">مهندسة مدنية</td>
+              <td><span class="dept-badge">إدارة المياه</span></td>
+              <td style="font-size:12px;">—</td>
+              <td style="font-size:12px;">4210</td>
+              <td style="font-size:12px;color:#6366f1;">r.alshamri@swa.gov.sa</td>
+              <td><button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+            <tr data-search-int="نايف القحطاني التخطيط والتطوير محلل استراتيجي">
+              <td style="color:#aaa;font-size:12px;">2</td>
+              <td style="font-weight:600;">نايف القحطاني</td>
+              <td style="color:#64748b;">محلل استراتيجي</td>
+              <td><span class="dept-badge">التخطيط والتطوير</span></td>
+              <td style="font-size:12px;">—</td>
+              <td style="font-size:12px;">3105</td>
+              <td style="font-size:12px;color:#6366f1;">n.alqahtani@swa.gov.sa</td>
+              <td><button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+            <tr data-search-int="لمياء السبيعي الموارد البشرية أخصائية موارد بشرية">
+              <td style="color:#aaa;font-size:12px;">3</td>
+              <td style="font-weight:600;">لمياء السبيعي</td>
+              <td style="color:#64748b;">أخصائية موارد بشرية</td>
+              <td><span class="dept-badge">الموارد البشرية</span></td>
+              <td style="font-size:12px;">—</td>
+              <td style="font-size:12px;">2030</td>
+              <td style="font-size:12px;color:#6366f1;">l.alsobiay@swa.gov.sa</td>
+              <td><button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -415,12 +519,28 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
 
+function setView(type, view) {
+  const isExt = type === 'ext';
+  const grid = document.getElementById(isExt ? 'gridExt' : 'gridInt');
+  const list = document.getElementById(isExt ? 'listExt' : 'listInt');
+  const btnGrid = document.getElementById(isExt ? 'vtExtGrid' : 'vtIntGrid');
+  const btnList = document.getElementById(isExt ? 'vtExtList' : 'vtIntList');
+  if (view === 'grid') {
+    grid.classList.add('active'); list.classList.remove('active');
+    btnGrid.classList.add('active'); btnList.classList.remove('active');
+  } else {
+    list.classList.add('active'); grid.classList.remove('active');
+    btnList.classList.add('active'); btnGrid.classList.remove('active');
+  }
+}
+
 function filterCards(type, q) {
   const attr = type === 'ext' ? 'data-search-ext' : 'data-search-int';
-  const grid = document.getElementById(type === 'ext' ? 'gridExt' : 'gridInt');
-  grid.querySelectorAll('.contact-card').forEach(card => {
-    const match = !q || (card.getAttribute(attr) || '').toLowerCase().includes(q.toLowerCase());
-    card.style.display = match ? '' : 'none';
+  const q2 = q.toLowerCase();
+  ['grid' + (type === 'ext' ? 'Ext' : 'Int'), 'list' + (type === 'ext' ? 'Ext' : 'Int')].forEach(id => {
+    document.getElementById(id).querySelectorAll('[' + attr + ']').forEach(el => {
+      el.style.display = (!q2 || (el.getAttribute(attr) || '').toLowerCase().includes(q2)) ? '' : 'none';
+    });
   });
 }
 
