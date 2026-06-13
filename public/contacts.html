@@ -125,7 +125,7 @@ tr:hover td{background:#f5f3ff;}
     <span class="role-badge">وكالة الشؤون الاقتصادية</span>
   </div>
   <div class="topbar-right">
-    <span id="topbarUser">خالد البرازي</span>
+    <span id="topbarUser"></span>
     <button class="btn-top" onclick="location.href='/hub.html'"><i class="fa-solid fa-grid-2" style="font-size:13px;"></i> الرئيسية</button>
   </div>
 </div>
@@ -134,127 +134,39 @@ tr:hover td{background:#f5f3ff;}
 
   <!-- Stats -->
   <div class="stats">
-    <div class="stat"><div class="n">18</div><div class="l">إجمالي جهات الاتصال</div></div>
-    <div class="stat"><div class="n">7</div><div class="l">جهات خارجية</div></div>
-    <div class="stat"><div class="n">11</div><div class="l">زملاء من خارج الوكالة</div></div>
+    <div class="stat"><div class="n" id="statTotal">0</div><div class="l">إجمالي جهات الاتصال</div></div>
+    <div class="stat"><div class="n" id="statExt">0</div><div class="l">جهات خارجية</div></div>
+    <div class="stat"><div class="n" id="statInt">0</div><div class="l">زملاء من خارج الوكالة</div></div>
   </div>
 
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" id="tabExt" onclick="switchTab('ext')">
-      <i class="fa-solid fa-building"></i> جهات خارجية <span class="count">7</span>
+      <i class="fa-solid fa-building"></i> جهات خارجية <span class="count" id="tabExtCount">0</span>
     </button>
     <button class="tab" id="tabInt" onclick="switchTab('int')">
-      <i class="fa-solid fa-user-tie"></i> زملاء من خارج الوكالة <span class="count">11</span>
+      <i class="fa-solid fa-user-tie"></i> زملاء من خارج الوكالة <span class="count" id="tabIntCount">0</span>
     </button>
   </div>
 
   <!-- ══ EXTERNAL PARTIES TAB ══ -->
   <div id="panelExt">
     <div class="toolbar">
-      <input type="text" placeholder="بحث بالاسم أو الجهة..." style="min-width:220px;" oninput="filterCards('ext',this.value)">
+      <input type="text" placeholder="بحث بالاسم أو الجهة..." style="min-width:220px;" oninput="filterExt()">
       <div class="view-toggle">
         <button class="vt-btn active" id="vtExtGrid" onclick="setView('ext','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
         <button class="vt-btn" id="vtExtList" onclick="setView('ext','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
       </div>
-      <button class="btn-new" onclick="openAddModal('ext')"><i class="fa-solid fa-plus"></i> إضافة جهة خارجية</button>
+      <button class="btn-new" onclick="openAddExt()"><i class="fa-solid fa-plus"></i> إضافة جهة خارجية</button>
     </div>
-    <div class="contact-grid active" id="gridExt">
-
-      <div class="contact-card" data-search-ext="محمد الأحمد شركة الاستشارات المالية استشاري مالي">
-        <div class="cc-header">
-          <div class="cc-avatar ext">م</div>
-          <div>
-            <div class="cc-name">محمد الأحمد</div>
-            <div class="cc-title">استشاري مالي</div>
-          </div>
-        </div>
-        <div class="cc-body">
-          <div class="cc-row"><i class="fa-solid fa-building"></i> شركة الاستشارات المالية</div>
-          <div class="cc-row"><i class="fa-solid fa-phone"></i> 0501234567</div>
-          <div class="cc-row"><i class="fa-solid fa-envelope"></i> m.alahmad@consultfin.sa</div>
-        </div>
-        <div class="cc-actions">
-          <button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
-        </div>
-      </div>
-
-      <div class="contact-card" data-search-ext="سلمى الرشيدي شركة الاستشارات المالية محللة أعمال">
-        <div class="cc-header">
-          <div class="cc-avatar ext">س</div>
-          <div>
-            <div class="cc-name">سلمى الرشيدي</div>
-            <div class="cc-title">محللة أعمال</div>
-          </div>
-        </div>
-        <div class="cc-body">
-          <div class="cc-row"><i class="fa-solid fa-building"></i> شركة الاستشارات المالية</div>
-          <div class="cc-row"><i class="fa-solid fa-phone"></i> 0559876543</div>
-          <div class="cc-row"><i class="fa-solid fa-envelope"></i> s.alrashidi@consultfin.sa</div>
-        </div>
-        <div class="cc-actions">
-          <button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
-        </div>
-      </div>
-
-      <div class="contact-card" data-search-ext="فهد العتيبي وزارة البيئة والمياه والزراعة مدير إدارة المياه">
-        <div class="cc-header">
-          <div class="cc-avatar ext">ف</div>
-          <div>
-            <div class="cc-name">فهد العتيبي</div>
-            <div class="cc-title">مدير إدارة المياه</div>
-          </div>
-        </div>
-        <div class="cc-body">
-          <div class="cc-row"><i class="fa-solid fa-building"></i> وزارة البيئة والمياه والزراعة</div>
-          <div class="cc-row"><i class="fa-solid fa-phone"></i> 0503334455</div>
-          <div class="cc-row"><i class="fa-solid fa-envelope"></i> f.alotaibi@mewa.gov.sa</div>
-        </div>
-        <div class="cc-actions">
-          <button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
-        </div>
-      </div>
-
-    </div>
-    <!-- List view — External -->
+    <div class="contact-grid active" id="gridExt"></div>
     <div class="list-view" id="listExt">
       <div class="list-card">
         <table>
           <thead>
             <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>الجهة</th><th>الجوال</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
           </thead>
-          <tbody>
-            <tr data-search-ext="محمد الأحمد شركة الاستشارات المالية استشاري مالي">
-              <td style="color:#aaa;font-size:12px;">1</td>
-              <td style="font-weight:600;">محمد الأحمد</td>
-              <td style="color:#64748b;">استشاري مالي</td>
-              <td><span class="org-badge">شركة الاستشارات المالية</span></td>
-              <td style="font-size:12px;">0501234567</td>
-              <td style="font-size:12px;color:#6366f1;">m.alahmad@consultfin.sa</td>
-              <td><button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-            <tr data-search-ext="سلمى الرشيدي شركة الاستشارات المالية محللة أعمال">
-              <td style="color:#aaa;font-size:12px;">2</td>
-              <td style="font-weight:600;">سلمى الرشيدي</td>
-              <td style="color:#64748b;">محللة أعمال</td>
-              <td><span class="org-badge">شركة الاستشارات المالية</span></td>
-              <td style="font-size:12px;">0559876543</td>
-              <td style="font-size:12px;color:#6366f1;">s.alrashidi@consultfin.sa</td>
-              <td><button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-            <tr data-search-ext="فهد العتيبي وزارة البيئة والمياه والزراعة مدير إدارة المياه">
-              <td style="color:#aaa;font-size:12px;">3</td>
-              <td style="font-weight:600;">فهد العتيبي</td>
-              <td style="color:#64748b;">مدير إدارة المياه</td>
-              <td><span class="org-badge">وزارة البيئة والمياه والزراعة</span></td>
-              <td style="font-size:12px;">0503334455</td>
-              <td style="font-size:12px;color:#6366f1;">f.alotaibi@mewa.gov.sa</td>
-              <td><button class="btn-edit" onclick="openEditModal('ext')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-          </tbody>
+          <tbody id="listExtBody"></tbody>
         </table>
       </div>
     </div>
@@ -263,8 +175,8 @@ tr:hover td{background:#f5f3ff;}
   <!-- ══ INTERNAL COLLEAGUES TAB ══ -->
   <div id="panelInt" style="display:none;">
     <div class="toolbar">
-      <input type="text" placeholder="بحث بالاسم أو الإدارة..." style="min-width:220px;" oninput="filterCards('int',this.value)">
-      <select>
+      <input type="text" placeholder="بحث بالاسم أو الإدارة..." style="min-width:220px;" oninput="filterInt()">
+      <select id="sectorFilter" onchange="filterInt()">
         <option value="">كل القطاعات</option>
         <option>المياه</option>
         <option>الصرف الصحي</option>
@@ -276,107 +188,16 @@ tr:hover td{background:#f5f3ff;}
         <button class="vt-btn active" id="vtIntGrid" onclick="setView('int','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
         <button class="vt-btn" id="vtIntList" onclick="setView('int','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
       </div>
-      <button class="btn-new" onclick="openAddModal('int')"><i class="fa-solid fa-plus"></i> إضافة زميل</button>
+      <button class="btn-new" onclick="openAddInt()"><i class="fa-solid fa-plus"></i> إضافة زميل</button>
     </div>
-    <div class="contact-grid active" id="gridInt">
-
-      <div class="contact-card" data-search-int="ريم الشمري إدارة المياه مهندسة مدنية">
-        <div class="cc-header">
-          <div class="cc-avatar">ر</div>
-          <div>
-            <div class="cc-name">ريم الشمري</div>
-            <div class="cc-title">مهندسة مدنية</div>
-          </div>
-        </div>
-        <div class="cc-body">
-          <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">إدارة المياه</span></div>
-          <div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي 4210</div>
-          <div class="cc-row"><i class="fa-solid fa-envelope"></i> r.alshamri@swa.gov.sa</div>
-        </div>
-        <div class="cc-actions">
-          <button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
-        </div>
-      </div>
-
-      <div class="contact-card" data-search-int="نايف القحطاني التخطيط والتطوير محلل استراتيجي">
-        <div class="cc-header">
-          <div class="cc-avatar">ن</div>
-          <div>
-            <div class="cc-name">نايف القحطاني</div>
-            <div class="cc-title">محلل استراتيجي</div>
-          </div>
-        </div>
-        <div class="cc-body">
-          <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">التخطيط والتطوير</span></div>
-          <div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي 3105</div>
-          <div class="cc-row"><i class="fa-solid fa-envelope"></i> n.alqahtani@swa.gov.sa</div>
-        </div>
-        <div class="cc-actions">
-          <button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
-        </div>
-      </div>
-
-      <div class="contact-card" data-search-int="لمياء السبيعي الموارد البشرية أخصائية موارد بشرية">
-        <div class="cc-header">
-          <div class="cc-avatar">ل</div>
-          <div>
-            <div class="cc-name">لمياء السبيعي</div>
-            <div class="cc-title">أخصائية موارد بشرية</div>
-          </div>
-        </div>
-        <div class="cc-body">
-          <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">الموارد البشرية</span></div>
-          <div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي 2030</div>
-          <div class="cc-row"><i class="fa-solid fa-envelope"></i> l.alsobiay@swa.gov.sa</div>
-        </div>
-        <div class="cc-actions">
-          <button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del"><i class="fa-solid fa-trash"></i> حذف</button>
-        </div>
-      </div>
-
-    </div>
-    <!-- List view — Internal -->
+    <div class="contact-grid active" id="gridInt"></div>
     <div class="list-view" id="listInt">
       <div class="list-card">
         <table>
           <thead>
             <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>القطاع / الإدارة</th><th>الجوال</th><th>الداخلي</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
           </thead>
-          <tbody>
-            <tr data-search-int="ريم الشمري إدارة المياه مهندسة مدنية">
-              <td style="color:#aaa;font-size:12px;">1</td>
-              <td style="font-weight:600;">ريم الشمري</td>
-              <td style="color:#64748b;">مهندسة مدنية</td>
-              <td><span class="dept-badge">إدارة المياه</span></td>
-              <td style="font-size:12px;">—</td>
-              <td style="font-size:12px;">4210</td>
-              <td style="font-size:12px;color:#6366f1;">r.alshamri@swa.gov.sa</td>
-              <td><button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-            <tr data-search-int="نايف القحطاني التخطيط والتطوير محلل استراتيجي">
-              <td style="color:#aaa;font-size:12px;">2</td>
-              <td style="font-weight:600;">نايف القحطاني</td>
-              <td style="color:#64748b;">محلل استراتيجي</td>
-              <td><span class="dept-badge">التخطيط والتطوير</span></td>
-              <td style="font-size:12px;">—</td>
-              <td style="font-size:12px;">3105</td>
-              <td style="font-size:12px;color:#6366f1;">n.alqahtani@swa.gov.sa</td>
-              <td><button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-            <tr data-search-int="لمياء السبيعي الموارد البشرية أخصائية موارد بشرية">
-              <td style="color:#aaa;font-size:12px;">3</td>
-              <td style="font-weight:600;">لمياء السبيعي</td>
-              <td style="color:#64748b;">أخصائية موارد بشرية</td>
-              <td><span class="dept-badge">الموارد البشرية</span></td>
-              <td style="font-size:12px;">—</td>
-              <td style="font-size:12px;">2030</td>
-              <td style="font-size:12px;color:#6366f1;">l.alsobiay@swa.gov.sa</td>
-              <td><button class="btn-edit" onclick="openEditModal('int')"><i class="fa-solid fa-pen"></i> تعديل</button> <button class="btn-del"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-          </tbody>
+          <tbody id="listIntBody"></tbody>
         </table>
       </div>
     </div>
@@ -395,14 +216,14 @@ tr:hover td{background:#f5f3ff;}
     <div class="modal-body">
       <div class="section-sep"><i class="fa-solid fa-user"></i> بيانات الشخص</div>
       <div class="f2">
-        <div class="fr"><label>الاسم الكامل *</label><input type="text" placeholder="محمد أحمد العمري"></div>
-        <div class="fr"><label>المسمى الوظيفي *</label><input type="text" placeholder="مدير مشاريع"></div>
+        <div class="fr"><label>الاسم الكامل *</label><input type="text" id="extName" placeholder="محمد أحمد العمري"></div>
+        <div class="fr"><label>المسمى الوظيفي *</label><input type="text" id="extTitle" placeholder="مدير مشاريع"></div>
       </div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-building"></i> بيانات الجهة</div>
-      <div class="fr"><label>اسم الجهة / الشركة *</label><input type="text" placeholder="شركة الاستشارات الهندسية"></div>
+      <div class="fr"><label>اسم الجهة / الشركة *</label><input type="text" id="extOrg" placeholder="شركة الاستشارات الهندسية"></div>
       <div class="f2">
         <div class="fr"><label>القطاع / النوع</label>
-          <select>
+          <select id="extSector">
             <option value="">-- اختر --</option>
             <option>استشارات</option>
             <option>مقاول</option>
@@ -411,18 +232,18 @@ tr:hover td{background:#f5f3ff;}
             <option>أخرى</option>
           </select>
         </div>
-        <div class="fr"><label>الموقع / المدينة</label><input type="text" placeholder="الرياض"></div>
+        <div class="fr"><label>الموقع / المدينة</label><input type="text" id="extCity" placeholder="الرياض"></div>
       </div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-phone"></i> بيانات التواصل</div>
       <div class="f2">
-        <div class="fr"><label>الجوال</label><input type="tel" placeholder="05XXXXXXXX"></div>
-        <div class="fr"><label>البريد الإلكتروني</label><input type="email" placeholder="name@org.com"></div>
+        <div class="fr"><label>الجوال</label><input type="tel" id="extMobile" placeholder="05XXXXXXXX"></div>
+        <div class="fr"><label>البريد الإلكتروني</label><input type="email" id="extEmail" placeholder="name@org.com"></div>
       </div>
-      <div class="fr"><label>ملاحظات</label><textarea rows="2" placeholder="أي ملاحظات إضافية..."></textarea></div>
+      <div class="fr"><label>ملاحظات</label><textarea id="extNotes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modalExt')">إلغاء</button>
-      <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      <button class="btn btn-primary" onclick="saveExt()"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
     </div>
   </div>
 </div>
@@ -438,13 +259,13 @@ tr:hover td{background:#f5f3ff;}
     <div class="modal-body">
       <div class="section-sep"><i class="fa-solid fa-user"></i> بيانات الموظف</div>
       <div class="f2">
-        <div class="fr"><label>الاسم الكامل *</label><input type="text" placeholder="عبدالله محمد السالم"></div>
-        <div class="fr"><label>الرقم الوظيفي</label><input type="text" placeholder="U3XXXXX" style="direction:ltr;"></div>
+        <div class="fr"><label>الاسم الكامل *</label><input type="text" id="intName" placeholder="عبدالله محمد السالم"></div>
+        <div class="fr"><label>الرقم الوظيفي</label><input type="text" id="intEmpId" placeholder="U3XXXXX" style="direction:ltr;"></div>
       </div>
       <div class="f2">
-        <div class="fr"><label>المسمى الوظيفي *</label><input type="text" placeholder="محلل بيانات"></div>
+        <div class="fr"><label>المسمى الوظيفي *</label><input type="text" id="intTitle" placeholder="محلل بيانات"></div>
         <div class="fr"><label>الدرجة الوظيفية</label>
-          <select>
+          <select id="intGrade">
             <option value="">-- اختر --</option>
             <option>الفئة الأولى</option>
             <option>الفئة الثانية</option>
@@ -457,7 +278,7 @@ tr:hover td{background:#f5f3ff;}
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-sitemap"></i> الإدارة / القطاع</div>
       <div class="f2">
         <div class="fr"><label>القطاع الرئيسي *</label>
-          <select>
+          <select id="intSector">
             <option value="">-- اختر --</option>
             <option>المياه</option>
             <option>الصرف الصحي</option>
@@ -469,54 +290,276 @@ tr:hover td{background:#f5f3ff;}
             <option>أخرى</option>
           </select>
         </div>
-        <div class="fr"><label>الإدارة / الوحدة</label><input type="text" placeholder="إدارة تطوير المنظومة"></div>
+        <div class="fr"><label>الإدارة / الوحدة</label><input type="text" id="intDept" placeholder="إدارة تطوير المنظومة"></div>
       </div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-phone"></i> بيانات التواصل</div>
       <div class="f2">
-        <div class="fr"><label>الجوال</label><input type="tel" placeholder="05XXXXXXXX"></div>
-        <div class="fr"><label>الداخلي</label><input type="text" placeholder="XXXX" style="direction:ltr;"></div>
+        <div class="fr"><label>الجوال</label><input type="tel" id="intMobile" placeholder="05XXXXXXXX"></div>
+        <div class="fr"><label>الداخلي</label><input type="text" id="intExtension" placeholder="XXXX" style="direction:ltr;"></div>
       </div>
-      <div class="fr"><label>البريد الإلكتروني</label><input type="email" placeholder="name@swa.gov.sa"></div>
-      <div class="fr"><label>ملاحظات</label><textarea rows="2" placeholder="أي ملاحظات..."></textarea></div>
+      <div class="fr"><label>البريد الإلكتروني</label><input type="email" id="intEmail" placeholder="name@swa.gov.sa"></div>
+      <div class="fr"><label>ملاحظات</label><textarea id="intNotes" rows="2" placeholder="أي ملاحظات..."></textarea></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modalInt')">إلغاء</button>
-      <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      <button class="btn btn-primary" onclick="saveInt()"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
     </div>
   </div>
 </div>
 
 
 <script>
+const user = JSON.parse(sessionStorage.getItem('user') || 'null');
+const token = sessionStorage.getItem('token');
+if (!user || !token) location.href = '/';
+
+const API = '/api';
+function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
+async function api(method, path, body) {
+  const res = await fetch(API + path, { method, headers: authHeaders(), body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'خطأ');
+  return data;
+}
+
+let extData = [], intData = [], editExtId = null, editIntId = null;
+
+async function init() {
+  document.getElementById('topbarUser').textContent = user.name || '';
+  await Promise.all([loadExt(), loadInt()]);
+}
+
+async function loadExt() {
+  extData = await api('GET', '/contacts/external').catch(() => []);
+  renderExt();
+}
+
+async function loadInt() {
+  intData = await api('GET', '/contacts/internal').catch(() => []);
+  renderInt();
+}
+
+function renderExt() {
+  updateStats();
+  const q = (document.querySelector('#panelExt .toolbar input') || {}).value || '';
+  const filtered = extData.filter(c => !q || (c.name + ' ' + (c.org || '') + ' ' + (c.title || '')).toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('tabExtCount').textContent = filtered.length;
+
+  document.getElementById('gridExt').innerHTML = filtered.length
+    ? filtered.map(c => extCard(c)).join('')
+    : '<div class="empty">لا توجد جهات خارجية</div>';
+
+  document.getElementById('listExtBody').innerHTML = filtered.length
+    ? filtered.map((c, i) => `
+      <tr>
+        <td style="color:#aaa;font-size:12px;">${i + 1}</td>
+        <td style="font-weight:600;">${c.name}</td>
+        <td style="color:#64748b;">${c.title || '—'}</td>
+        <td><span class="org-badge">${c.org || '—'}</span></td>
+        <td style="font-size:12px;">${c.mobile || '—'}</td>
+        <td style="font-size:12px;color:#6366f1;">${c.email || '—'}</td>
+        <td>
+          <button class="btn-edit" onclick="openEditExt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del" onclick="delContact('ext',${c.id})"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty">لا توجد جهات خارجية</td></tr>';
+}
+
+function renderInt() {
+  updateStats();
+  const q = (document.querySelector('#panelInt .toolbar input') || {}).value || '';
+  const sector = document.getElementById('sectorFilter').value;
+  const filtered = intData.filter(c => {
+    const matchQ = !q || (c.name + ' ' + (c.dept || '') + ' ' + (c.title || '') + ' ' + (c.sector || '')).toLowerCase().includes(q.toLowerCase());
+    const matchS = !sector || (c.sector || '') === sector;
+    return matchQ && matchS;
+  });
+  document.getElementById('tabIntCount').textContent = filtered.length;
+
+  document.getElementById('gridInt').innerHTML = filtered.length
+    ? filtered.map(c => intCard(c)).join('')
+    : '<div class="empty">لا يوجد زملاء</div>';
+
+  document.getElementById('listIntBody').innerHTML = filtered.length
+    ? filtered.map((c, i) => `
+      <tr>
+        <td style="color:#aaa;font-size:12px;">${i + 1}</td>
+        <td style="font-weight:600;">${c.name}</td>
+        <td style="color:#64748b;">${c.title || '—'}</td>
+        <td><span class="dept-badge">${c.sector || ''}${c.dept ? ' / ' + c.dept : ''}</span></td>
+        <td style="font-size:12px;">${c.mobile || '—'}</td>
+        <td style="font-size:12px;">${c.extension || '—'}</td>
+        <td style="font-size:12px;color:#6366f1;">${c.email || '—'}</td>
+        <td>
+          <button class="btn-edit" onclick="openEditInt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
+          <button class="btn-del" onclick="delContact('int',${c.id})"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" class="empty">لا يوجد زملاء</td></tr>';
+}
+
+function extCard(c) {
+  const letter = (c.name || '؟')[0];
+  return `
+    <div class="contact-card">
+      <div class="cc-header">
+        <div class="cc-avatar ext">${letter}</div>
+        <div>
+          <div class="cc-name">${c.name}</div>
+          <div class="cc-title">${c.title || ''}</div>
+        </div>
+      </div>
+      <div class="cc-body">
+        ${c.org ? `<div class="cc-row"><i class="fa-solid fa-building"></i> <span class="org-badge">${c.org}</span></div>` : ''}
+        ${c.mobile ? `<div class="cc-row"><i class="fa-solid fa-phone"></i> ${c.mobile}</div>` : ''}
+        ${c.email ? `<div class="cc-row"><i class="fa-solid fa-envelope"></i> ${c.email}</div>` : ''}
+        ${c.city ? `<div class="cc-row"><i class="fa-solid fa-location-dot"></i> ${c.city}</div>` : ''}
+      </div>
+      <div class="cc-actions">
+        <button class="btn-edit" onclick="openEditExt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
+        <button class="btn-del" onclick="delContact('ext',${c.id})"><i class="fa-solid fa-trash"></i> حذف</button>
+      </div>
+    </div>`;
+}
+
+function intCard(c) {
+  const letter = (c.name || '؟')[0];
+  return `
+    <div class="contact-card">
+      <div class="cc-header">
+        <div class="cc-avatar">${letter}</div>
+        <div>
+          <div class="cc-name">${c.name}</div>
+          <div class="cc-title">${c.title || ''}</div>
+        </div>
+      </div>
+      <div class="cc-body">
+        <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">${c.sector || ''}${c.dept ? ' / ' + c.dept : ''}</span></div>
+        ${c.extension ? `<div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي ${c.extension}</div>` : ''}
+        ${c.mobile ? `<div class="cc-row"><i class="fa-solid fa-mobile-screen"></i> ${c.mobile}</div>` : ''}
+        ${c.email ? `<div class="cc-row"><i class="fa-solid fa-envelope"></i> ${c.email}</div>` : ''}
+      </div>
+      <div class="cc-actions">
+        <button class="btn-edit" onclick="openEditInt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
+        <button class="btn-del" onclick="delContact('int',${c.id})"><i class="fa-solid fa-trash"></i> حذف</button>
+      </div>
+    </div>`;
+}
+
+function openAddExt() {
+  editExtId = null;
+  document.getElementById('modalExtTitle').textContent = 'إضافة جهة خارجية';
+  ['extName','extTitle','extOrg','extCity','extMobile','extEmail','extNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('extSector').value = '';
+  document.getElementById('modalExt').classList.add('open');
+}
+
+function openEditExt(id) {
+  editExtId = id;
+  const c = extData.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('modalExtTitle').textContent = 'تعديل بيانات الجهة';
+  document.getElementById('extName').value = c.name || '';
+  document.getElementById('extTitle').value = c.title || '';
+  document.getElementById('extOrg').value = c.org || '';
+  document.getElementById('extSector').value = c.sector || '';
+  document.getElementById('extCity').value = c.city || '';
+  document.getElementById('extMobile').value = c.mobile || '';
+  document.getElementById('extEmail').value = c.email || '';
+  document.getElementById('extNotes').value = c.notes || '';
+  document.getElementById('modalExt').classList.add('open');
+}
+
+async function saveExt() {
+  const body = {
+    name:   document.getElementById('extName').value.trim(),
+    title:  document.getElementById('extTitle').value.trim(),
+    org:    document.getElementById('extOrg').value.trim(),
+    sector: document.getElementById('extSector').value,
+    city:   document.getElementById('extCity').value.trim(),
+    mobile: document.getElementById('extMobile').value.trim(),
+    email:  document.getElementById('extEmail').value.trim(),
+    notes:  document.getElementById('extNotes').value.trim()
+  };
+  if (!body.name) return alert('الاسم مطلوب');
+  try {
+    if (editExtId) await api('PUT', `/contacts/external/${editExtId}`, body);
+    else await api('POST', '/contacts/external', body);
+    closeModal('modalExt');
+    await loadExt();
+  } catch(e) { alert(e.message); }
+}
+
+function openAddInt() {
+  editIntId = null;
+  document.getElementById('modalIntTitle').textContent = 'إضافة زميل من خارج الوكالة';
+  ['intName','intEmpId','intTitle','intDept','intMobile','intExtension','intEmail','intNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('intGrade').value = '';
+  document.getElementById('intSector').value = '';
+  document.getElementById('modalInt').classList.add('open');
+}
+
+function openEditInt(id) {
+  editIntId = id;
+  const c = intData.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('modalIntTitle').textContent = 'تعديل بيانات الزميل';
+  document.getElementById('intName').value = c.name || '';
+  document.getElementById('intEmpId').value = c.emp_id || '';
+  document.getElementById('intTitle').value = c.title || '';
+  document.getElementById('intGrade').value = c.grade || '';
+  document.getElementById('intSector').value = c.sector || '';
+  document.getElementById('intDept').value = c.dept || '';
+  document.getElementById('intMobile').value = c.mobile || '';
+  document.getElementById('intExtension').value = c.extension || '';
+  document.getElementById('intEmail').value = c.email || '';
+  document.getElementById('intNotes').value = c.notes || '';
+  document.getElementById('modalInt').classList.add('open');
+}
+
+async function saveInt() {
+  const body = {
+    name:      document.getElementById('intName').value.trim(),
+    emp_id:    document.getElementById('intEmpId').value.trim(),
+    title:     document.getElementById('intTitle').value.trim(),
+    grade:     document.getElementById('intGrade').value,
+    sector:    document.getElementById('intSector').value,
+    dept:      document.getElementById('intDept').value.trim(),
+    mobile:    document.getElementById('intMobile').value.trim(),
+    extension: document.getElementById('intExtension').value.trim(),
+    email:     document.getElementById('intEmail').value.trim(),
+    notes:     document.getElementById('intNotes').value.trim()
+  };
+  if (!body.name) return alert('الاسم مطلوب');
+  try {
+    if (editIntId) await api('PUT', `/contacts/internal/${editIntId}`, body);
+    else await api('POST', '/contacts/internal', body);
+    closeModal('modalInt');
+    await loadInt();
+  } catch(e) { alert(e.message); }
+}
+
+async function delContact(type, id) {
+  if (!confirm('هل تريد حذف هذا الاتصال؟')) return;
+  try {
+    await api('DELETE', `/contacts/${type === 'ext' ? 'external' : 'internal'}/${id}`);
+    if (type === 'ext') await loadExt();
+    else await loadInt();
+  } catch(e) { alert(e.message); }
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = extData.length + intData.length;
+  document.getElementById('statExt').textContent = extData.length;
+  document.getElementById('statInt').textContent = intData.length;
+}
+
 function switchTab(t) {
   document.getElementById('panelExt').style.display = t === 'ext' ? '' : 'none';
   document.getElementById('panelInt').style.display = t === 'int' ? '' : 'none';
   document.getElementById('tabExt').className = 'tab' + (t === 'ext' ? ' active' : '');
   document.getElementById('tabInt').className = 'tab' + (t === 'int' ? ' active' : '');
-}
-
-function openAddModal(type) {
-  if (type === 'ext') {
-    document.getElementById('modalExtTitle').textContent = 'إضافة جهة خارجية';
-    document.getElementById('modalExt').classList.add('open');
-  } else {
-    document.getElementById('modalIntTitle').textContent = 'إضافة زميل من خارج الوكالة';
-    document.getElementById('modalInt').classList.add('open');
-  }
-}
-
-function openEditModal(type) {
-  if (type === 'ext') {
-    document.getElementById('modalExtTitle').textContent = 'تعديل بيانات الجهة';
-    document.getElementById('modalExt').classList.add('open');
-  } else {
-    document.getElementById('modalIntTitle').textContent = 'تعديل بيانات الزميل';
-    document.getElementById('modalInt').classList.add('open');
-  }
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
 }
 
 function setView(type, view) {
@@ -534,17 +577,15 @@ function setView(type, view) {
   }
 }
 
-function filterCards(type, q) {
-  const attr = type === 'ext' ? 'data-search-ext' : 'data-search-int';
-  const q2 = q.toLowerCase();
-  ['grid' + (type === 'ext' ? 'Ext' : 'Int'), 'list' + (type === 'ext' ? 'Ext' : 'Int')].forEach(id => {
-    document.getElementById(id).querySelectorAll('[' + attr + ']').forEach(el => {
-      el.style.display = (!q2 || (el.getAttribute(attr) || '').toLowerCase().includes(q2)) ? '' : 'none';
-    });
-  });
+function filterExt() { renderExt(); }
+function filterInt() { renderInt(); }
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
 }
 
 lucide.createIcons();
+init();
 </script>
 </body>
 </html>
