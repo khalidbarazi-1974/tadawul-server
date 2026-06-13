@@ -220,6 +220,9 @@ try { db.exec("ALTER TABLE employees ADD COLUMN title TEXT DEFAULT ''"); } catch
 try { db.exec("ALTER TABLE employees ADD COLUMN grade TEXT DEFAULT ''"); } catch(e) {}
 try { db.exec('ALTER TABLE employees ADD COLUMN annual_leave_balance INTEGER DEFAULT 30'); } catch(e) {}
 try { db.exec('ALTER TABLE employees ADD COLUMN last_login_at TEXT'); } catch(e) {}
+try { db.exec("ALTER TABLE contacts_external ADD COLUMN car_plate TEXT DEFAULT ''"); } catch(e) {}
+try { db.exec("ALTER TABLE contacts_external ADD COLUMN car_make  TEXT DEFAULT ''"); } catch(e) {}
+try { db.exec("ALTER TABLE contacts_external ADD COLUMN car_color TEXT DEFAULT ''"); } catch(e) {}
 
 // Promote خالد البرازي to admin on existing databases
 try { db.prepare("UPDATE employees SET role='admin' WHERE id='U292409' AND role='manager'").run(); } catch(e) {}

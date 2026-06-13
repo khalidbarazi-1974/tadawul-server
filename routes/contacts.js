@@ -22,22 +22,24 @@ router.get('/external', (req, res) => {
 });
 
 router.post('/external', (req, res) => {
-    const { name, title, org, sector, city, mobile, email, notes } = req.body;
+    const { name, title, org, sector, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const id = uid();
     db.prepare(`INSERT INTO contacts_external
-        (id, name, title, org, sector, city, mobile, email, notes, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id, name.trim(), title||'', org||'', sector||'', city||'', mobile||'', email||'', notes||'', req.user.id);
+        (id, name, title, org, sector, city, mobile, email, notes, car_plate, car_make, car_color, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(id, name.trim(), title||'', org||'', sector||'', city||'', mobile||'', email||'', notes||'',
+           car_plate||'', car_make||'', car_color||'', req.user.id);
     res.json({ id });
 });
 
 router.put('/external/:id', (req, res) => {
-    const { name, title, org, sector, city, mobile, email, notes } = req.body;
+    const { name, title, org, sector, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const info = db.prepare(`UPDATE contacts_external
-        SET name=?,title=?,org=?,sector=?,city=?,mobile=?,email=?,notes=? WHERE id=?`)
-      .run(name.trim(), title||'', org||'', sector||'', city||'', mobile||'', email||'', notes||'', req.params.id);
+        SET name=?,title=?,org=?,sector=?,city=?,mobile=?,email=?,notes=?,car_plate=?,car_make=?,car_color=? WHERE id=?`)
+      .run(name.trim(), title||'', org||'', sector||'', city||'', mobile||'', email||'', notes||'',
+           car_plate||'', car_make||'', car_color||'', req.params.id);
     if (!info.changes) return res.status(404).json({ error: 'غير موجود' });
     res.json({ ok: true });
 });
