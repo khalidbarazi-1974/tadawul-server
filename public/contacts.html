@@ -191,14 +191,7 @@ tr:hover td{background:#f5f3ff;}
   <div id="panelInt" style="display:none;">
     <div class="toolbar">
       <input type="text" placeholder="بحث بالاسم أو الإدارة..." style="min-width:220px;" oninput="filterInt()">
-      <select id="sectorFilter" onchange="filterInt()">
-        <option value="">كل القطاعات</option>
-        <option>المياه</option>
-        <option>الصرف الصحي</option>
-        <option>التخطيط والتطوير</option>
-        <option>الموارد البشرية</option>
-        <option>المالية</option>
-      </select>
+      <input type="text" id="sectorFilter" placeholder="تصفية بالقطاع..." style="min-width:160px;" oninput="filterInt()">
       <div class="view-toggle">
         <button class="vt-btn active" id="vtIntGrid" onclick="setView('int','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
         <button class="vt-btn" id="vtIntList" onclick="setView('int','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
@@ -282,19 +275,7 @@ tr:hover td{background:#f5f3ff;}
       <div class="fr"><label>المسمى الوظيفي *</label><input type="text" id="intTitle" placeholder="محلل بيانات"></div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-sitemap"></i> الإدارة / القطاع</div>
       <div class="f2">
-        <div class="fr"><label>القطاع الرئيسي *</label>
-          <select id="intSector">
-            <option value="">-- اختر --</option>
-            <option>المياه</option>
-            <option>الصرف الصحي</option>
-            <option>التخطيط والتطوير</option>
-            <option>الموارد البشرية</option>
-            <option>المالية والمشتريات</option>
-            <option>تقنية المعلومات</option>
-            <option>الشؤون القانونية</option>
-            <option>أخرى</option>
-          </select>
-        </div>
+        <div class="fr"><label>القطاع</label><input type="text" id="intSector" placeholder="قطاع المياه"></div>
         <div class="fr"><label>الإدارة / الوحدة</label><input type="text" id="intDept" placeholder="إدارة تطوير المنظومة"></div>
       </div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-phone"></i> بيانات التواصل</div>
@@ -397,7 +378,7 @@ function renderInt() {
   const sector = document.getElementById('sectorFilter').value;
   const filtered = intData.filter(c => {
     const matchQ = !q || (c.name + ' ' + (c.dept || '') + ' ' + (c.title || '') + ' ' + (c.sector || '')).toLowerCase().includes(q.toLowerCase());
-    const matchS = !sector || (c.sector || '') === sector;
+    const matchS = !sector || (c.sector || '').toLowerCase().includes(sector.toLowerCase());
     return matchQ && matchS;
   });
   document.getElementById('tabIntCount').textContent = filtered.length;
