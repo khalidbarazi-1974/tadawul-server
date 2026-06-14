@@ -144,7 +144,7 @@ router.post('/actions/:actionId/create-task', (req, res) => {
     if (action.task_id) return res.status(409).json({ error: 'مرتبطة بمهمة بالفعل' });
 
     const { name, deptId, assignedTo, dueDate, priority } = req.body;
-    if (!name?.trim() || !deptId) return res.status(400).json({ error: 'اسم المهمة والإدارة مطلوبان' });
+    if (!name?.trim() || deptId == null) return res.status(400).json({ error: 'اسم المهمة والإدارة مطلوبان' });
 
     const taskId = 't_' + uid();
     const now = new Date().toISOString();
