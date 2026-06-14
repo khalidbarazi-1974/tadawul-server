@@ -137,6 +137,31 @@ router.patch('/actions/:actionId', (req, res) => {
     res.json({ ok: true });
 });
 
+// Create a task from an action item
+router.post('/actions/:actionId/create-task', (req, res) => {
+    const action = db.prepare('SELECT * FROM meeting_actions WHERE id=?').get(req.params.actionId);
+    if (!action) return res.status(404).json({ error: 'غير موجود' });
+    if (action.task_id) return res.status(409).json({ error: 'مرتبطة بمهمة بالفعل' });
+
+    const { name, deptId, assignedTo, dueDate, priority } = req.body;
+    if (!name?.trim() || !deptId) return res.status(400).json({ error: 'اسم المهمة والإدارة مطلوبان' });
+
+    const taskId = 't_' + uid();
+    const now = new Date().toISOString();
+    db.prepare(`INSERT INTO tasks
+        (id,name,description,priority,status,due_date,dept_id,
+         created_by,created_by_role,assigned_to,assigned_date,
+         is_new_for_employee,is_new_for_manager,approved,created_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .run(taskId, name.trim(), action.description, priority||'متوسطة', 'جديد',
+           dueDate||'', deptId, req.user.name, req.user.role,
+           assignedTo||null, assignedTo ? now : null,
+           assignedTo ? 1 : 0, 0, 1, now);
+
+    db.prepare('UPDATE meeting_actions SET task_id=? WHERE id=?').run(taskId, req.params.actionId);
+    res.json({ task_id: taskId });
+});
+
 // Delete
 router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM meetings WHERE id=?').run(req.params.id);

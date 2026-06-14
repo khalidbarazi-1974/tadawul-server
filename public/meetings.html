@@ -100,6 +100,9 @@ tr:hover td{background:#fffbeb;}
 .action-table th{background:#f8fafc;padding:8px 10px;font-size:11px;color:#64748b;font-weight:700;text-align:right;border-bottom:1.5px solid #e2e8f0;}
 .action-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9;}
 .action-table input,.action-table select{width:100%;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:12px;}
+.btn-link-task{background:#ede9fe;color:#6d28d9;border:1.5px solid #c4b5fd;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;white-space:nowrap;}
+.btn-link-task:hover{background:#ddd6fe;}
+.task-linked{background:#d1fae5;color:#065f46;border:1.5px solid #a7f3d0;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
 
 /* ── Buttons ── */
 .btn{padding:9px 20px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
@@ -413,6 +416,7 @@ tr:hover td{background:#fffbeb;}
             <th>البند</th>
             <th>المسؤول</th>
             <th>تاريخ الإنجاز</th>
+            <th>مهمة تداول</th>
           </tr>
         </thead>
         <tbody id="dActionTbody"></tbody>
@@ -444,7 +448,7 @@ async function api(method, path, body) {
 const TYPE_NAMES = {WK:'أسبوعي',MN:'شهري',QR:'ربع سنوي',SA:'نصف سنوي',AN:'سنوي',NM:'عادي'};
 const TYPE_CSS   = {WK:'t-wk',MN:'t-mn',QR:'t-qr',SA:'t-sa',AN:'t-an',NM:'t-nm'};
 
-let meetings = [], allStaff = [], extContacts = [], intContacts = [];
+let meetings = [], allStaff = [], extContacts = [], intContacts = [], departments = [];
 let formType = 'WK', formSubject = '';
 let formAttendees = [];
 let formAgenda = [];
@@ -456,11 +460,12 @@ let currentMeetingId = null;
 
 async function init() {
   document.getElementById('topUser').textContent = user.name || '';
-  [meetings, allStaff, extContacts, intContacts] = await Promise.all([
+  [meetings, allStaff, extContacts, intContacts, departments] = await Promise.all([
     api('GET', '/meetings').catch(() => []),
     api('GET', '/employees/all').catch(() => []),
     api('GET', '/contacts/external').catch(() => []),
-    api('GET', '/contacts/internal').catch(() => [])
+    api('GET', '/contacts/internal').catch(() => []),
+    api('GET', '/departments').catch(() => [])
   ]);
   renderStats();
   renderTable();
@@ -761,6 +766,10 @@ async function openDetail(id) {
       <td>${ac.description}</td>
       <td>${ac.owner_name || '—'}</td>
       <td style="font-size:12px;color:#666;">${ac.due_date || '—'}</td>
+      <td>${ac.task_id
+        ? `<span class="task-linked"><i class="fa-solid fa-check"></i> مرتبطة</span>`
+        : `<button class="btn-link-task" onclick="openCreateTaskModal('${ac.id}','${(ac.description||'').replace(/'/g,"\\'")}','${ac.due_date||''}')"><i class="fa-solid fa-arrow-left"></i> إنشاء مهمة</button>`
+      }</td>
     </tr>`).join('');
   document.getElementById('detailOv').classList.add('open');
 }
@@ -810,8 +819,103 @@ function logout() {
   location.href = '/';
 }
 
+// ── Create Task from Action Item ──────────────────────────────────────────────
+
+function openCreateTaskModal(actionId, description, dueDate) {
+  document.getElementById('ctActionId').value = actionId;
+  document.getElementById('ctName').value = description;
+  document.getElementById('ctDue').value = dueDate || '';
+  document.getElementById('ctPriority').value = 'متوسطة';
+  const deptSel = document.getElementById('ctDept');
+  deptSel.innerHTML = '<option value="">— اختر —</option>' +
+    departments.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+  document.getElementById('ctAssignee').innerHTML = '<option value="">— بدون تكليف —</option>';
+  const modal = document.getElementById('createTaskModal');
+  modal.style.display = 'flex';
+}
+
+function closeCreateTaskModal() {
+  document.getElementById('createTaskModal').style.display = 'none';
+}
+
+function onCtDeptChange() {
+  const deptId = parseInt(document.getElementById('ctDept').value);
+  const staff = allStaff.filter(e => e.dept_id === deptId);
+  document.getElementById('ctAssignee').innerHTML =
+    '<option value="">— بدون تكليف —</option>' +
+    staff.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+}
+
+async function submitCreateTask() {
+  const actionId  = document.getElementById('ctActionId').value;
+  const name      = document.getElementById('ctName').value.trim();
+  const deptId    = document.getElementById('ctDept').value;
+  const assignedTo = document.getElementById('ctAssignee').value || null;
+  const dueDate   = document.getElementById('ctDue').value;
+  const priority  = document.getElementById('ctPriority').value;
+  if (!name || !deptId) return alert('اسم المهمة والإدارة مطلوبان');
+  try {
+    await api('POST', `/meetings/actions/${actionId}/create-task`,
+      { name, deptId: parseInt(deptId), assignedTo, dueDate, priority });
+    closeCreateTaskModal();
+    const m = await api('GET', `/meetings/${currentMeetingId}`);
+    openDetail(currentMeetingId);
+    meetings = await api('GET', '/meetings');
+  } catch(e) { alert(e.message); }
+}
+
 lucide.createIcons();
 init();
 </script>
+
+<!-- ══ CREATE TASK MODAL ══ -->
+<div class="overlay" id="createTaskModal" style="display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.18);overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#6d28d9,#7c3aed);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="color:#fff;font-size:15px;font-weight:700;"><i class="fa-solid fa-list-check" style="margin-left:8px;"></i> إنشاء مهمة من بند العمل</h3>
+      <button onclick="closeCreateTaskModal()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;">×</button>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <input type="hidden" id="ctActionId">
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">اسم المهمة *</label>
+        <input type="text" id="ctName" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">الإدارة *</label>
+          <select id="ctDept" onchange="onCtDeptChange()" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;">
+            <option value="">— اختر —</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">تكليف إلى</label>
+          <select id="ctAssignee" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;">
+            <option value="">— بدون تكليف —</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">تاريخ الإنجاز</label>
+          <input type="date" id="ctDue" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">الأولوية</label>
+          <select id="ctPriority" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;">
+            <option value="عالية">عالية</option>
+            <option value="متوسطة" selected>متوسطة</option>
+            <option value="منخفضة">منخفضة</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;">
+      <button onclick="closeCreateTaskModal()" style="padding:8px 18px;border:1.5px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;">إلغاء</button>
+      <button onclick="submitCreateTask()" style="padding:8px 18px;border:none;border-radius:8px;background:#6d28d9;color:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;"><i class="fa-solid fa-plus"></i> إنشاء المهمة</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
