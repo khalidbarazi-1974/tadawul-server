@@ -836,7 +836,8 @@ async function openCreateTaskModal(actionId, description, dueDate) {
   const deptSel = document.getElementById('ctDept');
   deptSel.innerHTML = '<option value="">— اختر —</option>' +
     departments.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-  document.getElementById('ctAssignee').innerHTML = '<option value="">— بدون تكليف —</option>';
+  deptSel.value = user.deptId ?? '';
+  onCtDeptChange();
   document.getElementById('createTaskModal').classList.add('open');
 }
 
