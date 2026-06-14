@@ -343,18 +343,23 @@ if (empCount.c === 0) {
 }
 
 // Seed dummy contacts
+console.log('[seed] DUMMY_SEED =', process.env.DUMMY_SEED);
 if (process.env.DUMMY_SEED === 'true') {
     const extCount = db.prepare('SELECT COUNT(*) as c FROM contacts_external').get();
+    console.log('[seed] contacts_external count =', extCount.c);
     if (extCount.c === 0) {
-        const ins = db.prepare(`INSERT INTO contacts_external (id,name,title,org,created_by) VALUES (?,?,?,?,?)`);
+        const ins = db.prepare('INSERT INTO contacts_external (id,name,title,org,created_by) VALUES (?,?,?,?,?)');
         ins.run('mqcsfsw4ko0fd', 'عبدالله',   'عبدالرحمن',    'XYZ',  'D9999');
         ins.run('mqdfv0grku165', 'محمد أحمد', 'مدير تنفيذي',  'ABCD', 'D9999');
+        console.log('[seed] inserted 2 external contacts');
     }
     const intCount = db.prepare('SELECT COUNT(*) as c FROM contacts_internal').get();
+    console.log('[seed] contacts_internal count =', intCount.c);
     if (intCount.c === 0) {
-        const ins = db.prepare(`INSERT INTO contacts_internal (id,name,title,created_by) VALUES (?,?,?,?)`);
+        const ins = db.prepare('INSERT INTO contacts_internal (id,name,title,created_by) VALUES (?,?,?,?)');
         ins.run('mqcsgwlcpd8e1', 'فيصل محمد', 'مدير عام xx', 'D9999');
         ins.run('mqdfvdonegha2', 'ناصر سعد',  'مدير عام YY', 'D9999');
+        console.log('[seed] inserted 2 internal contacts');
     }
 }
 
