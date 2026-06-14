@@ -282,7 +282,6 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
               <th class="sortable" style="width:74px" id="th-priority" onclick="setSort('priority')">الأولوية</th>
               <th class="sortable" style="width:90px" id="th-status" onclick="setSort('status')">الحالة</th>
               <th class="sortable" style="width:115px" id="th-assignedTo" onclick="setSort('assignedTo')">المسؤول</th>
-              <th class="sortable" style="width:92px" id="th-startDate" onclick="setSort('startDate')">تاريخ البدء</th>
               <th class="sortable" style="width:92px" id="th-dueDate" onclick="setSort('dueDate')">الاستحقاق</th>
               <th class="sortable" style="width:92px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
               <th style="width:54px">المدة</th>
@@ -353,10 +352,6 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
         <div class="form-group">
           <label>الحالة</label>
           <select id="fStatus"><option>جديد</option><option>قيد التنفيذ</option><option>مكتمل</option></select>
-        </div>
-        <div class="form-group">
-          <label>تاريخ البدء *</label>
-          <input type="date" id="fStart">
         </div>
         <div class="form-group">
           <label>تاريخ الاستحقاق</label>
@@ -552,7 +547,7 @@ function updateStats() {
     countUp(document.getElementById('sComments'), pending.comments.length);
 }
 
-const SORT_COLS_TASK = ['name','priority','status','assignedTo','startDate','dueDate','createdAt'];
+const SORT_COLS_TASK = ['name','priority','status','assignedTo','dueDate','createdAt'];
 const PRIO_RANK = {'عالية':3,'متوسطة':2,'منخفضة':1};
 function setSort(col) {
     if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
@@ -600,7 +595,6 @@ function renderTasks() {
         else if (sortCol==='priority')    { va=PRIO_RANK[a.priority]||0; vb=PRIO_RANK[b.priority]||0; }
         else if (sortCol==='status')      { va=a.status||''; vb=b.status||''; }
         else if (sortCol==='assignedTo')  { va=a.assignedTo||''; vb=b.assignedTo||''; }
-        else if (sortCol==='startDate')   { va=a.startDate||''; vb=b.startDate||''; }
         else if (sortCol==='dueDate')     { va=a.dueDate||''; vb=b.dueDate||''; }
         else if (sortCol==='createdAt')   { va=a.createdAt||''; vb=b.createdAt||''; }
         else return 0;
@@ -634,7 +628,6 @@ function renderTasks() {
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
             <td>${t.assignedTo || '-'}</td>
-            <td style="text-align:center;color:#666;font-size:12px;">${t.startDate||'-'}</td>
             <td>${dueDateChip(t.dueDate)}</td>
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
             <td>${delayBadge(t)}</td>
@@ -711,7 +704,6 @@ function openAddModal() {
     document.getElementById('fDesc').value = '';
     document.getElementById('fPriority').value = 'متوسطة';
     document.getElementById('fStatus').value = 'جديد';
-    document.getElementById('fStart').value = '';
     document.getElementById('fDue').value = '';
     document.getElementById('fAssign').value = '';
     document.getElementById('fMeetingRef').value = '';
@@ -728,7 +720,6 @@ function openEdit() {
     document.getElementById('fDesc').value = t.description || '';
     document.getElementById('fPriority').value = t.priority;
     document.getElementById('fStatus').value = t.status;
-    document.getElementById('fStart').value = t.startDate || '';
     document.getElementById('fDue').value = t.dueDate || '';
     document.getElementById('fAssign').value = t.assignedTo || '';
     document.getElementById('fMeetingRef').value = t.meeting_ref || '';
@@ -740,13 +731,11 @@ async function saveTask() {
     const id = document.getElementById('editId').value;
     let name = document.getElementById('fName').value.trim();
     if (!name) return toast('اسم الموضوع مطلوب', 'error');
-    if (!id && !document.getElementById('fStart').value) return toast('تاريخ البدء مطلوب', 'error');
     while (true) {
         const body = {
             name, description: document.getElementById('fDesc').value.trim(),
             priority: document.getElementById('fPriority').value,
             status:   document.getElementById('fStatus').value,
-            startDate: document.getElementById('fStart').value,
             dueDate:  document.getElementById('fDue').value,
             deptId:   user.deptId,
             assignedTo: document.getElementById('fAssign').value || null,
@@ -823,14 +812,13 @@ function renderDetail() {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;">
             <div><span style="color:#888;">الأولوية:</span> ${priorityBadge(t.priority)}</div>
             <div><span style="color:#888;">الحالة:</span> ${statusBadge(t.status)}</div>
-            <div><span style="color:#888;">تاريخ البدء:</span> ${t.startDate||'-'}</div>
             <div><span style="color:#888;">المدة:</span> ${delayBadge(t)}</div>
             <div><span style="color:#888;">الاستحقاق:</span> ${t.dueDate||'-'}</div>
             <div><span style="color:#888;">تاريخ الإنشاء:</span> ${t.createdAt?t.createdAt.slice(0,10):'-'}</div>
             <div><span style="color:#888;">التاريخ المقترح:</span> ${t.suggestedDueDate||'-'}</div>
             <div><span style="color:#888;">المسؤول:</span> ${t.assignedTo||'-'}</div>
             <div><span style="color:#888;">أنشئ بواسطة:</span> ${t.createdBy||'-'} ${roleLabel(t.createdByRole)}</div>
-            ${t.meeting_ref ? `<div><span style="color:#888;">اجتماع مرجعي:</span> <span style="background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:6px;font-weight:700;font-size:13px;">${t.meeting_ref}</span></div>` : ''}
+            <div><span style="color:#888;">اجتماع مرجعي:</span> ${t.meeting_ref ? `<span style="background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:6px;font-weight:700;font-size:13px;">${t.meeting_ref}</span>` : `<span style="color:#bbb;">—</span>`}</div>
             <div style="grid-column:1/-1;"><span style="color:#888;">الوصف:</span> ${t.description||'-'}</div>
         </div>`;
 
@@ -1029,8 +1017,9 @@ function showSkeleton() {
 }
 
 function delayBadge(t) {
-    if (!t.startDate) return '-';
-    const diff = Math.floor((new Date() - new Date(t.startDate)) / 86400000);
+    const ref = t.createdAt || t.startDate;
+    if (!ref) return '-';
+    const diff = Math.floor((new Date() - new Date(ref)) / 86400000);
     return `<span style="font-size:12px;color:#555;">${diff} يوم</span>`;
 }
 function priorityBadge(p){const m={'عالية':'badge-high','متوسطة':'badge-med','منخفضة':'badge-low'};return `<span class="badge ${m[p]||'badge-med'}">${p}</span>`;}
