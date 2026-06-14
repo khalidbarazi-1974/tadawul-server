@@ -843,15 +843,14 @@ function onCtDeptChange() {
   const staff = allStaff.filter(e => e.dept_id === deptId);
   document.getElementById('ctAssignee').innerHTML =
     '<option value="">— بدون تكليف —</option>' +
-    staff.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+    staff.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
 }
 
 async function submitCreateTask() {
   const actionId   = document.getElementById('ctActionId').value;
   const name       = document.getElementById('ctName').value.trim();
   const deptId     = document.getElementById('ctDept').value;
-  const assigneeId = document.getElementById('ctAssignee').value;
-  const assignedTo = assigneeId ? (allStaff.find(e => e.id === assigneeId)?.name || null) : null;
+  const assignedTo = document.getElementById('ctAssignee').value || null;
   const dueDate    = document.getElementById('ctDue').value;
   const priority   = document.getElementById('ctPriority').value;
   if (!name || deptId === '') return alert('اسم المهمة والإدارة مطلوبان');
