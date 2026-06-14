@@ -853,7 +853,7 @@ async function submitCreateTask() {
   const assignedTo = document.getElementById('ctAssignee').value || null;
   const dueDate   = document.getElementById('ctDue').value;
   const priority  = document.getElementById('ctPriority').value;
-  if (!name || !deptId) return alert('اسم المهمة والإدارة مطلوبان');
+  if (!name || !deptId) return alert(`DEBUG name="${name}" deptId="${deptId}" depts=${departments.length}`);
   try {
     await api('POST', `/meetings/actions/${actionId}/create-task`,
       { name, deptId: parseInt(deptId), assignedTo, dueDate, priority });
