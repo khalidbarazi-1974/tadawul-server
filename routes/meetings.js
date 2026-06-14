@@ -146,18 +146,20 @@ router.post('/actions/:actionId/create-task', (req, res) => {
     const { name, deptId, assignedTo, dueDate, priority } = req.body;
     if (!name?.trim() || deptId == null) return res.status(400).json({ error: 'اسم المهمة والإدارة مطلوبان' });
 
+    const meeting = db.prepare('SELECT meeting_number FROM meetings WHERE id=?').get(action.meeting_id);
+    const meetingRef = meeting ? meeting.meeting_number : null;
     const taskId = 't_' + uid();
     const now = new Date().toISOString();
     const isEmployee = req.user.role === 'employee';
     db.prepare(`INSERT INTO tasks
         (id,name,description,priority,status,due_date,dept_id,
          created_by,created_by_role,assigned_to,assigned_date,
-         is_new_for_employee,is_new_for_manager,approved,created_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+         is_new_for_employee,is_new_for_manager,approved,created_at,meeting_ref)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
       .run(taskId, name.trim(), action.description, priority||'متوسطة', 'جديد',
            dueDate||'', deptId, req.user.name, req.user.role,
            assignedTo||null, assignedTo ? now : null,
-           assignedTo ? 1 : 0, isEmployee ? 1 : 0, isEmployee ? 0 : 1, now);
+           assignedTo ? 1 : 0, isEmployee ? 1 : 0, isEmployee ? 0 : 1, now, meetingRef);
 
     db.prepare('UPDATE meeting_actions SET task_id=? WHERE id=?').run(taskId, req.params.actionId);
     res.json({ task_id: taskId });

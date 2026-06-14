@@ -820,6 +820,7 @@ function renderDetail() {
             <div><span style="color:#888;">التاريخ المقترح:</span> ${t.suggestedDueDate||'-'}</div>
             <div><span style="color:#888;">المسؤول:</span> ${t.assignedTo||'-'}</div>
             <div><span style="color:#888;">أنشئ بواسطة:</span> ${t.createdBy||'-'} ${roleLabel(t.createdByRole)}</div>
+            ${t.meeting_ref ? `<div><span style="color:#888;">اجتماع مرجعي:</span> <span style="background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:6px;font-weight:700;font-size:13px;">${t.meeting_ref}</span></div>` : ''}
             <div style="grid-column:1/-1;"><span style="color:#888;">الوصف:</span> ${t.description||'-'}</div>
         </div>`;
 
