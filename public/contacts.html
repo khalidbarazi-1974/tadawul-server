@@ -164,7 +164,7 @@ tr:hover td{background:#f5f3ff;}
   <!-- ══ EXTERNAL PARTIES TAB ══ -->
   <div id="panelExt">
     <div class="toolbar">
-      <input type="text" placeholder="بحث بالاسم أو الجهة..." style="min-width:220px;" oninput="filterExt()">
+      <input type="text" id="extSearch" placeholder="بحث..." style="min-width:220px;" oninput="filterExt()">
       <div class="view-toggle">
         <button class="vt-btn active" id="vtExtGrid" onclick="setView('ext','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
         <button class="vt-btn" id="vtExtList" onclick="setView('ext','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
@@ -346,8 +346,10 @@ async function loadInt() {
 
 function renderExt() {
   updateStats();
-  const q = (document.querySelector('#panelExt .toolbar input') || {}).value || '';
-  const filtered = extData.filter(c => !q || (c.name + ' ' + (c.org || '') + ' ' + (c.title || '')).toLowerCase().includes(q.toLowerCase()));
+  const q = (document.getElementById('extSearch')?.value || '').toLowerCase();
+  const filtered = extData.filter(c => !q ||
+    [c.name, c.title, c.org, c.city, c.mobile, c.email, c.car_plate, c.car_make, c.notes]
+      .some(v => (v || '').toLowerCase().includes(q)));
   document.getElementById('tabExtCount').textContent = filtered.length;
 
   document.getElementById('gridExt').innerHTML = filtered.length
