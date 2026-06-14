@@ -847,12 +847,13 @@ function onCtDeptChange() {
 }
 
 async function submitCreateTask() {
-  const actionId  = document.getElementById('ctActionId').value;
-  const name      = document.getElementById('ctName').value.trim();
-  const deptId    = document.getElementById('ctDept').value;
-  const assignedTo = document.getElementById('ctAssignee').value || null;
-  const dueDate   = document.getElementById('ctDue').value;
-  const priority  = document.getElementById('ctPriority').value;
+  const actionId   = document.getElementById('ctActionId').value;
+  const name       = document.getElementById('ctName').value.trim();
+  const deptId     = document.getElementById('ctDept').value;
+  const assigneeId = document.getElementById('ctAssignee').value;
+  const assignedTo = assigneeId ? (allStaff.find(e => e.id === assigneeId)?.name || null) : null;
+  const dueDate    = document.getElementById('ctDue').value;
+  const priority   = document.getElementById('ctPriority').value;
   if (!name || deptId === '') return alert('اسم المهمة والإدارة مطلوبان');
   try {
     await api('POST', `/meetings/actions/${actionId}/create-task`,

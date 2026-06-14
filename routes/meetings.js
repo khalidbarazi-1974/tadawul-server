@@ -148,6 +148,7 @@ router.post('/actions/:actionId/create-task', (req, res) => {
 
     const taskId = 't_' + uid();
     const now = new Date().toISOString();
+    const isEmployee = req.user.role === 'employee';
     db.prepare(`INSERT INTO tasks
         (id,name,description,priority,status,due_date,dept_id,
          created_by,created_by_role,assigned_to,assigned_date,
@@ -156,7 +157,7 @@ router.post('/actions/:actionId/create-task', (req, res) => {
       .run(taskId, name.trim(), action.description, priority||'متوسطة', 'جديد',
            dueDate||'', deptId, req.user.name, req.user.role,
            assignedTo||null, assignedTo ? now : null,
-           assignedTo ? 1 : 0, 0, 1, now);
+           assignedTo ? 1 : 0, isEmployee ? 1 : 0, isEmployee ? 0 : 1, now);
 
     db.prepare('UPDATE meeting_actions SET task_id=? WHERE id=?').run(taskId, req.params.actionId);
     res.json({ task_id: taskId });
