@@ -245,20 +245,63 @@ if (settingsCount.c === 0) {
 const deptCount = db.prepare('SELECT COUNT(*) as c FROM departments').get();
 if (deptCount.c === 0) {
     const ins = db.prepare('INSERT INTO departments (id, name) VALUES (?, ?)');
-    [
+    const depts = process.env.DUMMY_SEED === 'true' ? [
+        [0, 'الإدارة العامة الأولى'],
+        [1, 'الإدارة العامة الثانية'],
+        [2, 'الإدارة العامة الثالثة'],
+        [3, 'الإدارة العامة الرابعة'],
+        [4, 'مكتب المدير العام'],
+    ] : [
         [0, 'الإدارة العامة لتميز الأداء القطاعي'],
         [1, 'الإدارة العامة للتخطيط التكاملي'],
         [2, 'الإدارة العامة للشؤون الاقتصادية'],
         [3, 'الإدارة العامة لحلول العلاقات التجارية'],
-        [4, 'مكتب الوكيل']
-    ].forEach(([id, name]) => ins.run(id, name));
+        [4, 'مكتب الوكيل'],
+    ];
+    depts.forEach(([id, name]) => ins.run(id, name));
 }
 
 // Seed employees
 const empCount = db.prepare('SELECT COUNT(*) as c FROM employees').get();
 if (empCount.c === 0) {
     const ins = db.prepare('INSERT INTO employees (id, name, dept_id, password_hash, role) VALUES (?, ?, ?, ?, ?)');
-    const employees = [
+    const employees = process.env.DUMMY_SEED === 'true' ? [
+        // Dept 0
+        { id: 'D1001', name: 'عمر بن سالم العمري',           dept: 0, role: 'manager'  },
+        { id: 'D1002', name: 'خالد بن أحمد الغامدي',         dept: 0, role: 'employee' },
+        { id: 'D1003', name: 'سعد بن فهد المطيري',           dept: 0, role: 'employee' },
+        { id: 'D1004', name: 'عبدالعزيز بن محمد الحربي',     dept: 0, role: 'employee' },
+        { id: 'D1005', name: 'وليد بن صالح العتيبي',         dept: 0, role: 'employee' },
+        { id: 'D1006', name: 'نورة بنت عمر الزهراني',        dept: 0, role: 'employee' },
+        { id: 'D1007', name: 'مريم بنت سعد الشمري',          dept: 0, role: 'employee' },
+        { id: 'D1008', name: 'ياسر بن علي القحطاني',         dept: 0, role: 'employee' },
+        // Dept 1
+        { id: 'D1101', name: 'فيصل بن عبدالرحمن الدوسري',   dept: 1, role: 'manager'  },
+        { id: 'D1102', name: 'راشد بن سلطان المالكي',        dept: 1, role: 'employee' },
+        { id: 'D1103', name: 'ماجد بن فهد العنزي',           dept: 1, role: 'employee' },
+        { id: 'D1104', name: 'أحمد بن عبدالله الحميدي',      dept: 1, role: 'employee' },
+        { id: 'D1105', name: 'صالح بن ناصر البقمي',          dept: 1, role: 'employee' },
+        { id: 'D1106', name: 'هند بنت محمد السبيعي',         dept: 1, role: 'employee' },
+        // Dept 2
+        { id: 'D1201', name: 'بندر بن خالد الرويلي',         dept: 2, role: 'manager'  },
+        { id: 'D1202', name: 'جاسم بن عبدالله الراشد',       dept: 2, role: 'employee' },
+        { id: 'D1203', name: 'ندى بنت سالم الأسمري',         dept: 2, role: 'employee' },
+        { id: 'D1204', name: 'دلال بنت أحمد الفيفي',         dept: 2, role: 'employee' },
+        { id: 'D1205', name: 'منيرة بنت عمر القرشي',         dept: 2, role: 'employee' },
+        { id: 'D1206', name: 'شريف بن يوسف البلوي',          dept: 2, role: 'employee' },
+        { id: 'D1207', name: 'تركي بن فيصل السلمي',          dept: 2, role: 'employee' },
+        { id: 'D1208', name: 'ريم بنت سعد الجهني',           dept: 2, role: 'employee' },
+        // Dept 3
+        { id: 'D1301', name: 'عبدالرحمن بن صالح التميمي',    dept: 3, role: 'manager'  },
+        // Dept 4
+        { id: 'D1401', name: 'مساعد بن فهد الشهري',          dept: 4, role: 'deputy'   },
+        { id: 'D9999', name: 'مدير النظام',                   dept: 4, role: 'admin'    },
+        { id: 'D1402', name: 'محمد بن عمر العمير',            dept: 4, role: 'employee' },
+        { id: 'D1403', name: 'سارة بنت خالد العسيري',        dept: 4, role: 'employee' },
+        { id: 'D1404', name: 'منال بنت سعد الحازمي',         dept: 4, role: 'employee' },
+        { id: 'D1405', name: 'لمياء بنت علي الغامدي',        dept: 4, role: 'employee' },
+        { id: 'D1406', name: 'حمد بن عبدالله المزروعي',      dept: 4, role: 'employee' },
+    ] : [
         // Dept 0 — الإدارة العامة لتميز الأداء القطاعي
         { id: 'U291655', name: 'بدر بن عبدالله الدوسري',              dept: 0, role: 'manager'  },
         { id: 'U291654', name: 'نايف بن عبدالله الحمودي',             dept: 0, role: 'employee' },
