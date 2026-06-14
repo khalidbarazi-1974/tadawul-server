@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="/vendor/fonts/cairo.css">
 <script src="/vendor/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100vh;}
@@ -84,6 +85,17 @@ tr:hover td{background:#f5f3ff;}
 .btn-secondary{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;}
 .btn-secondary:hover{background:#e2e8f0;}
 
+/* ── Import / Export ── */
+.btn-export{background:#eef2ff;color:#4338ca;border:1.5px solid #c7d2fe;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-export:hover{background:#e0e7ff;}
+.btn-import{background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-import:hover{background:#dcfce7;}
+.conflict-item{background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:12px;}
+.conflict-header{margin-bottom:10px;}
+.conflict-table{width:100%;border-collapse:collapse;font-size:12px;}
+.conflict-table th{background:#fef3c7;padding:7px 10px;text-align:right;color:#92400e;font-weight:700;}
+.conflict-table td{padding:7px 10px;border-top:1px solid #fde68a;color:#333;}
+
 /* ── View toggle ── */
 .view-toggle{display:flex;gap:4px;background:#f1f5f9;border-radius:8px;padding:3px;}
 .vt-btn{background:none;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;color:#64748b;font-size:13px;line-height:1;}
@@ -136,7 +148,7 @@ tr:hover td{background:#f5f3ff;}
   <div class="stats">
     <div class="stat"><div class="n" id="statTotal">0</div><div class="l">إجمالي جهات الاتصال</div></div>
     <div class="stat"><div class="n" id="statExt">0</div><div class="l">جهات خارجية</div></div>
-    <div class="stat"><div class="n" id="statInt">0</div><div class="l">زملاء من خارج الوكالة</div></div>
+    <div class="stat"><div class="n" id="statInt">0</div><div class="l">من الهيئة</div></div>
   </div>
 
   <!-- Tabs -->
@@ -145,7 +157,7 @@ tr:hover td{background:#f5f3ff;}
       <i class="fa-solid fa-building"></i> جهات خارجية <span class="count" id="tabExtCount">0</span>
     </button>
     <button class="tab" id="tabInt" onclick="switchTab('int')">
-      <i class="fa-solid fa-user-tie"></i> زملاء من خارج الوكالة <span class="count" id="tabIntCount">0</span>
+      <i class="fa-solid fa-user-tie"></i> من الهيئة <span class="count" id="tabIntCount">0</span>
     </button>
   </div>
 
@@ -157,6 +169,9 @@ tr:hover td{background:#f5f3ff;}
         <button class="vt-btn active" id="vtExtGrid" onclick="setView('ext','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
         <button class="vt-btn" id="vtExtList" onclick="setView('ext','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
       </div>
+      <button class="btn-export" onclick="exportContacts('ext')"><i class="fa-solid fa-file-excel"></i> تصدير</button>
+      <button class="btn-import" onclick="triggerImport('ext')"><i class="fa-solid fa-file-import"></i> استيراد</button>
+      <input type="file" id="fileExtImport" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importContacts('ext',this)">
       <button class="btn-new" onclick="openAddExt()"><i class="fa-solid fa-plus"></i> إضافة جهة خارجية</button>
     </div>
     <div class="contact-grid active" id="gridExt"></div>
@@ -188,6 +203,9 @@ tr:hover td{background:#f5f3ff;}
         <button class="vt-btn active" id="vtIntGrid" onclick="setView('int','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
         <button class="vt-btn" id="vtIntList" onclick="setView('int','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
       </div>
+      <button class="btn-export" onclick="exportContacts('int')"><i class="fa-solid fa-file-excel"></i> تصدير</button>
+      <button class="btn-import" onclick="triggerImport('int')"><i class="fa-solid fa-file-import"></i> استيراد</button>
+      <input type="file" id="fileIntImport" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importContacts('int',this)">
       <button class="btn-new" onclick="openAddInt()"><i class="fa-solid fa-plus"></i> إضافة زميل</button>
     </div>
     <div class="contact-grid active" id="gridInt"></div>
@@ -307,6 +325,26 @@ tr:hover td{background:#f5f3ff;}
 </div>
 
 
+<!-- ══ CONFLICT RESOLUTION MODAL ══ -->
+<div class="overlay" id="conflictModal">
+  <div class="modal" style="width:680px;">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i> تحديث محتمل للبيانات</h3>
+      <button class="btn-close" onclick="closeModal('conflictModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="conflictSummary" style="font-size:13px;color:#555;margin-bottom:10px;"></p>
+      <p style="font-size:12px;color:#888;margin-bottom:14px;">حدد الجهات التي تريد تحديث بياناتها بالقيم الواردة من الملف:</p>
+      <div id="conflictList"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('conflictModal')">تجاهل الكل</button>
+      <button class="btn btn-primary" onclick="applyConflictResolutions()"><i class="fa-solid fa-check"></i> تطبيق المحدد</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 const user = JSON.parse(sessionStorage.getItem('user') || 'null');
 const token = sessionStorage.getItem('token');
@@ -358,8 +396,8 @@ function renderExt() {
         <td style="font-size:12px;">${c.mobile || '—'}</td>
         <td style="font-size:12px;color:#6366f1;">${c.email || '—'}</td>
         <td>
-          <button class="btn-edit" onclick="openEditExt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del" onclick="delContact('ext',${c.id})"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn-edit" onclick="openEditExt('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn-del" onclick="delContact('ext','${c.id}')"><i class="fa-solid fa-trash"></i></button>
         </td>
       </tr>`).join('')
     : '<tr><td colspan="7" class="empty">لا توجد جهات خارجية</td></tr>';
@@ -391,8 +429,8 @@ function renderInt() {
         <td style="font-size:12px;">${c.extension || '—'}</td>
         <td style="font-size:12px;color:#6366f1;">${c.email || '—'}</td>
         <td>
-          <button class="btn-edit" onclick="openEditInt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
-          <button class="btn-del" onclick="delContact('int',${c.id})"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn-edit" onclick="openEditInt('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn-del" onclick="delContact('int','${c.id}')"><i class="fa-solid fa-trash"></i></button>
         </td>
       </tr>`).join('')
     : '<tr><td colspan="8" class="empty">لا يوجد زملاء</td></tr>';
@@ -416,8 +454,8 @@ function extCard(c) {
         ${c.city ? `<div class="cc-row"><i class="fa-solid fa-location-dot"></i> ${c.city}</div>` : ''}
       </div>
       <div class="cc-actions">
-        <button class="btn-edit" onclick="openEditExt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
-        <button class="btn-del" onclick="delContact('ext',${c.id})"><i class="fa-solid fa-trash"></i> حذف</button>
+        <button class="btn-edit" onclick="openEditExt('${c.id}')"><i class="fa-solid fa-pen"></i> تعديل</button>
+        <button class="btn-del" onclick="delContact('ext','${c.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
       </div>
     </div>`;
 }
@@ -440,8 +478,8 @@ function intCard(c) {
         ${c.email ? `<div class="cc-row"><i class="fa-solid fa-envelope"></i> ${c.email}</div>` : ''}
       </div>
       <div class="cc-actions">
-        <button class="btn-edit" onclick="openEditInt(${c.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
-        <button class="btn-del" onclick="delContact('int',${c.id})"><i class="fa-solid fa-trash"></i> حذف</button>
+        <button class="btn-edit" onclick="openEditInt('${c.id}')"><i class="fa-solid fa-pen"></i> تعديل</button>
+        <button class="btn-del" onclick="delContact('int','${c.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
       </div>
     </div>`;
 }
@@ -597,6 +635,131 @@ function toggleCarSection() {
 
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
+}
+
+// ── Import / Export ──────────────────────────────────────────────────────────
+
+const EXT_HEADERS = ['الاسم','المسمى الوظيفي','الجهة','القطاع','المدينة','الجوال','البريد الإلكتروني','رقم اللوحة','الماركة/الموديل','اللون','ملاحظات'];
+const EXT_FIELDS  = ['name','title','org','sector','city','mobile','email','car_plate','car_make','car_color','notes'];
+const INT_HEADERS = ['الاسم','الرقم الوظيفي','المسمى الوظيفي','القطاع','الإدارة','الجوال','الداخلي','البريد الإلكتروني','ملاحظات'];
+const INT_FIELDS  = ['name','employee_id','title','sector','dept','mobile','extension','email','notes'];
+
+function exportContacts(type) {
+  const data = type === 'ext' ? extData : intData;
+  if (!data.length) return alert('لا توجد بيانات للتصدير');
+  const headers = type === 'ext' ? EXT_HEADERS : INT_HEADERS;
+  const fields  = type === 'ext' ? EXT_FIELDS  : INT_FIELDS;
+  const rows = data.map(c => fields.map(f => c[f] || ''));
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  ws['!cols'] = headers.map(() => ({ wch: 22 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, type === 'ext' ? 'الجهات الخارجية' : 'الزملاء');
+  XLSX.writeFile(wb, type === 'ext' ? 'external_contacts.xlsx' : 'internal_contacts.xlsx');
+}
+
+function triggerImport(type) {
+  document.getElementById(type === 'ext' ? 'fileExtImport' : 'fileIntImport').click();
+}
+
+async function importContacts(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      if (!raw.length) return alert('الملف فارغ أو لا يحتوي على بيانات.');
+
+      const fileHeaders = Object.keys(raw[0]);
+      const hasExtSig = fileHeaders.includes('الجهة');
+      const hasIntSig = fileHeaders.includes('الرقم الوظيفي') || fileHeaders.includes('الداخلي');
+      if (type === 'ext' && hasIntSig && !hasExtSig)
+        return alert('هذا الملف يبدو أنه قائمة زملاء (داخلي).\nاستخدم زر الاستيراد في تبويب "من الهيئة".');
+      if (type === 'int' && hasExtSig && !hasIntSig)
+        return alert('هذا الملف يبدو أنه قائمة جهات خارجية.\nاستخدم زر الاستيراد في تبويب "جهات خارجية".');
+
+      const headers = type === 'ext' ? EXT_HEADERS : INT_HEADERS;
+      const fields  = type === 'ext' ? EXT_FIELDS  : INT_FIELDS;
+      const map = {};
+      headers.forEach((h, i) => { map[h] = fields[i]; });
+
+      const records = raw.map(row => {
+        const rec = {};
+        Object.entries(map).forEach(([h, f]) => { rec[f] = String(row[h] || '').trim(); });
+        return rec;
+      }).filter(r => r.name);
+
+      if (!records.length) return alert('لم يُعثر على بيانات صالحة. تأكد أن الملف يحتوي على رأس الجدول الصحيح.');
+
+      const endpoint = type === 'ext' ? '/contacts/external/import' : '/contacts/internal/import';
+      const result = await api('POST', endpoint, { records });
+      if (type === 'ext') await loadExt(); else await loadInt();
+
+      if (result.conflicts && result.conflicts.length) {
+        showConflicts(type, result.conflicts, result.inserted, result.skipped);
+      } else {
+        alert(`اكتمل الاستيراد:\n• تمت إضافة: ${result.inserted}\n• موجود مسبقاً: ${result.skipped}`);
+      }
+    } catch(err) {
+      alert('خطأ في معالجة الملف: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+let conflictData = [], conflictType = '';
+
+function showConflicts(type, conflicts, inserted, skipped) {
+  conflictData = conflicts;
+  conflictType = type;
+  document.getElementById('conflictSummary').textContent =
+    `تمت إضافة ${inserted} جهة جديدة، و${skipped} موجودة بدون تغيير. وُجدت ${conflicts.length} جهة بقيم مختلفة:`;
+
+  document.getElementById('conflictList').innerHTML = conflicts.map((c, idx) => {
+    const rows = c.diffs.map(f => `
+      <tr>
+        <td style="font-weight:600;color:#555;white-space:nowrap;">${c.labels[f]}</td>
+        <td style="color:#64748b;">${c.existing[f] || '—'}</td>
+        <td style="color:#0369a1;font-weight:600;">${c.incoming[f] || '—'}</td>
+      </tr>`).join('');
+    return `
+      <div class="conflict-item">
+        <div class="conflict-header">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+            <input type="checkbox" class="conflict-cb" data-idx="${idx}" checked>
+            <strong>${c.existing.name}</strong>
+          </label>
+        </div>
+        <table class="conflict-table">
+          <thead><tr><th>الحقل</th><th>القيمة الحالية</th><th>القيمة في الملف</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }).join('');
+
+  document.getElementById('conflictModal').classList.add('open');
+}
+
+async function applyConflictResolutions() {
+  const updates = [];
+  document.querySelectorAll('.conflict-cb').forEach(cb => {
+    if (!cb.checked) return;
+    const c = conflictData[parseInt(cb.dataset.idx)];
+    const merged = { ...c.existing };
+    c.diffs.forEach(f => { merged[f] = (c.incoming[f] || '').trim(); });
+    updates.push(merged);
+  });
+  if (!updates.length) { closeModal('conflictModal'); return; }
+  const endpoint = conflictType === 'ext' ? '/contacts/external/import/resolve' : '/contacts/internal/import/resolve';
+  try {
+    const result = await api('POST', endpoint, { updates });
+    if (conflictType === 'ext') await loadExt(); else await loadInt();
+    closeModal('conflictModal');
+    alert(`تم تحديث ${result.updated} جهة اتصال.`);
+  } catch(e) { alert(e.message); }
 }
 
 lucide.createIcons();
