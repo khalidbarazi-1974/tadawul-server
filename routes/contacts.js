@@ -22,23 +22,23 @@ router.get('/external', (req, res) => {
 });
 
 router.post('/external', (req, res) => {
-    const { name, title, org, sector, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
+    const { name, title, org, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const id = uid();
     db.prepare(`INSERT INTO contacts_external
-        (id, name, title, org, sector, city, mobile, email, notes, car_plate, car_make, car_color, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id, name.trim(), title||'', org||'', sector||'', city||'', mobile||'', email||'', notes||'',
+        (id, name, title, org, city, mobile, email, notes, car_plate, car_make, car_color, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(id, name.trim(), title||'', org||'', city||'', mobile||'', email||'', notes||'',
            car_plate||'', car_make||'', car_color||'', req.user.id);
     res.json({ id });
 });
 
 router.put('/external/:id', (req, res) => {
-    const { name, title, org, sector, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
+    const { name, title, org, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const info = db.prepare(`UPDATE contacts_external
-        SET name=?,title=?,org=?,sector=?,city=?,mobile=?,email=?,notes=?,car_plate=?,car_make=?,car_color=? WHERE id=?`)
-      .run(name.trim(), title||'', org||'', sector||'', city||'', mobile||'', email||'', notes||'',
+        SET name=?,title=?,org=?,city=?,mobile=?,email=?,notes=?,car_plate=?,car_make=?,car_color=? WHERE id=?`)
+      .run(name.trim(), title||'', org||'', city||'', mobile||'', email||'', notes||'',
            car_plate||'', car_make||'', car_color||'', req.params.id);
     if (!info.changes) return res.status(404).json({ error: 'غير موجود' });
     res.json({ ok: true });
@@ -89,9 +89,9 @@ router.post('/external/import', (req, res) => {
     let inserted = 0, skipped = 0;
     const conflicts = [];
     const stmt = db.prepare(`INSERT INTO contacts_external
-        (id,name,title,org,sector,city,mobile,email,notes,car_plate,car_make,car_color,created_by)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-    const FIELDS = { title:'المسمى', org:'الجهة', sector:'القطاع', city:'المدينة',
+        (id,name,title,org,city,mobile,email,notes,car_plate,car_make,car_color,created_by)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`);
+    const FIELDS = { title:'المسمى', org:'الجهة', city:'المدينة',
                      mobile:'الجوال', email:'البريد', car_plate:'رقم اللوحة',
                      car_make:'الماركة', car_color:'اللون', notes:'ملاحظات' };
     db.transaction(() => {
@@ -106,7 +106,7 @@ router.post('/external/import', (req, res) => {
                 if (diffs.length) conflicts.push({ existing, incoming: r, diffs, labels: FIELDS });
                 else skipped++;
             } else {
-                stmt.run(uid(), name, r.title||'', r.org||'', r.sector||'', r.city||'',
+                stmt.run(uid(), name, r.title||'', r.org||'', r.city||'',
                          r.mobile||'', r.email||'', r.notes||'',
                          r.car_plate||'', r.car_make||'', r.car_color||'', req.user.id);
                 inserted++;
@@ -120,9 +120,9 @@ router.post('/external/import/resolve', (req, res) => {
     const { updates } = req.body;
     if (!Array.isArray(updates)) return res.status(400).json({ error: 'invalid' });
     const stmt = db.prepare(`UPDATE contacts_external
-        SET title=?,org=?,sector=?,city=?,mobile=?,email=?,car_plate=?,car_make=?,car_color=?,notes=? WHERE id=?`);
+        SET title=?,org=?,city=?,mobile=?,email=?,car_plate=?,car_make=?,car_color=?,notes=? WHERE id=?`);
     db.transaction(() => {
-        updates.forEach(u => stmt.run(u.title||'', u.org||'', u.sector||'', u.city||'',
+        updates.forEach(u => stmt.run(u.title||'', u.org||'', u.city||'',
             u.mobile||'', u.email||'', u.car_plate||'', u.car_make||'', u.car_color||'', u.notes||'', u.id));
     })();
     res.json({ ok: true, updated: updates.length });

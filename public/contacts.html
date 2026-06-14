@@ -239,19 +239,7 @@ tr:hover td{background:#f5f3ff;}
       </div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-building"></i> بيانات الجهة</div>
       <div class="fr"><label>اسم الجهة / الشركة *</label><input type="text" id="extOrg" placeholder="شركة الاستشارات الهندسية"></div>
-      <div class="f2">
-        <div class="fr"><label>القطاع / النوع</label>
-          <select id="extSector">
-            <option value="">-- اختر --</option>
-            <option>استشارات</option>
-            <option>مقاول</option>
-            <option>جهة حكومية</option>
-            <option>موردّ</option>
-            <option>أخرى</option>
-          </select>
-        </div>
-        <div class="fr"><label>الموقع / المدينة</label><input type="text" id="extCity" placeholder="الرياض"></div>
-      </div>
+      <div class="fr"><label>الموقع / المدينة</label><input type="text" id="extCity" placeholder="الرياض"></div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-phone"></i> بيانات التواصل</div>
       <div class="f2">
         <div class="fr"><label>الجوال</label><input type="tel" id="extMobile" placeholder="05XXXXXXXX"></div>
@@ -502,7 +490,6 @@ function openEditExt(id) {
   document.getElementById('extName').value = c.name || '';
   document.getElementById('extTitle').value = c.title || '';
   document.getElementById('extOrg').value = c.org || '';
-  document.getElementById('extSector').value = c.sector || '';
   document.getElementById('extCity').value = c.city || '';
   document.getElementById('extMobile').value = c.mobile || '';
   document.getElementById('extEmail').value = c.email || '';
@@ -521,7 +508,6 @@ async function saveExt() {
     name:   document.getElementById('extName').value.trim(),
     title:  document.getElementById('extTitle').value.trim(),
     org:    document.getElementById('extOrg').value.trim(),
-    sector: document.getElementById('extSector').value,
     city:   document.getElementById('extCity').value.trim(),
     mobile:    document.getElementById('extMobile').value.trim(),
     email:     document.getElementById('extEmail').value.trim(),
@@ -639,8 +625,8 @@ function closeModal(id) {
 
 // ── Import / Export ──────────────────────────────────────────────────────────
 
-const EXT_HEADERS = ['الاسم','المسمى الوظيفي','الجهة','القطاع','المدينة','الجوال','البريد الإلكتروني','رقم اللوحة','الماركة/الموديل','اللون','ملاحظات'];
-const EXT_FIELDS  = ['name','title','org','sector','city','mobile','email','car_plate','car_make','car_color','notes'];
+const EXT_HEADERS = ['الاسم','المسمى الوظيفي','الجهة','المدينة','الجوال','البريد الإلكتروني','رقم اللوحة','الماركة/الموديل','اللون','ملاحظات'];
+const EXT_FIELDS  = ['name','title','org','city','mobile','email','car_plate','car_make','car_color','notes'];
 const INT_HEADERS = ['الاسم','الرقم الوظيفي','المسمى الوظيفي','القطاع','الإدارة','الجوال','الداخلي','البريد الإلكتروني','ملاحظات'];
 const INT_FIELDS  = ['name','employee_id','title','sector','dept','mobile','extension','email','notes'];
 
