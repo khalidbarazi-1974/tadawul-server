@@ -2,6 +2,8 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
+const DUMMY = (process.env.DUMMY_SEED || process.env.dummy_seed || '').trim().toLowerCase() === 'true';
+
 const db = new Database(path.join(__dirname, 'tadawul.db'));
 
 db.pragma('journal_mode = WAL');
@@ -245,7 +247,7 @@ if (settingsCount.c === 0) {
 const deptCount = db.prepare('SELECT COUNT(*) as c FROM departments').get();
 if (deptCount.c === 0) {
     const ins = db.prepare('INSERT INTO departments (id, name) VALUES (?, ?)');
-    const depts = process.env.DUMMY_SEED === 'true' ? [
+    const depts = DUMMY ? [
         [0, 'الإدارة العامة الأولى'],
         [1, 'الإدارة العامة الثانية'],
         [2, 'الإدارة العامة الثالثة'],
@@ -265,7 +267,7 @@ if (deptCount.c === 0) {
 const empCount = db.prepare('SELECT COUNT(*) as c FROM employees').get();
 if (empCount.c === 0) {
     const ins = db.prepare('INSERT INTO employees (id, name, dept_id, password_hash, role) VALUES (?, ?, ?, ?, ?)');
-    const employees = process.env.DUMMY_SEED === 'true' ? [
+    const employees = DUMMY ? [
         // Dept 0
         { id: 'D1001', name: 'عمر بن سالم العمري',           dept: 0, role: 'manager'  },
         { id: 'D1002', name: 'خالد بن أحمد الغامدي',         dept: 0, role: 'employee' },
@@ -343,8 +345,8 @@ if (empCount.c === 0) {
 }
 
 // Seed dummy contacts
-console.log('[seed] DUMMY_SEED =', process.env.DUMMY_SEED);
-if (process.env.DUMMY_SEED === 'true') {
+console.log('[seed] DUMMY =', DUMMY, '| raw =', process.env.DUMMY_SEED || process.env.dummy_seed);
+if (DUMMY) {
     const extCount = db.prepare('SELECT COUNT(*) as c FROM contacts_external').get();
     console.log('[seed] contacts_external count =', extCount.c);
     if (extCount.c === 0) {
