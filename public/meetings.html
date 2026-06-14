@@ -861,14 +861,25 @@ async function submitCreateTask() {
   const dueDate    = document.getElementById('ctDue').value;
   const priority   = document.getElementById('ctPriority').value;
   if (!name || deptId === '') return alert('اسم المهمة والإدارة مطلوبان');
+
+  const submitBtn = document.querySelector('#createTaskModal button[onclick="submitCreateTask()"]');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '...جارٍ الإنشاء'; }
   try {
     await api('POST', `/meetings/actions/${actionId}/create-task`,
       { name, deptId: parseInt(deptId), assignedTo, dueDate, priority });
     closeCreateTaskModal();
-    const m = await api('GET', `/meetings/${currentMeetingId}`);
     openDetail(currentMeetingId);
     meetings = await api('GET', '/meetings');
-  } catch(e) { alert(e.message); }
+  } catch(e) {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> إنشاء المهمة'; }
+    if (e.status === 409) {
+      alert('هذا البند مرتبط بمهمة بالفعل');
+      closeCreateTaskModal();
+      openDetail(currentMeetingId);
+    } else {
+      alert(e.message);
+    }
+  }
 }
 
 lucide.createIcons();

@@ -162,29 +162,37 @@ router.patch('/actions/:actionId', (req, res) => {
 
 // Create a task from an action item
 router.post('/actions/:actionId/create-task', (req, res) => {
-    const action = db.prepare('SELECT * FROM meeting_actions WHERE id=?').get(req.params.actionId);
-    if (!action) return res.status(404).json({ error: 'غير موجود' });
-    if (action.task_id) return res.status(409).json({ error: 'مرتبطة بمهمة بالفعل' });
-
     const { name, deptId, assignedTo, dueDate, priority } = req.body;
     if (!name?.trim() || deptId == null) return res.status(400).json({ error: 'اسم المهمة والإدارة مطلوبان' });
 
-    const meeting = db.prepare('SELECT meeting_number FROM meetings WHERE id=?').get(action.meeting_id);
-    const meetingRef = meeting ? meeting.meeting_number : null;
     const taskId = 't_' + uid();
     const now = new Date().toISOString();
     const isEmployee = req.user.role === 'employee';
-    db.prepare(`INSERT INTO tasks
-        (id,name,description,priority,status,due_date,dept_id,
-         created_by,created_by_role,assigned_to,assigned_date,
-         is_new_for_employee,is_new_for_manager,approved,created_at,meeting_ref)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-      .run(taskId, name.trim(), action.description, priority||'متوسطة', 'جديد',
-           dueDate||'', deptId, req.user.name, req.user.role,
-           assignedTo||null, assignedTo ? now : null,
-           assignedTo ? 1 : 0, isEmployee ? 1 : 0, isEmployee ? 0 : 1, now, meetingRef);
 
-    db.prepare('UPDATE meeting_actions SET task_id=? WHERE id=?').run(taskId, req.params.actionId);
+    // Run entirely inside a transaction so concurrent requests can't both slip through
+    const result = db.transaction(() => {
+        const action = db.prepare('SELECT * FROM meeting_actions WHERE id=?').get(req.params.actionId);
+        if (!action) return { err: 404, msg: 'غير موجود' };
+        if (action.task_id) return { err: 409, msg: 'مرتبطة بمهمة بالفعل' };
+
+        const meeting = db.prepare('SELECT meeting_number FROM meetings WHERE id=?').get(action.meeting_id);
+        const meetingRef = meeting ? meeting.meeting_number : null;
+
+        db.prepare(`INSERT INTO tasks
+            (id,name,description,priority,status,due_date,dept_id,
+             created_by,created_by_role,assigned_to,assigned_date,
+             is_new_for_employee,is_new_for_manager,approved,created_at,meeting_ref)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+          .run(taskId, name.trim(), action.description, priority||'متوسطة', 'جديد',
+               dueDate||'', deptId, req.user.name, req.user.role,
+               assignedTo||null, assignedTo ? now : null,
+               assignedTo ? 1 : 0, isEmployee ? 1 : 0, isEmployee ? 0 : 1, now, meetingRef);
+
+        db.prepare('UPDATE meeting_actions SET task_id=? WHERE id=?').run(taskId, req.params.actionId);
+        return { ok: true };
+    })();
+
+    if (result.err) return res.status(result.err).json({ error: result.msg });
     res.json({ task_id: taskId });
 });
 
