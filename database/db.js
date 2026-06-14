@@ -228,6 +228,9 @@ try { db.exec("ALTER TABLE contacts_external ADD COLUMN car_color TEXT DEFAULT '
 try { db.exec("ALTER TABLE meeting_actions ADD COLUMN task_id TEXT DEFAULT NULL"); } catch(e) {}
 try { db.exec("ALTER TABLE tasks ADD COLUMN meeting_ref TEXT DEFAULT NULL"); } catch(e) {}
 
+// Clean up orphaned task links (task was deleted but meeting_actions.task_id still set)
+db.prepare("UPDATE meeting_actions SET task_id=NULL WHERE task_id IS NOT NULL AND task_id NOT IN (SELECT id FROM tasks)").run();
+
 // Promote خالد البرازي to admin on existing databases
 try { db.prepare("UPDATE employees SET role='admin' WHERE id='U292409' AND role='manager'").run(); } catch(e) {}
 
