@@ -75,7 +75,7 @@ router.get('/all', requireRole('deputy', 'admin'), (req, res) => {
 // ── Create task ───────────────────────────────────────────────────────────────
 
 router.post('/', (req, res) => {
-    const { name, description, priority, status, startDate, dueDate, deptId, assignedTo } = req.body;
+    const { name, description, priority, status, startDate, dueDate, deptId, assignedTo, meetingRef } = req.body;
 
     const duplicate = db.prepare('SELECT id FROM tasks WHERE name = ? AND dept_id = ? AND description = ?').get(name?.trim(), deptId, description || '');
     if (duplicate) return res.status(409).json({ error: `يوجد موضوع مطابق تماماً في نفس الإدارة بالفعل` });
@@ -88,8 +88,8 @@ router.post('/', (req, res) => {
         INSERT INTO tasks
             (id, name, description, priority, status, start_date, due_date, dept_id,
              created_by, created_by_role, assigned_to, assigned_date,
-             is_new_for_employee, is_new_for_manager, approved, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             is_new_for_employee, is_new_for_manager, approved, created_at, meeting_ref)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
         id, name, description || '', priority || 'متوسطة', status || 'جديد',
         startDate || '', dueDate || '', deptId,
@@ -99,7 +99,8 @@ router.post('/', (req, res) => {
         assignedTo ? 1 : 0,
         isEmployee ? 1 : 0,
         isEmployee ? 0 : 1,
-        now
+        now,
+        meetingRef || null
     );
 
     res.json({ success: true, id });
@@ -108,12 +109,14 @@ router.post('/', (req, res) => {
 // ── Manager: direct update (no approval needed) ───────────────────────────────
 
 router.put('/:id', requireRole('manager', 'deputy', 'admin'), (req, res) => {
-    const { name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo } = req.body;
+    const { name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo, meetingRef } = req.body;
     db.prepare(`
         UPDATE tasks SET name=?, description=?, priority=?, status=?,
-            start_date=?, due_date=?, suggested_due_date=?, assigned_to=?, is_new_for_manager=0
+            start_date=?, due_date=?, suggested_due_date=?, assigned_to=?,
+            meeting_ref=?, is_new_for_manager=0
         WHERE id=?
-    `).run(name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo, req.params.id);
+    `).run(name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo,
+           meetingRef ?? null, req.params.id);
     res.json({ success: true });
 });
 

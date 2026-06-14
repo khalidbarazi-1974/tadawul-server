@@ -348,6 +348,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
         <div class="form-group"><label>الحالة</label><select id="fStatus"><option>جديد</option><option>قيد التنفيذ</option><option>مكتمل</option></select></div>
         <div class="form-group"><label>تاريخ البدء *</label><input type="date" id="fStart"></div>
         <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="fDue"></div>
+        <div class="form-group"><label>رقم الاجتماع المرجعي</label><input type="text" id="fMeetingRef" placeholder="مثال: BOD-001"></div>
       </div>
     </div>
     <div class="modal-foot">
@@ -452,11 +453,14 @@ async function api(method, path, body){
     return data;
 }
 
-let _loading = false;
+let _loading = false, _pendingLoad = false;
 async function safeReload() {
-    if (_loading) return;
-    _loading = true;
-    try { await reload(); } finally { _loading = false; }
+    if (_loading) { _pendingLoad = true; return; }
+    _loading = true; _pendingLoad = false;
+    try { await reload(); } finally {
+        _loading = false;
+        if (_pendingLoad) safeReload();
+    }
 }
 
 let _lastHeartbeat = Date.now();
@@ -730,6 +734,7 @@ function openAddModal(){
     document.getElementById('fStart').value='';
     document.getElementById('fStart').disabled=false;
     document.getElementById('fDue').value='';
+    document.getElementById('fMeetingRef').value='';
     document.getElementById('fDept').value= currentDeptId===-1 ? depts[0]?.id : currentDeptId;
     populateAssign(document.getElementById('fDept').value);
     document.getElementById('deleteBtn').style.display='none';
@@ -748,6 +753,7 @@ function openEdit(){
     document.getElementById('fStart').value=t.startDate||'';
     document.getElementById('fStart').disabled=true;
     document.getElementById('fDue').value=t.dueDate||'';
+    document.getElementById('fMeetingRef').value=t.meeting_ref||'';
     document.getElementById('fDept').value=t.dept_id;
     populateAssign(t.dept_id, t.assignedTo||'');
     document.getElementById('deleteBtn').style.display='inline-block';
@@ -760,7 +766,7 @@ async function saveTask(){
     if(!name) return toast('اسم الموضوع مطلوب','error');
     if(!id && !document.getElementById('fStart').value) return toast('تاريخ البدء مطلوب','error');
     while(true){
-        const body={name,description:document.getElementById('fDesc').value.trim(),priority:document.getElementById('fPriority').value,status:document.getElementById('fStatus').value,startDate:id?undefined:document.getElementById('fStart').value,dueDate:document.getElementById('fDue').value,deptId:parseInt(document.getElementById('fDept').value),assignedTo:document.getElementById('fAssign').value||null};
+        const body={name,description:document.getElementById('fDesc').value.trim(),priority:document.getElementById('fPriority').value,status:document.getElementById('fStatus').value,startDate:id?undefined:document.getElementById('fStart').value,dueDate:document.getElementById('fDue').value,deptId:parseInt(document.getElementById('fDept').value),assignedTo:document.getElementById('fAssign').value||null,meetingRef:document.getElementById('fMeetingRef').value.trim()||null};
         try{
             if(id){ await api('PUT',`/tasks/${id}`,body); }
             else   { await api('POST','/tasks',body); }

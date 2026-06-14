@@ -366,6 +366,10 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           <label>تعيين لموظف</label>
           <select id="fAssign"><option value="">— بدون تعيين —</option></select>
         </div>
+        <div class="form-group">
+          <label>رقم الاجتماع المرجعي</label>
+          <input type="text" id="fMeetingRef" placeholder="مثال: BOD-001">
+        </div>
       </div>
     </div>
     <div class="modal-foot">
@@ -459,11 +463,14 @@ async function api(method, path, body) {
     return data;
 }
 
-let _loading = false;
+let _loading = false, _pendingLoad = false;
 async function safeLoad() {
-    if (_loading) return;
-    _loading = true;
-    try { await loadAll(); } finally { _loading = false; }
+    if (_loading) { _pendingLoad = true; return; }
+    _loading = true; _pendingLoad = false;
+    try { await loadAll(); } finally {
+        _loading = false;
+        if (_pendingLoad) safeLoad();
+    }
 }
 
 let _lastHeartbeat = Date.now();
@@ -707,6 +714,7 @@ function openAddModal() {
     document.getElementById('fStart').value = '';
     document.getElementById('fDue').value = '';
     document.getElementById('fAssign').value = '';
+    document.getElementById('fMeetingRef').value = '';
     document.getElementById('deleteBtn').style.display = 'none';
     document.getElementById('taskModal').classList.add('open');
 }
@@ -723,6 +731,7 @@ function openEdit() {
     document.getElementById('fStart').value = t.startDate || '';
     document.getElementById('fDue').value = t.dueDate || '';
     document.getElementById('fAssign').value = t.assignedTo || '';
+    document.getElementById('fMeetingRef').value = t.meeting_ref || '';
     document.getElementById('deleteBtn').style.display = 'inline-block';
     document.getElementById('taskModal').classList.add('open');
 }
@@ -740,7 +749,8 @@ async function saveTask() {
             startDate: document.getElementById('fStart').value,
             dueDate:  document.getElementById('fDue').value,
             deptId:   user.deptId,
-            assignedTo: document.getElementById('fAssign').value || null
+            assignedTo: document.getElementById('fAssign').value || null,
+            meetingRef: document.getElementById('fMeetingRef').value.trim() || null
         };
         try {
             if (id) { await api('PUT', `/tasks/${id}`, body); }
