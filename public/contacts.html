@@ -455,7 +455,6 @@ function openAddExt() {
   editExtId = null;
   document.getElementById('modalExtTitle').textContent = 'إضافة جهة خارجية';
   ['extName','extTitle','extOrg','extCity','extMobile','extEmail','extNotes','extCarPlate','extCarMake','extCarColor'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('extSector').value = '';
   document.getElementById('carSection').style.display = 'none';
   document.getElementById('carToggleIcon').textContent = '+ إضافة';
   document.getElementById('modalExt').classList.add('open');
