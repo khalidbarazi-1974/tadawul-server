@@ -190,8 +190,7 @@ tr:hover td{background:#f5f3ff;}
   <!-- ══ INTERNAL COLLEAGUES TAB ══ -->
   <div id="panelInt" style="display:none;">
     <div class="toolbar">
-      <input type="text" placeholder="بحث بالاسم أو الإدارة..." style="min-width:220px;" oninput="filterInt()">
-      <input type="text" id="sectorFilter" placeholder="تصفية بالقطاع..." style="min-width:160px;" oninput="filterInt()">
+      <input type="text" id="intSearch" placeholder="بحث..." style="min-width:220px;" oninput="filterInt()">
       <div class="view-toggle">
         <button class="vt-btn active" id="vtIntGrid" onclick="setView('int','grid')" title="بطاقات"><i class="fa-solid fa-grip"></i></button>
         <button class="vt-btn" id="vtIntList" onclick="setView('int','list')" title="قائمة"><i class="fa-solid fa-list"></i></button>
@@ -374,13 +373,10 @@ function renderExt() {
 
 function renderInt() {
   updateStats();
-  const q = (document.querySelector('#panelInt .toolbar input') || {}).value || '';
-  const sector = document.getElementById('sectorFilter').value;
-  const filtered = intData.filter(c => {
-    const matchQ = !q || (c.name + ' ' + (c.dept || '') + ' ' + (c.title || '') + ' ' + (c.sector || '')).toLowerCase().includes(q.toLowerCase());
-    const matchS = !sector || (c.sector || '').toLowerCase().includes(sector.toLowerCase());
-    return matchQ && matchS;
-  });
+  const q = (document.getElementById('intSearch')?.value || '').toLowerCase();
+  const filtered = intData.filter(c => !q ||
+    [c.name, c.employee_id, c.title, c.sector, c.dept, c.mobile, c.extension, c.email, c.notes]
+      .some(v => (v || '').toLowerCase().includes(q)));
   document.getElementById('tabIntCount').textContent = filtered.length;
 
   document.getElementById('gridInt').innerHTML = filtered.length
