@@ -108,7 +108,7 @@ router.post('/', (req, res) => {
     res.json({ id, meeting_number });
 });
 
-// Update (replaces all child rows)
+// Update (replaces attendees/agenda/decisions; smart-merges actions to preserve task links)
 router.put('/:id', (req, res) => {
     if (!db.prepare('SELECT id FROM meetings WHERE id=?').get(req.params.id))
         return res.status(404).json({ error: 'غير موجود' });
@@ -122,9 +122,32 @@ router.put('/:id', (req, res) => {
     db.transaction(() => {
         db.prepare(`UPDATE meetings SET subject=?,date=?,time=?,location=?,next_meeting_date=? WHERE id=?`)
           .run(subject.trim(), date, time||'', location||'', next_meeting_date||'', mid);
-        ['meeting_attendees','meeting_agenda','meeting_decisions','meeting_actions']
+
+        // Replace simple child tables
+        ['meeting_attendees','meeting_agenda','meeting_decisions']
             .forEach(t => db.prepare(`DELETE FROM ${t} WHERE meeting_id=?`).run(mid));
-        insertChildren(mid, attendees, agenda, decisions, actions);
+        insertChildren(mid, attendees, agenda, decisions, []);
+
+        // Smart merge actions: preserve existing rows (and their task_id links)
+        const existing = db.prepare('SELECT id FROM meeting_actions WHERE meeting_id=?').all(mid);
+        const existingIds = new Set(existing.map(r => r.id));
+        const sentIds = new Set((actions||[]).filter(a => a.id).map(a => a.id));
+
+        // Delete actions removed by user (skip linked ones — keep them if task_id set)
+        existing.forEach(r => {
+            if (!sentIds.has(r.id)) db.prepare('DELETE FROM meeting_actions WHERE id=?').run(r.id);
+        });
+
+        const updAction = db.prepare('UPDATE meeting_actions SET description=?,owner_name=?,due_date=? WHERE id=?');
+        const insAction = db.prepare('INSERT INTO meeting_actions (id,meeting_id,description,owner_name,due_date) VALUES (?,?,?,?,?)');
+        (actions||[]).forEach(ac => {
+            if (!ac.description?.trim()) return;
+            if (ac.id && existingIds.has(ac.id)) {
+                updAction.run(ac.description.trim(), ac.owner_name||'', ac.due_date||'', ac.id);
+            } else {
+                insAction.run(uid(), mid, ac.description.trim(), ac.owner_name||'', ac.due_date||'');
+            }
+        });
     })();
 
     res.json({ ok: true });

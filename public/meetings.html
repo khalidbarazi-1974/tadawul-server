@@ -703,7 +703,7 @@ function renderActions() {
         ${ac.owner_name && !formAttendees.find(a => a.name === ac.owner_name) ? `<option value="${ac.owner_name}">${ac.owner_name}</option>` : ''}
       </select></td>
       <td><input type="date" value="${ac.due_date || ''}" onchange="formActions[${i}].due_date=this.value"></td>
-      <td><button class="att-remove" onclick="removeAction(${i})">×</button></td>
+      <td>${ac.task_id ? `<span style="font-size:11px;color:#7e22ce;background:#ede9fe;padding:2px 8px;border-radius:10px;">مرتبطة</span>` : `<button class="att-remove" onclick="removeAction(${i})">×</button>`}</td>
     </tr>`).join('');
   formActions.forEach((ac, i) => {
     const sel = document.getElementById('actionTbody').rows[i]?.cells[2]?.querySelector('select');
@@ -787,7 +787,7 @@ async function openEdit() {
   formAttendees = (m.attendees || []).map(a => ({kind: a.kind, ref_id: a.ref_id, name: a.name, title: a.title, org: a.org}));
   formAgenda    = (m.agenda || []).map(a => a.text || a);
   formDecisions = (m.decisions || []).map(d => d.text || d);
-  formActions   = (m.actions || []).map(ac => ({description: ac.description, owner_name: ac.owner_name, due_date: ac.due_date}));
+  formActions   = (m.actions || []).map(ac => ({id: ac.id, task_id: ac.task_id||null, description: ac.description, owner_name: ac.owner_name, due_date: ac.due_date}));
   closeDetail();
   document.querySelectorAll('.type-card').forEach(c => c.classList.toggle('selected', c.dataset.code === formType));
   document.getElementById('fSubject').value = formSubject;
