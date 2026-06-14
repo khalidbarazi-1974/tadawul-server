@@ -205,7 +205,7 @@ tr:hover td{background:#f5f3ff;}
       <div class="list-card">
         <table>
           <thead>
-            <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>القطاع / الإدارة</th><th>الجوال</th><th>الداخلي</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
+            <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>القطاع / الوكالة / الإدارة</th><th>الجوال</th><th>الداخلي</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
           </thead>
           <tbody id="listIntBody"></tbody>
         </table>
@@ -272,9 +272,9 @@ tr:hover td{background:#f5f3ff;}
         <div class="fr"><label>الرقم الوظيفي</label><input type="text" id="intEmpId" placeholder="U3XXXXX" style="direction:ltr;"></div>
       </div>
       <div class="fr"><label>المسمى الوظيفي *</label><input type="text" id="intTitle" placeholder="محلل بيانات"></div>
-      <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-sitemap"></i> الإدارة / القطاع</div>
+      <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-sitemap"></i> القطاع / الإدارة</div>
       <div class="f2">
-        <div class="fr"><label>القطاع</label><input type="text" id="intSector" placeholder="قطاع المياه"></div>
+        <div class="fr"><label>القطاع / الوكالة</label><input type="text" id="intSector" placeholder="قطاع المياه"></div>
         <div class="fr"><label>الإدارة / الوحدة</label><input type="text" id="intDept" placeholder="إدارة تطوير المنظومة"></div>
       </div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-phone"></i> بيانات التواصل</div>
@@ -605,7 +605,7 @@ function closeModal(id) {
 
 const EXT_HEADERS = ['الاسم','المسمى الوظيفي','الجهة','المدينة','الجوال','البريد الإلكتروني','رقم اللوحة','الماركة/الموديل','اللون','ملاحظات'];
 const EXT_FIELDS  = ['name','title','org','city','mobile','email','car_plate','car_make','car_color','notes'];
-const INT_HEADERS = ['الاسم','الرقم الوظيفي','المسمى الوظيفي','القطاع','الإدارة','الجوال','الداخلي','البريد الإلكتروني','ملاحظات'];
+const INT_HEADERS = ['الاسم','الرقم الوظيفي','المسمى الوظيفي','القطاع / الوكالة','الإدارة','الجوال','الداخلي','البريد الإلكتروني','ملاحظات'];
 const INT_FIELDS  = ['name','employee_id','title','sector','dept','mobile','extension','email','notes'];
 
 function exportContacts(type) {
