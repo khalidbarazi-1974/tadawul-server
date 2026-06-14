@@ -150,6 +150,7 @@ router.patch('/changes/:changeId/approve', requireRole('manager', 'deputy', 'adm
 
     const now = new Date().toISOString();
     if (change.field === 'delete') {
+        db.prepare('UPDATE meeting_actions SET task_id=NULL WHERE task_id=?').run(change.task_id);
         db.prepare('DELETE FROM tasks WHERE id = ?').run(change.task_id);
     } else {
         const fieldMap = { status: 'status', description: 'description', priority: 'priority', suggestedDueDate: 'suggested_due_date' };
@@ -228,6 +229,7 @@ router.delete('/all', requireRole('admin'), (req, res) => {
     if (req.user.id.toLowerCase() !== 'u292409') {
         return res.status(403).json({ error: 'لا يمكنك تنفيذ هذا الإجراء' });
     }
+    db.prepare('UPDATE meeting_actions SET task_id=NULL').run();
     db.prepare('DELETE FROM guidances').run();
     db.prepare('DELETE FROM task_changes').run();
     db.prepare('DELETE FROM tasks').run();
@@ -237,7 +239,9 @@ router.delete('/all', requireRole('admin'), (req, res) => {
 // ── Delete task ───────────────────────────────────────────────────────────────
 
 router.delete('/:id', requireRole('manager', 'deputy', 'admin'), (req, res) => {
-    db.prepare('DELETE FROM tasks WHERE id = ?').run(req.params.id);
+    const id = req.params.id;
+    db.prepare('UPDATE meeting_actions SET task_id=NULL WHERE task_id=?').run(id);
+    db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
     res.json({ success: true });
 });
 
