@@ -148,7 +148,8 @@ body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;backg
 .tbl-btn.tbl-del:hover{background:#dc2626;color:#fff;}
 .tbl-btn.tbl-del:hover svg{stroke:#fff;}
 </style>
-<script src="/vendor/lucide.min.js"></script></head>
+<script src="/vendor/lucide.min.js"></script>
+<script src="/vendor/xlsx.full.min.js"></script></head>
 <body><div id="portal-topbar">
   <h2>الخطابات والمذكرات</h2>
   <div class="tbr">
@@ -394,9 +395,10 @@ body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;backg
         <code>عبدالله عبدالرحمن</code>
       </div>
       <div class="mgmt-row">
-        <input type="file" id="fileSenders" accept=".txt">
+        <input type="file" id="fileSenders" accept=".xlsx,.txt">
         <button class="mgmt-btn" onclick="uploadList('senders')">رفع وإضافة</button>
         <button class="mgmt-btn" onclick="openAddModal('senders')" style="background:#1d6b55">&#43; إضافة يدوية</button>
+        <button class="mgmt-btn" onclick="exportList('senders')" style="background:#1e40af">&#8595; تصدير Excel</button>
         <button class="mgmt-btn danger" onclick="resetList('senders')">إعادة الضبط</button>
       </div>
       <div class="mgmt-status" id="statusSenders"></div>
@@ -411,9 +413,10 @@ body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;backg
         (حقل الدعاء اختياري)
       </div>
       <div class="mgmt-row">
-        <input type="file" id="fileRecipients" accept=".txt">
+        <input type="file" id="fileRecipients" accept=".xlsx,.txt">
         <button class="mgmt-btn" onclick="uploadList('recipients')">رفع وإضافة</button>
         <button class="mgmt-btn" onclick="openAddModal('recipients')" style="background:#1d6b55">&#43; إضافة يدوية</button>
+        <button class="mgmt-btn" onclick="exportList('recipients')" style="background:#1e40af">&#8595; تصدير Excel</button>
         <button class="mgmt-btn danger" onclick="resetList('recipients')">إعادة الضبط</button>
       </div>
       <div class="mgmt-status" id="statusRecipients"></div>
@@ -699,12 +702,64 @@ function toggleMgmt() {
   if (body.classList.contains('open')) renderCurrentLists();
 }
 
+function exportList(type) {
+  const isSenders = type === 'senders';
+  const arr = isSenders ? SENDERS : RECIPIENTS;
+  if (!arr.length) { alert('القائمة فارغة'); return; }
+  const header = isSenders
+    ? ['المسمى الوظيفي', 'الاسم الكامل']
+    : ['اللقب والمسمى', 'الدعاء'];
+  const rows = arr.map(e => isSenders
+    ? [e.title, e.name || '']
+    : [e.title, e.suffix || '']);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws['!cols'] = [{ wch: 45 }, { wch: 30 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, isSenders ? 'المرسلين' : 'المستقبلين');
+  XLSX.writeFile(wb, isSenders ? 'senders.xlsx' : 'recipients.xlsx');
+}
+
 function uploadList(type) {
   const isSenders = type === 'senders';
   const fileInput = document.getElementById(isSenders ? 'fileSenders' : 'fileRecipients');
   const statusEl  = document.getElementById(isSenders ? 'statusSenders' : 'statusRecipients');
   const file = fileInput.files[0];
   if (!file) { showMgmtStatus(statusEl, 'err', 'الرجاء اختيار ملف أولاً'); return; }
+
+  const isExcel = file.name.endsWith('.xlsx');
+  if (isExcel) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      let added = 0, skipped = 0;
+      rows.forEach((row, idx) => {
+        if (idx === 0) return; // skip header
+        const title  = (row[0] || '').toString().trim();
+        const second = (row[1] || '').toString().trim();
+        if (!title) { skipped++; return; }
+        if (isSenders) {
+          if (SENDERS.some(s => s.title === title)) { skipped++; return; }
+          SENDERS.push({ title, name: second });
+        } else {
+          if (RECIPIENTS.some(r => r.title === title)) { skipped++; return; }
+          RECIPIENTS.push({ title, suffix: second });
+        }
+        added++;
+      });
+      localStorage.setItem(isSenders ? LS_SENDERS : LS_RECIP,
+        JSON.stringify(isSenders ? SENDERS : RECIPIENTS));
+      rebuildDropdowns();
+      fileInput.value = '';
+      showMgmtStatus(statusEl, 'ok',
+        `تمت الإضافة: ${added} عنصر جديد` +
+        (skipped ? ` (تم تجاهل ${skipped} مكرر أو ناقص)` : ''));
+    };
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = e => {
     const lines = e.target.result.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
