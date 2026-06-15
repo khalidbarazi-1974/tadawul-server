@@ -269,7 +269,6 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           <th style="width:170px">الوصف</th>
           <th class="sortable" style="width:74px" id="th-priority" onclick="setSort('priority')">الأولوية</th>
           <th class="sortable" style="width:90px" id="th-status" onclick="setSort('status')">الحالة</th>
-          <th class="sortable" style="width:92px" id="th-startDate" onclick="setSort('startDate')">تاريخ البدء</th>
           <th class="sortable" style="width:92px" id="th-dueDate" onclick="setSort('dueDate')">الاستحقاق</th>
           <th class="sortable" style="width:92px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
           <th style="width:54px">المدة</th>
@@ -338,10 +337,6 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
             <option selected>متوسطة</option>
             <option>منخفضة</option>
           </select>
-        </div>
-        <div class="form-group">
-          <label>تاريخ البدء *</label>
-          <input type="date" id="fStart">
         </div>
         <div class="form-group">
           <label>تاريخ الاستحقاق</label>
@@ -522,7 +517,7 @@ function setStatFilter(key) {
     renderTasks();
 }
 
-const SORT_COLS_TASK = ['name','priority','status','startDate','dueDate','createdAt'];
+const SORT_COLS_TASK = ['name','priority','status','dueDate','createdAt'];
 const PRIO_RANK = {'عالية':3,'متوسطة':2,'منخفضة':1};
 function setSort(col) {
     if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
@@ -565,7 +560,7 @@ function renderTasks() {
         if (sortCol==='name')       { va=a.name||''; vb=b.name||''; }
         else if (sortCol==='priority')   { va=PRIO_RANK[a.priority]||0; vb=PRIO_RANK[b.priority]||0; }
         else if (sortCol==='status')     { va=a.status||''; vb=b.status||''; }
-        else if (sortCol==='startDate')  { va=a.startDate||''; vb=b.startDate||''; }
+
         else if (sortCol==='dueDate')    { va=a.dueDate||''; vb=b.dueDate||''; }
         else if (sortCol==='createdAt')  { va=a.createdAt||''; vb=b.createdAt||''; }
         else return 0;
@@ -605,7 +600,6 @@ function renderTasks() {
             <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666;">${t.description||'-'}</td>
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
-            <td style="text-align:center;color:#666;font-size:12px;">${t.startDate||'-'}</td>
             <td>${dueDateChip(t.dueDate)}</td>
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
             <td>${delayBadge(t)}</td>
@@ -706,8 +700,9 @@ function showSkeleton() {
 }
 
 function delayBadge(t) {
-    if (!t.startDate) return '-';
-    const diff = Math.floor((new Date() - new Date(t.startDate)) / 86400000);
+    const ref = t.createdAt || t.startDate;
+    if (!ref) return '-';
+    const diff = Math.floor((new Date() - new Date(ref)) / 86400000);
     return `<span style="font-size:12px;color:#555;">${diff} يوم</span>`;
 }
 function priorityBadge(p) {
@@ -728,7 +723,6 @@ function openAddModal() {
     document.getElementById('fName').value = '';
     document.getElementById('fDesc').value = '';
     document.getElementById('fPriority').value = 'متوسطة';
-    document.getElementById('fStart').value = '';
     document.getElementById('fDue').value = '';
     document.getElementById('changeSection').style.display = 'none';
     document.getElementById('saveBtn').style.display = 'inline-block';
@@ -738,14 +732,12 @@ function openAddModal() {
 async function saveTask() {
     let name = document.getElementById('fName').value.trim();
     if (!name) return toast('اسم الموضوع مطلوب', 'error');
-    if (!document.getElementById('fStart').value) return toast('تاريخ البدء مطلوب', 'error');
     while (true) {
         try {
             await api('POST', '/tasks', {
                 name,
                 description: document.getElementById('fDesc').value.trim(),
                 priority:    document.getElementById('fPriority').value,
-                startDate:   document.getElementById('fStart').value,
                 dueDate:     document.getElementById('fDue').value,
                 deptId:      user.deptId
             });
@@ -793,7 +785,6 @@ function renderDetail() {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;">
             <div><span style="color:#888;">الأولوية:</span> ${priorityBadge(t.priority)}</div>
             <div><span style="color:#888;">الحالة:</span> ${statusBadge(t.status)}</div>
-            <div><span style="color:#888;">تاريخ البدء:</span> ${t.startDate || '-'}</div>
             <div><span style="color:#888;">المدة:</span> ${delayBadge(t)}</div>
             <div><span style="color:#888;">تاريخ الاستحقاق:</span> ${t.dueDate || '-'}</div>
             <div><span style="color:#888;">تاريخ الإنشاء:</span> ${t.createdAt?t.createdAt.slice(0,10):'-'}</div>
@@ -942,10 +933,10 @@ async function submitComment() {
 
 function exportExcel() {
     if (!tasks.length) return toast('لا توجد مواضيع للتصدير', 'warning');
-    const rows = [['#', 'الموضوع', 'الوصف', 'الأولوية', 'الحالة', 'تاريخ البدء', 'تاريخ الاستحقاق', 'التاريخ المقترح', 'عدد التعليقات']];
+    const rows = [['#', 'الموضوع', 'الوصف', 'الأولوية', 'الحالة', 'تاريخ الاستحقاق', 'التاريخ المقترح', 'تاريخ الإنشاء', 'عدد التعليقات']];
     tasks.forEach((t, i) => rows.push([
         i + 1, t.name, t.description || '', t.priority, t.status,
-        t.startDate || '', t.dueDate || '', t.suggestedDueDate || '', t.guidances.length
+        t.dueDate || '', t.suggestedDueDate || '', t.createdAt ? t.createdAt.slice(0,10) : '', t.guidances.length
     ]));
     downloadCSV(rows, `مواضيعي_${today()}`);
 }
