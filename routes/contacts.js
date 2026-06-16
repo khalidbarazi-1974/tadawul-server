@@ -22,24 +22,24 @@ router.get('/external', (req, res) => {
 });
 
 router.post('/external', (req, res) => {
-    const { name, title, org, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
+    const { name, prefix, title, org, city, mobile, email, notes, suffix, car_plate, car_make, car_color } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const id = uid();
     db.prepare(`INSERT INTO contacts_external
-        (id, name, title, org, city, mobile, email, notes, car_plate, car_make, car_color, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id, name.trim(), title||'', org||'', city||'', mobile||'', email||'', notes||'',
-           car_plate||'', car_make||'', car_color||'', req.user.id);
+        (id, name, prefix, title, org, city, mobile, email, notes, suffix, car_plate, car_make, car_color, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(id, name.trim(), prefix||'', title||'', org||'', city||'', mobile||'', email||'', notes||'',
+           suffix||'', car_plate||'', car_make||'', car_color||'', req.user.id);
     res.json({ id });
 });
 
 router.put('/external/:id', (req, res) => {
-    const { name, title, org, city, mobile, email, notes, car_plate, car_make, car_color } = req.body;
+    const { name, prefix, title, org, city, mobile, email, notes, suffix, car_plate, car_make, car_color } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const info = db.prepare(`UPDATE contacts_external
-        SET name=?,title=?,org=?,city=?,mobile=?,email=?,notes=?,car_plate=?,car_make=?,car_color=? WHERE id=?`)
-      .run(name.trim(), title||'', org||'', city||'', mobile||'', email||'', notes||'',
-           car_plate||'', car_make||'', car_color||'', req.params.id);
+        SET name=?,prefix=?,title=?,org=?,city=?,mobile=?,email=?,notes=?,suffix=?,car_plate=?,car_make=?,car_color=? WHERE id=?`)
+      .run(name.trim(), prefix||'', title||'', org||'', city||'', mobile||'', email||'', notes||'',
+           suffix||'', car_plate||'', car_make||'', car_color||'', req.params.id);
     if (!info.changes) return res.status(404).json({ error: 'غير موجود' });
     res.json({ ok: true });
 });
@@ -56,22 +56,22 @@ router.get('/internal', (req, res) => {
 });
 
 router.post('/internal', (req, res) => {
-    const { name, employee_id, title, grade, sector, dept, mobile, extension, email, notes } = req.body;
+    const { name, employee_id, prefix, title, grade, sector, dept, mobile, extension, email, notes, suffix } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const id = uid();
     db.prepare(`INSERT INTO contacts_internal
-        (id, name, employee_id, title, grade, sector, dept, mobile, extension, email, notes, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id, name.trim(), employee_id||'', title||'', grade||'', sector||'', dept||'', mobile||'', extension||'', email||'', notes||'', req.user.id);
+        (id, name, employee_id, prefix, title, grade, sector, dept, mobile, extension, email, notes, suffix, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(id, name.trim(), employee_id||'', prefix||'', title||'', grade||'', sector||'', dept||'', mobile||'', extension||'', email||'', notes||'', suffix||'', req.user.id);
     res.json({ id });
 });
 
 router.put('/internal/:id', (req, res) => {
-    const { name, employee_id, title, grade, sector, dept, mobile, extension, email, notes } = req.body;
+    const { name, employee_id, prefix, title, grade, sector, dept, mobile, extension, email, notes, suffix } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
     const info = db.prepare(`UPDATE contacts_internal
-        SET name=?,employee_id=?,title=?,grade=?,sector=?,dept=?,mobile=?,extension=?,email=?,notes=? WHERE id=?`)
-      .run(name.trim(), employee_id||'', title||'', grade||'', sector||'', dept||'', mobile||'', extension||'', email||'', notes||'', req.params.id);
+        SET name=?,employee_id=?,prefix=?,title=?,grade=?,sector=?,dept=?,mobile=?,extension=?,email=?,notes=?,suffix=? WHERE id=?`)
+      .run(name.trim(), employee_id||'', prefix||'', title||'', grade||'', sector||'', dept||'', mobile||'', extension||'', email||'', notes||'', suffix||'', req.params.id);
     if (!info.changes) return res.status(404).json({ error: 'غير موجود' });
     res.json({ ok: true });
 });

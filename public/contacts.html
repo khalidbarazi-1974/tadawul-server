@@ -227,7 +227,21 @@ tr:hover td{background:#f5f3ff;}
       <div class="section-sep"><i class="fa-solid fa-user"></i> بيانات الشخص</div>
       <div class="f2">
         <div class="fr"><label>الاسم الكامل *</label><input type="text" id="extName" placeholder="محمد أحمد العمري"></div>
-        <div class="fr"><label>المسمى الوظيفي *</label><input type="text" id="extTitle" placeholder="مدير مشاريع"></div>
+        <div class="fr"><label>اللقب البروتوكولي</label>
+          <select id="extPrefix">
+            <option value="">— بدون لقب —</option>
+            <option value="سعادة">سعادة</option>
+            <option value="معالي">معالي</option>
+            <option value="صاحب سمو">صاحب سمو</option>
+            <option value="صاحب السمو الملكي">صاحب السمو الملكي</option>
+            <option value="فضيلة">فضيلة</option>
+            <option value="سماحة">سماحة</option>
+          </select>
+        </div>
+      </div>
+      <div class="f2">
+        <div class="fr"><label>المسمى الوظيفي / المنصب *</label><input type="text" id="extTitle" placeholder="مدير إدارة الموارد البشرية"></div>
+        <div class="fr"><label>الدعاء (اختياري)</label><input type="text" id="extSuffix" placeholder="وفقه الله"></div>
       </div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-building"></i> بيانات الجهة</div>
       <div class="fr"><label>اسم الجهة / الشركة *</label><input type="text" id="extOrg" placeholder="شركة الاستشارات الهندسية"></div>
@@ -271,7 +285,21 @@ tr:hover td{background:#f5f3ff;}
         <div class="fr"><label>الاسم الكامل *</label><input type="text" id="intName" placeholder="عبدالله محمد السالم"></div>
         <div class="fr"><label>الرقم الوظيفي</label><input type="text" id="intEmpId" placeholder="U3XXXXX" style="direction:ltr;"></div>
       </div>
-      <div class="fr"><label>المسمى الوظيفي *</label><input type="text" id="intTitle" placeholder="محلل بيانات"></div>
+      <div class="f2">
+        <div class="fr"><label>اللقب البروتوكولي</label>
+          <select id="intPrefix">
+            <option value="">— بدون لقب —</option>
+            <option value="سعادة">سعادة</option>
+            <option value="معالي">معالي</option>
+            <option value="صاحب سمو">صاحب سمو</option>
+            <option value="صاحب السمو الملكي">صاحب السمو الملكي</option>
+            <option value="فضيلة">فضيلة</option>
+            <option value="سماحة">سماحة</option>
+          </select>
+        </div>
+        <div class="fr"><label>الدعاء (اختياري)</label><input type="text" id="intSuffix" placeholder="وفقه الله"></div>
+      </div>
+      <div class="fr"><label>المسمى الوظيفي / المنصب *</label><input type="text" id="intTitle" placeholder="مدير إدارة الموارد البشرية"></div>
       <div class="section-sep" style="margin-top:4px;"><i class="fa-solid fa-sitemap"></i> القطاع / الإدارة</div>
       <div class="f2">
         <div class="fr"><label>القطاع / الوكالة</label><input type="text" id="intSector" placeholder="قطاع المياه"></div>
@@ -455,6 +483,8 @@ function openAddExt() {
   editExtId = null;
   document.getElementById('modalExtTitle').textContent = 'إضافة جهة خارجية';
   ['extName','extTitle','extOrg','extCity','extMobile','extEmail','extNotes','extCarPlate','extCarMake','extCarColor'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('extPrefix').value = '';
+  document.getElementById('extSuffix').value = 'سلمه الله';
   document.getElementById('carSection').style.display = 'none';
   document.getElementById('carToggleIcon').textContent = '+ إضافة';
   document.getElementById('modalExt').classList.add('open');
@@ -466,7 +496,9 @@ function openEditExt(id) {
   if (!c) return;
   document.getElementById('modalExtTitle').textContent = 'تعديل بيانات الجهة';
   document.getElementById('extName').value = c.name || '';
+  document.getElementById('extPrefix').value = c.prefix || '';
   document.getElementById('extTitle').value = c.title || '';
+  document.getElementById('extSuffix').value = c.suffix || '';
   document.getElementById('extOrg').value = c.org || '';
   document.getElementById('extCity').value = c.city || '';
   document.getElementById('extMobile').value = c.mobile || '';
@@ -483,10 +515,12 @@ function openEditExt(id) {
 
 async function saveExt() {
   const body = {
-    name:   document.getElementById('extName').value.trim(),
-    title:  document.getElementById('extTitle').value.trim(),
-    org:    document.getElementById('extOrg').value.trim(),
-    city:   document.getElementById('extCity').value.trim(),
+    name:      document.getElementById('extName').value.trim(),
+    prefix:    document.getElementById('extPrefix').value,
+    title:     document.getElementById('extTitle').value.trim(),
+    suffix:    document.getElementById('extSuffix').value.trim(),
+    org:       document.getElementById('extOrg').value.trim(),
+    city:      document.getElementById('extCity').value.trim(),
     mobile:    document.getElementById('extMobile').value.trim(),
     email:     document.getElementById('extEmail').value.trim(),
     notes:     document.getElementById('extNotes').value.trim(),
@@ -507,6 +541,8 @@ function openAddInt() {
   editIntId = null;
   document.getElementById('modalIntTitle').textContent = 'إضافة زميل من خارج الوكالة';
   ['intName','intEmpId','intTitle','intDept','intMobile','intExtension','intEmail','intNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('intPrefix').value = '';
+  document.getElementById('intSuffix').value = 'سلمه الله';
   document.getElementById('intSector').value = '';
   document.getElementById('modalInt').classList.add('open');
 }
@@ -518,7 +554,9 @@ function openEditInt(id) {
   document.getElementById('modalIntTitle').textContent = 'تعديل بيانات الزميل';
   document.getElementById('intName').value = c.name || '';
   document.getElementById('intEmpId').value = c.emp_id || '';
+  document.getElementById('intPrefix').value = c.prefix || '';
   document.getElementById('intTitle').value = c.title || '';
+  document.getElementById('intSuffix').value = c.suffix || '';
   document.getElementById('intSector').value = c.sector || '';
   document.getElementById('intDept').value = c.dept || '';
   document.getElementById('intMobile').value = c.mobile || '';
@@ -530,15 +568,17 @@ function openEditInt(id) {
 
 async function saveInt() {
   const body = {
-    name:      document.getElementById('intName').value.trim(),
-    emp_id:    document.getElementById('intEmpId').value.trim(),
-    title:     document.getElementById('intTitle').value.trim(),
-    sector:    document.getElementById('intSector').value,
-    dept:      document.getElementById('intDept').value.trim(),
-    mobile:    document.getElementById('intMobile').value.trim(),
-    extension: document.getElementById('intExtension').value.trim(),
-    email:     document.getElementById('intEmail').value.trim(),
-    notes:     document.getElementById('intNotes').value.trim()
+    name:        document.getElementById('intName').value.trim(),
+    emp_id:      document.getElementById('intEmpId').value.trim(),
+    prefix:      document.getElementById('intPrefix').value,
+    title:       document.getElementById('intTitle').value.trim(),
+    suffix:      document.getElementById('intSuffix').value.trim(),
+    sector:      document.getElementById('intSector').value,
+    dept:        document.getElementById('intDept').value.trim(),
+    mobile:      document.getElementById('intMobile').value.trim(),
+    extension:   document.getElementById('intExtension').value.trim(),
+    email:       document.getElementById('intEmail').value.trim(),
+    notes:       document.getElementById('intNotes').value.trim()
   };
   if (!body.name) return alert('الاسم مطلوب');
   try {

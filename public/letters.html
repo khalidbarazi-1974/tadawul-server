@@ -205,6 +205,10 @@ body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;backg
       </div></div>
 
       <div id="sec-to"><div class="sec">المُرسَل إليه <span style="color:#dc2626">*</span></div>
+      <div style="margin-bottom:8px;display:flex;gap:20px;align-items:center;font-size:13px;color:#374151;">
+        <label style="cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="radio" name="recipType" value="ext" checked onchange="onRecipTypeChange()"> خارجي</label>
+        <label style="cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="radio" name="recipType" value="int" onchange="onRecipTypeChange()"> داخلي</label>
+      </div>
       <div class="cc-list" id="toList"></div>
       <button class="btn-add" type="button" onclick="addTo()"><i data-lucide="plus"></i> إضافة مُرسَل إليه</button></div>
 
@@ -404,24 +408,6 @@ body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;backg
       <div class="mgmt-status" id="statusSenders"></div>
       <div class="current-list" id="listSenders"></div>
     </div>
-    <div class="mgmt-section">
-      <h3>قائمة المستقبِلين</h3>
-      <div class="mgmt-hint">
-        صيغة الملف النصي – سطر لكل مستقبِل:<br>
-        <code>اللقب والمسمى | الدعاء</code><br>
-        مثال: <code>سعادة مدير عام هيئة الاتصالات | وفقه الله</code><br>
-        (حقل الدعاء اختياري)
-      </div>
-      <div class="mgmt-row">
-        <input type="file" id="fileRecipients" accept=".xlsx,.txt">
-        <button class="mgmt-btn" onclick="uploadList('recipients')">رفع وإضافة</button>
-        <button class="mgmt-btn" onclick="openAddModal('recipients')" style="background:#1d6b55">&#43; إضافة يدوية</button>
-        <button class="mgmt-btn" onclick="exportList('recipients')" style="background:#1e40af">&#8595; تصدير Excel</button>
-        <button class="mgmt-btn danger" onclick="resetList('recipients')">إعادة الضبط</button>
-      </div>
-      <div class="mgmt-status" id="statusRecipients"></div>
-      <div class="current-list" id="listRecipients"></div>
-    </div>
   </div>
 </div>
 
@@ -550,13 +536,7 @@ const SENDERS = [
   { title: 'مدير عام تميز الأداء القطاعي',        name: 'بدر بن عبدالله الدوسري' },
   { title: 'مدير عام الشؤون الاقتصادية',          name: 'مشاري بن سعود الدلبحي' },
 ];
-const RECIPIENTS = [
-  { title: 'سمو وزير الطاقة',                                              suffix: 'حفظه الله' },
-  { title: 'معالي وزير البيئة والمياه والزراعة',                             suffix: 'حفظه الله' },
-  { title: 'سعادة الرئيس التنفيذي لشركة المياه الوطنية',                    suffix: 'وفقه الله' },
-  { title: 'سعادة وكيل المياه بوزارة البيئة والمياه والزراعة',               suffix: 'وفقه الله' },
-  { title: 'سعادة وكيل رأس المال البشري',                                   suffix: 'وفقها الله' },
-];
+let RECIPIENTS = [];
 
 // ── Persistent lists (localStorage) ──────────────────────────────────────
 const LS_SENDERS  = 'wsa_senders_v1';
@@ -565,16 +545,44 @@ const LS_ARCHIVE_LETTER = 'wsa_archive_letter_v1';
 const LS_ARCHIVE_MEMO   = 'wsa_archive_memo_v1';
 const ARCHIVE_MAX = 20;
 function arcKey() { return currentTab === 'letter' ? LS_ARCHIVE_LETTER : LS_ARCHIVE_MEMO; }
-const DEFAULT_SENDERS    = SENDERS.map(s => ({...s}));
-const DEFAULT_RECIPIENTS = RECIPIENTS.map(r => ({...r}));
+const DEFAULT_SENDERS = SENDERS.map(s => ({...s}));
 
 function loadLists() {
   const ls = JSON.parse(localStorage.getItem(LS_SENDERS) || 'null');
-  const lr = JSON.parse(localStorage.getItem(LS_RECIP)   || 'null');
   if (ls) SENDERS.splice(0, SENDERS.length, ...ls);
-  if (lr) RECIPIENTS.splice(0, RECIPIENTS.length, ...lr);
 }
 loadLists();
+
+// ── Contacts from API (replaces hardcoded RECIPIENTS) ─────────────────────
+let extContacts = [], intContacts = [];
+
+function activeRecipients() {
+  const sel = document.querySelector('input[name="recipType"]:checked');
+  return (sel && sel.value === 'int') ? intContacts : extContacts;
+}
+
+async function loadContacts() {
+  const tok = sessionStorage.getItem('token');
+  if (!tok) return;
+  try {
+    const h = { Authorization: 'Bearer ' + tok };
+    const [ext, int_] = await Promise.all([
+      fetch('/api/contacts/external', { headers: h }).then(r => r.json()),
+      fetch('/api/contacts/internal', { headers: h }).then(r => r.json())
+    ]);
+    extContacts = ext.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '' }));
+    intContacts = int_.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '' }));
+    RECIPIENTS = activeRecipients();
+    rebuildDropdowns();
+  } catch(e) { console.error('contacts load failed', e); }
+}
+
+function onRecipTypeChange() {
+  RECIPIENTS = activeRecipients();
+  document.getElementById('toList').innerHTML = '';
+  document.getElementById('ccList').innerHTML = '';
+  addTo();
+}
 
 function rebuildDropdowns() {
   ['l_sig_title', 'm_sig_title_sel'].forEach(id => {
@@ -1661,6 +1669,7 @@ async function generate() {
 // initialise dropdowns from loaded lists
 rebuildDropdowns();
 addTo();
+loadContacts();
 showDraftUI(null);
 lucide.createIcons();
 

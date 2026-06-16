@@ -227,6 +227,10 @@ try { db.exec("ALTER TABLE contacts_external ADD COLUMN car_make  TEXT DEFAULT '
 try { db.exec("ALTER TABLE contacts_external ADD COLUMN car_color TEXT DEFAULT ''"); } catch(e) {}
 try { db.exec("ALTER TABLE meeting_actions ADD COLUMN task_id TEXT DEFAULT NULL"); } catch(e) {}
 try { db.exec("ALTER TABLE tasks ADD COLUMN meeting_ref TEXT DEFAULT NULL"); } catch(e) {}
+try { db.exec("ALTER TABLE contacts_external ADD COLUMN prefix TEXT DEFAULT ''"); } catch(e) {}
+try { db.exec("ALTER TABLE contacts_internal ADD COLUMN prefix TEXT DEFAULT ''"); } catch(e) {}
+try { db.exec("ALTER TABLE contacts_external ADD COLUMN suffix TEXT DEFAULT ''"); } catch(e) {}
+try { db.exec("ALTER TABLE contacts_internal ADD COLUMN suffix TEXT DEFAULT ''"); } catch(e) {}
 
 // Clean up orphaned task links (task was deleted but meeting_actions.task_id still set)
 db.prepare("UPDATE meeting_actions SET task_id=NULL WHERE task_id IS NOT NULL AND task_id NOT IN (SELECT id FROM tasks)").run();
