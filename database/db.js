@@ -231,6 +231,8 @@ try { db.exec("ALTER TABLE contacts_external ADD COLUMN prefix TEXT DEFAULT ''")
 try { db.exec("ALTER TABLE contacts_internal ADD COLUMN prefix TEXT DEFAULT ''"); } catch(e) {}
 try { db.exec("ALTER TABLE contacts_external ADD COLUMN suffix TEXT DEFAULT ''"); } catch(e) {}
 try { db.exec("ALTER TABLE contacts_internal ADD COLUMN suffix TEXT DEFAULT ''"); } catch(e) {}
+db.exec("UPDATE contacts_external SET suffix='سلمه الله' WHERE suffix=''");
+db.exec("UPDATE contacts_internal SET suffix='سلمه الله' WHERE suffix=''")
 
 // Clean up orphaned task links (task was deleted but meeting_actions.task_id still set)
 db.prepare("UPDATE meeting_actions SET task_id=NULL WHERE task_id IS NOT NULL AND task_id NOT IN (SELECT id FROM tasks)").run();
