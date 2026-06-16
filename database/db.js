@@ -231,8 +231,6 @@ try { db.exec("ALTER TABLE contacts_external ADD COLUMN prefix TEXT DEFAULT ''")
 try { db.exec("ALTER TABLE contacts_internal ADD COLUMN prefix TEXT DEFAULT ''"); } catch(e) {}
 try { db.exec("ALTER TABLE contacts_external ADD COLUMN suffix TEXT DEFAULT ''"); } catch(e) {}
 try { db.exec("ALTER TABLE contacts_internal ADD COLUMN suffix TEXT DEFAULT ''"); } catch(e) {}
-db.exec("UPDATE contacts_external SET suffix='سلمه الله' WHERE suffix=''");
-db.exec("UPDATE contacts_internal SET suffix='سلمه الله' WHERE suffix=''")
 
 // Clean up orphaned task links (task was deleted but meeting_actions.task_id still set)
 db.prepare("UPDATE meeting_actions SET task_id=NULL WHERE task_id IS NOT NULL AND task_id NOT IN (SELECT id FROM tasks)").run();
@@ -358,15 +356,19 @@ if (empCount.c === 0) {
 // Seed contacts (always, on fresh DB)
 const extCount = db.prepare('SELECT COUNT(*) as c FROM contacts_external').get();
 if (extCount.c === 0) {
-    const ins = db.prepare('INSERT INTO contacts_external (id,name,title,org,created_by) VALUES (?,?,?,?,?)');
-    ins.run('mqcsfsw4ko0fd', 'عبدالله',   'عبدالرحمن',   'XYZ',  'D1401');
-    ins.run('mqdfv0grku165', 'محمد أحمد', 'مدير تنفيذي', 'ABCD', 'D1401');
+    const ins = db.prepare('INSERT INTO contacts_external (id,name,title,org,suffix,created_by) VALUES (?,?,?,?,?,?)');
+    ins.run('mqcsfsw4ko0fd', 'عبدالله',   'عبدالرحمن',   'XYZ',  'سلمه الله', 'D1401');
+    ins.run('mqdfv0grku165', 'محمد أحمد', 'مدير تنفيذي', 'ABCD', 'سلمه الله', 'D1401');
 }
 const intCount = db.prepare('SELECT COUNT(*) as c FROM contacts_internal').get();
 if (intCount.c === 0) {
-    const ins = db.prepare('INSERT INTO contacts_internal (id,name,title,created_by) VALUES (?,?,?,?)');
-    ins.run('mqcsgwlcpd8e1', 'فيصل محمد', 'مدير عام xx', 'D1401');
-    ins.run('mqdfvdonegha2', 'ناصر سعد',  'مدير عام YY', 'D1401');
+    const ins = db.prepare('INSERT INTO contacts_internal (id,name,title,suffix,created_by) VALUES (?,?,?,?,?)');
+    ins.run('mqcsgwlcpd8e1', 'فيصل محمد', 'مدير عام xx', 'سلمه الله', 'D1401');
+    ins.run('mqdfvdonegha2', 'ناصر سعد',  'مدير عام YY', 'سلمه الله', 'D1401');
 }
+
+// Backfill suffix for any existing contacts that don't have it yet
+db.exec("UPDATE contacts_external SET suffix='سلمه الله' WHERE suffix=''");
+db.exec("UPDATE contacts_internal SET suffix='سلمه الله' WHERE suffix=''")
 
 module.exports = db;
