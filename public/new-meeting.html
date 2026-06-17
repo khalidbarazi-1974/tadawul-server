@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>اجتماع جديد</title>
+<link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/vendor/fonts/cairo.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100vh;}
+
+.topbar{background:linear-gradient(135deg,#b45309 0%,#d97706 100%);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-left i{font-size:20px;opacity:.9;}
+.topbar h2{font-size:17px;font-weight:700;}
+.btn-top{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;gap:6px;}
+.btn-top:hover{background:rgba(255,255,255,.25);}
+
+.page{max-width:860px;margin:0 auto;padding:28px 20px 60px;}
+
+.section-card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.08);padding:22px 26px;margin-bottom:18px;}
+.section-title{font-size:13px;font-weight:700;color:#b45309;margin-bottom:14px;padding-bottom:8px;border-bottom:1.5px solid #fde68a;display:flex;align-items:center;gap:7px;}
+
+.type-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.type-card{border:2px solid #e5e7eb;border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+.type-card:hover{border-color:#d97706;background:#fffbeb;}
+.type-card.selected{border-color:#b45309;background:#fff7ed;}
+.type-card .tc-icon{font-size:20px;margin-bottom:5px;}
+.type-card .tc-name{font-size:12px;font-weight:700;color:#333;}
+.type-card .tc-code{font-size:10px;color:#888;font-family:monospace;margin-top:2px;}
+
+.fr{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.fr label{font-size:13px;font-weight:600;color:#555;}
+.fr input,.fr textarea,.fr select{padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;}
+.fr input:focus,.fr textarea:focus,.fr select:focus{outline:none;border-color:#d97706;}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+.meeting-num-badge{display:inline-block;font-family:monospace;font-size:15px;font-weight:700;background:#fff7ed;color:#b45309;border:1.5px solid #fcd34d;padding:4px 14px;border-radius:6px;margin-bottom:16px;}
+
+.att-tabs{display:flex;gap:0;margin-bottom:10px;border:1.5px solid #e5e7eb;border-radius:8px;overflow:hidden;}
+.att-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;background:#f9fafb;color:#888;border:none;font-family:inherit;}
+.att-tab.active{background:#fff7ed;color:#b45309;}
+.att-list{border:1.5px solid #e5e7eb;border-radius:8px;min-height:60px;overflow:hidden;}
+.att-remove{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:14px;padding:0 4px;}
+.att-table{width:100%;border-collapse:collapse;font-size:13px;}
+.att-table th{background:#fef3c7;padding:7px 10px;font-size:11px;color:#92400e;font-weight:700;text-align:right;border-bottom:1.5px solid #fde68a;}
+.att-table td{padding:7px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+.att-table tr:last-child td{border-bottom:none;}
+.att-table tr:hover td{background:#fffbeb;}
+.btn-add-att{background:#fff7ed;color:#b45309;border:1.5px dashed #fcd34d;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;width:100%;margin-top:8px;}
+
+.agenda-list,.decision-list{display:flex;flex-direction:column;gap:6px;}
+.agenda-item{display:flex;align-items:center;gap:8px;}
+.agenda-item input{flex:1;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px;}
+.btn-add-row{background:#f0fdf4;color:#16a34a;border:1.5px dashed #86efac;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;width:100%;margin-top:6px;}
+
+.action-table{width:100%;border-collapse:collapse;font-size:13px;}
+.action-table th{background:#f8fafc;padding:8px 10px;font-size:11px;color:#64748b;font-weight:700;text-align:right;border-bottom:1.5px solid #e2e8f0;}
+.action-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9;}
+.action-table input,.action-table select{width:100%;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:12px;}
+
+.bottom-bar{position:fixed;bottom:0;right:0;left:0;background:#fff;border-top:1px solid #e5e7eb;padding:12px 24px;display:flex;justify-content:flex-end;gap:10px;box-shadow:0 -2px 8px rgba(0,0,0,.07);}
+.btn{padding:9px 22px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:linear-gradient(135deg,#b45309,#d97706);color:#fff;}
+.btn-primary:hover{opacity:.9;}
+.btn-secondary{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;}
+.btn-secondary:hover{background:#e2e8f0;}
+
+@media(max-width:640px){
+  .type-grid{grid-template-columns:repeat(3,1fr);}
+  .f2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <i class="fa-solid fa-plus-circle"></i>
+    <h2>اجتماع جديد</h2>
+  </div>
+  <div>
+    <button class="btn-top" onclick="location.href='/meetings.html'">
+      <i class="fa-solid fa-arrow-right" style="font-size:12px;"></i> العودة للاجتماعات
+    </button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Type Selection -->
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-tag"></i> نوع الاجتماع</div>
+    <div class="type-grid">
+      <div class="type-card selected" data-code="WK" onclick="selectType(this)">
+        <div class="tc-icon"><i class="fa-solid fa-calendar-week" style="color:#b45309;"></i></div>
+        <div class="tc-name">أسبوعي</div>
+        <div class="tc-code">WK</div>
+      </div>
+      <div class="type-card" data-code="MN" onclick="selectType(this)">
+        <div class="tc-icon"><i class="fa-solid fa-calendar-days" style="color:#b45309;"></i></div>
+        <div class="tc-name">شهري</div>
+        <div class="tc-code">MN</div>
+      </div>
+      <div class="type-card" data-code="QR" onclick="selectType(this)">
+        <div class="tc-icon"><i class="fa-solid fa-chart-bar" style="color:#b45309;"></i></div>
+        <div class="tc-name">ربع سنوي</div>
+        <div class="tc-code">QR</div>
+      </div>
+      <div class="type-card" data-code="SA" onclick="selectType(this)">
+        <div class="tc-icon"><i class="fa-solid fa-chart-line" style="color:#b45309;"></i></div>
+        <div class="tc-name">نصف سنوي</div>
+        <div class="tc-code">SA</div>
+      </div>
+      <div class="type-card" data-code="AN" onclick="selectType(this)">
+        <div class="tc-icon"><i class="fa-solid fa-trophy" style="color:#b45309;"></i></div>
+        <div class="tc-name">سنوي</div>
+        <div class="tc-code">AN</div>
+      </div>
+      <div class="type-card" data-code="NM" onclick="selectType(this)">
+        <div class="tc-icon"><i class="fa-solid fa-comments" style="color:#b45309;"></i></div>
+        <div class="tc-name">عادي</div>
+        <div class="tc-code">NM</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Basic Info -->
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-circle-info"></i> بيانات الاجتماع &nbsp;<span id="meetingNumBadge" class="meeting-num-badge" style="display:none;"></span></div>
+    <div class="fr">
+      <label>موضوع الاجتماع *</label>
+      <input type="text" id="fSubject" placeholder="أدخل موضوع الاجتماع..." oninput="updateNum()">
+    </div>
+    <div class="f2">
+      <div class="fr">
+        <label>التاريخ *</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="fr">
+        <label>الوقت</label>
+        <input type="time" id="fTime">
+      </div>
+    </div>
+    <div class="fr">
+      <label>الموقع</label>
+      <input type="text" id="fLocation" placeholder="قاعة رقم ... الدور ...">
+    </div>
+  </div>
+
+  <!-- Attendees -->
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
+    <div class="att-tabs">
+      <button class="att-tab active" id="attTabInternal" onclick="switchAttTab('internal')">داخلي (موظفون وزملاء)</button>
+      <button class="att-tab" id="attTabExternal" onclick="switchAttTab('external')">خارجي (جهات خارجية)</button>
+    </div>
+    <div class="att-list" id="attListInternal"></div>
+    <div class="att-list" id="attListExternal" style="display:none;"></div>
+    <select id="attPicker" onchange="addAttendeeFromPicker()" style="width:100%;margin-top:8px;padding:7px 10px;border:1.5px solid #fcd34d;border-radius:7px;font-family:inherit;font-size:13px;background:#fffbeb;">
+      <option value="">-- اختر حاضراً للإضافة --</option>
+    </select>
+  </div>
+
+  <!-- Agenda -->
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-list-check"></i> جدول الأعمال</div>
+    <div class="agenda-list" id="agendaList"></div>
+    <button class="btn-add-row" onclick="addAgendaItem()"><i class="fa-solid fa-plus"></i> إضافة بند</button>
+  </div>
+
+  <!-- Decisions -->
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-gavel"></i> القرارات</div>
+    <div class="agenda-list" id="decisionList"></div>
+    <button class="btn-add-row" style="background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;" onclick="addDecision()"><i class="fa-solid fa-plus"></i> إضافة قرار</button>
+  </div>
+
+  <!-- Action Items -->
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-bolt"></i> بنود العمل</div>
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>البند</th>
+          <th style="width:140px;">المسؤول</th>
+          <th style="width:130px;">تاريخ الإنجاز</th>
+          <th style="width:32px;"></th>
+        </tr>
+      </thead>
+      <tbody id="actionTbody"></tbody>
+    </table>
+    <button class="btn-add-row" style="background:#fdf4ff;color:#7e22ce;border-color:#d8b4fe;margin-top:8px;" onclick="addAction()"><i class="fa-solid fa-plus"></i> إضافة بند عمل</button>
+  </div>
+
+  <!-- Next Meeting -->
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-calendar-plus"></i> الاجتماع القادم</div>
+    <div class="f2">
+      <div class="fr">
+        <label>التاريخ المتوقع</label>
+        <input type="date" id="fNextDate">
+      </div>
+      <div class="fr">
+        <label>الوقت المتوقع</label>
+        <input type="time" id="fNextTime">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" onclick="location.href='/meetings.html'">
+    <i class="fa-solid fa-arrow-right"></i> رجوع
+  </button>
+  <button class="btn btn-primary" onclick="saveMeeting()">
+    <i class="fa-solid fa-floppy-disk"></i> حفظ الاجتماع
+  </button>
+</div>
+
+<script>
+const user  = JSON.parse(sessionStorage.getItem('user') || 'null');
+const token = sessionStorage.getItem('token');
+if (!user || !token) location.href = '/';
+
+const API = '/api';
+function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
+async function api(method, path, body) {
+  const res = await fetch(API + path, { method, headers: authHeaders(), body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'خطأ');
+  return data;
+}
+
+let formType = 'WK';
+let formAttendees = [];
+let formAgenda    = [];
+let formDecisions = [];
+let formActions   = [];
+let activeAttTab  = 'internal';
+let allStaff = [], extContacts = [], intContacts = [];
+
+async function init() {
+  [allStaff, extContacts, intContacts] = await Promise.all([
+    api('GET', '/employees/all').catch(() => []),
+    api('GET', '/contacts/external').catch(() => []),
+    api('GET', '/contacts/internal').catch(() => [])
+  ]);
+  renderAttendees();
+  populatePicker();
+  updateNum();
+}
+
+function selectType(el) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  formType = el.dataset.code;
+  updateNum();
+}
+
+let numTimeout = null;
+function updateNum() {
+  clearTimeout(numTimeout);
+  numTimeout = setTimeout(async () => {
+    try {
+      const r = await api('GET', `/meetings/next-number/${formType}`);
+      const badge = document.getElementById('meetingNumBadge');
+      badge.textContent = r.number;
+      badge.style.display = '';
+    } catch(e) {}
+  }, 300);
+}
+
+function switchAttTab(tab) {
+  activeAttTab = tab;
+  document.getElementById('attListInternal').style.display = tab === 'internal' ? '' : 'none';
+  document.getElementById('attListExternal').style.display = tab === 'external'  ? '' : 'none';
+  document.getElementById('attTabInternal').classList.toggle('active', tab === 'internal');
+  document.getElementById('attTabExternal').classList.toggle('active', tab === 'external');
+  populatePicker();
+}
+
+function populatePicker() {
+  const sel = document.getElementById('attPicker');
+  sel.innerHTML = '<option value="">-- اختر حاضراً للإضافة --</option>';
+  const added = new Set(formAttendees.map(a => a.ref_id || a.name));
+  if (activeAttTab === 'internal') {
+    allStaff.forEach(e => {
+      if (!added.has(String(e.id))) {
+        const label = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
+        const opt = new Option(`${e.name} — ${label}`, e.id);
+        opt.dataset.kind  = 'internal_staff';
+        opt.dataset.name  = e.name;
+        opt.dataset.title = label;
+        sel.add(opt);
+      }
+    });
+    intContacts.forEach(c => {
+      if (!added.has(String(c.id))) {
+        const opt = new Option(`${c.name} — ${c.sector || 'خارج الوكالة'}`, c.id);
+        opt.dataset.kind  = 'internal_contact';
+        opt.dataset.name  = c.name;
+        opt.dataset.title = c.title || '';
+        sel.add(opt);
+      }
+    });
+  } else {
+    extContacts.forEach(c => {
+      if (!added.has(String(c.id))) {
+        const opt = new Option(`${c.name} — ${c.org || ''}`, c.id);
+        opt.dataset.kind  = 'external';
+        opt.dataset.name  = c.name;
+        opt.dataset.title = c.title || '';
+        opt.dataset.org   = c.org || '';
+        sel.add(opt);
+      }
+    });
+  }
+}
+
+function addAttendeeFromPicker() {
+  const sel = document.getElementById('attPicker');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt.value) return;
+  formAttendees.push({ kind: opt.dataset.kind, ref_id: opt.value, name: opt.dataset.name, title: opt.dataset.title, org: opt.dataset.org || '' });
+  sel.value = '';
+  renderAttendees();
+  populatePicker();
+}
+
+function removeAttendee(idx) {
+  formAttendees.splice(idx, 1);
+  renderAttendees();
+  populatePicker();
+  renderActions();
+}
+
+function renderAttendees() {
+  const buildTable = (list, fixedOrg) => {
+    if (!list.length) return `<div style="color:#aaa;font-size:13px;padding:12px;">لا يوجد حضور</div>`;
+    return `<table class="att-table">
+      <thead><tr><th>الاسم</th><th>المنصب</th><th>الجهة</th><th style="width:30px;"></th></tr></thead>
+      <tbody>${list.map(a => {
+        const idx = formAttendees.indexOf(a);
+        return `<tr>
+          <td>${a.name}</td>
+          <td>${a.title || '—'}</td>
+          <td>${fixedOrg || a.org || '—'}</td>
+          <td><button class="att-remove" onclick="removeAttendee(${idx})">×</button></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  };
+  document.getElementById('attListInternal').innerHTML = buildTable(formAttendees.filter(a => a.kind !== 'external'), 'الهيئة السعودية للمياه');
+  document.getElementById('attListExternal').innerHTML  = buildTable(formAttendees.filter(a => a.kind === 'external'), null);
+}
+
+function addAgendaItem() {
+  formAgenda.push('');
+  renderAgenda();
+  const inputs = document.getElementById('agendaList').querySelectorAll('input');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+}
+
+function renderAgenda() {
+  document.getElementById('agendaList').innerHTML = formAgenda.map((text, i) => `
+    <div class="agenda-item">
+      <span style="color:#b45309;font-weight:700;min-width:20px;">${i + 1}.</span>
+      <input type="text" value="${text.replace(/"/g,'&quot;')}" oninput="formAgenda[${i}]=this.value" placeholder="أضف بنداً...">
+      <button class="att-remove" onclick="removeAgenda(${i})">×</button>
+    </div>`).join('');
+}
+
+function removeAgenda(i) { formAgenda.splice(i, 1); renderAgenda(); }
+
+function addDecision() {
+  formDecisions.push('');
+  renderDecisions();
+}
+
+function renderDecisions() {
+  document.getElementById('decisionList').innerHTML = formDecisions.map((text, i) => `
+    <div class="agenda-item">
+      <span style="color:#1d4ed8;font-weight:700;min-width:20px;">${i + 1}.</span>
+      <input type="text" value="${text.replace(/"/g,'&quot;')}" oninput="formDecisions[${i}]=this.value" placeholder="أضف قراراً...">
+      <button class="att-remove" onclick="removeDecision(${i})">×</button>
+    </div>`).join('');
+}
+
+function removeDecision(i) { formDecisions.splice(i, 1); renderDecisions(); }
+
+function addAction() {
+  formActions.push({ description: '', owner_name: '', due_date: '' });
+  renderActions();
+}
+
+function renderActions() {
+  const ownerOptions = formAttendees.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
+  document.getElementById('actionTbody').innerHTML = formActions.map((ac, i) => `
+    <tr>
+      <td style="color:#888;font-size:12px;">${i + 1}</td>
+      <td><input type="text" value="${(ac.description||'').replace(/"/g,'&quot;')}" oninput="formActions[${i}].description=this.value" placeholder="بند العمل..."></td>
+      <td><select onchange="formActions[${i}].owner_name=this.value">
+        <option value="">— اختر —</option>${ownerOptions}
+      </select></td>
+      <td><input type="date" value="${ac.due_date||''}" onchange="formActions[${i}].due_date=this.value"></td>
+      <td><button class="att-remove" onclick="removeAction(${i})">×</button></td>
+    </tr>`).join('');
+  formActions.forEach((ac, i) => {
+    const sel = document.getElementById('actionTbody').rows[i]?.cells[2]?.querySelector('select');
+    if (sel && ac.owner_name) sel.value = ac.owner_name;
+  });
+}
+
+function removeAction(i) { formActions.splice(i, 1); renderActions(); }
+
+async function saveMeeting() {
+  const subject = document.getElementById('fSubject').value.trim();
+  const date    = document.getElementById('fDate').value;
+  if (!subject) return alert('الموضوع مطلوب');
+  if (!date)    return alert('التاريخ مطلوب');
+  const body = {
+    type:              formType,
+    subject,
+    date,
+    time:              document.getElementById('fTime').value,
+    location:          document.getElementById('fLocation').value.trim(),
+    next_meeting_date: document.getElementById('fNextDate').value,
+    attendees:         formAttendees,
+    agenda:            formAgenda.filter(t => t.trim()),
+    decisions:         formDecisions.filter(t => t.trim()),
+    actions:           formActions.filter(ac => ac.description.trim())
+  };
+  try {
+    await api('POST', '/meetings', body);
+    location.href = '/meetings.html';
+  } catch(e) { alert(e.message); }
+}
+
+init();
+</script>
+</body>
+</html>
