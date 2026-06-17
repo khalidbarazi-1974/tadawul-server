@@ -207,6 +207,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           <option value="خاصة">خاصة</option>
           <option value="مهمة رسمية">مهمة رسمية</option>
           <option value="بدون راتب">بدون راتب</option>
+          <option value="دورة تدريبية">دورة تدريبية</option>
         </select>
         <input type="text" id="fSrch" placeholder="بحث..." oninput="renderLeaves()" style="min-width:130px;">
         <button class="btn-add" onclick="openLeaveModal()"><i data-lucide="plus"></i>تسجيل إجازة</button>
@@ -343,6 +344,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
       <option value="خاصة">خاصة</option>
       <option value="مهمة رسمية">مهمة رسمية</option>
       <option value="بدون راتب">بدون راتب</option>
+      <option value="دورة تدريبية">دورة تدريبية</option>
     </select>
   </div>
   <div class="fr">
@@ -452,7 +454,7 @@ let holSortCol=null,   holSortDir='asc';
 let leaveEmpId=null, leaveEmpName=null, leaveDeptId=null, leaveBalance=0, leaveEditId=null;
 let ganttY=new Date().getFullYear(), ganttM=new Date().getMonth()+1;
 
-const LCOL={'اعتيادية':'#7db389','خاصة':'#f59f00','مهمة رسمية':'#74c0fc','بدون راتب':'#ff7675'};
+const LCOL={'اعتيادية':'#7db389','خاصة':'#f59f00','مهمة رسمية':'#74c0fc','بدون راتب':'#ff7675','دورة تدريبية':'#8b5cf6'};
 const DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 
 function tok(){return sessionStorage.getItem('token');}

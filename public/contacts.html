@@ -312,6 +312,17 @@ tr:hover td{background:#f5f3ff;}
       </div>
       <div class="fr"><label>البريد الإلكتروني</label><input type="email" id="intEmail" placeholder="name@swa.gov.sa"></div>
       <div class="fr"><label>ملاحظات</label><textarea id="intNotes" rows="2" placeholder="أي ملاحظات..."></textarea></div>
+      <div class="section-sep" style="margin-top:4px;cursor:pointer;" onclick="toggleIntCarSection()">
+        <i class="fa-solid fa-car"></i> بيانات المركبة
+        <span id="intCarToggleIcon" style="margin-right:auto;font-size:11px;color:#4338ca;">+ إضافة</span>
+      </div>
+      <div id="intCarSection" style="display:none;">
+        <div class="f2">
+          <div class="fr"><label>رقم اللوحة</label><input type="text" id="intCarPlate" placeholder="أ ب ج 1234" style="direction:ltr;"></div>
+          <div class="fr"><label>اللون</label><input type="text" id="intCarColor" placeholder="أبيض"></div>
+        </div>
+        <div class="fr"><label>الماركة / الموديل</label><input type="text" id="intCarMake" placeholder="تويوتا كامري 2024"></div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modalInt')">إلغاء</button>
@@ -540,10 +551,12 @@ async function saveExt() {
 function openAddInt() {
   editIntId = null;
   document.getElementById('modalIntTitle').textContent = 'إضافة زميل من خارج الوكالة';
-  ['intName','intEmpId','intTitle','intDept','intMobile','intExtension','intEmail','intNotes'].forEach(id => document.getElementById(id).value = '');
+  ['intName','intEmpId','intTitle','intDept','intMobile','intExtension','intEmail','intNotes','intCarPlate','intCarMake','intCarColor'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('intPrefix').value = '';
   document.getElementById('intSuffix').value = 'سلمه الله';
   document.getElementById('intSector').value = '';
+  document.getElementById('intCarSection').style.display = 'none';
+  document.getElementById('intCarToggleIcon').textContent = '+ إضافة';
   document.getElementById('modalInt').classList.add('open');
 }
 
@@ -563,6 +576,12 @@ function openEditInt(id) {
   document.getElementById('intExtension').value = c.extension || '';
   document.getElementById('intEmail').value = c.email || '';
   document.getElementById('intNotes').value = c.notes || '';
+  document.getElementById('intCarPlate').value = c.car_plate || '';
+  document.getElementById('intCarMake').value = c.car_make || '';
+  document.getElementById('intCarColor').value = c.car_color || '';
+  const hasVehicle = !!(c.car_plate || c.car_make || c.car_color);
+  document.getElementById('intCarSection').style.display = hasVehicle ? '' : 'none';
+  document.getElementById('intCarToggleIcon').textContent = hasVehicle ? '− إخفاء' : '+ إضافة';
   document.getElementById('modalInt').classList.add('open');
 }
 
@@ -578,7 +597,10 @@ async function saveInt() {
     mobile:      document.getElementById('intMobile').value.trim(),
     extension:   document.getElementById('intExtension').value.trim(),
     email:       document.getElementById('intEmail').value.trim(),
-    notes:       document.getElementById('intNotes').value.trim()
+    notes:       document.getElementById('intNotes').value.trim(),
+    car_plate:   document.getElementById('intCarPlate').value.trim(),
+    car_make:    document.getElementById('intCarMake').value.trim(),
+    car_color:   document.getElementById('intCarColor').value.trim()
   };
   if (!body.name) return alert('الاسم مطلوب');
   try {
@@ -632,6 +654,14 @@ function filterInt() { renderInt(); }
 function toggleCarSection() {
   const s = document.getElementById('carSection');
   const t = document.getElementById('carToggleIcon');
+  const show = s.style.display === 'none';
+  s.style.display = show ? '' : 'none';
+  t.textContent = show ? '− إخفاء' : '+ إضافة';
+}
+
+function toggleIntCarSection() {
+  const s = document.getElementById('intCarSection');
+  const t = document.getElementById('intCarToggleIcon');
   const show = s.style.display === 'none';
   s.style.display = show ? '' : 'none';
   t.textContent = show ? '− إخفاء' : '+ إضافة';

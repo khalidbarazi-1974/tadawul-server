@@ -6,6 +6,7 @@
 <title>الاجتماعات</title>
 <link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="/vendor/fonts/cairo.css">
+<script src="/vendor/jszip.min.js"></script>
 <script src="/vendor/lucide.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -87,10 +88,13 @@ tr:hover td{background:#fffbeb;}
 .att-tabs{display:flex;gap:0;margin-bottom:12px;border:1.5px solid #e5e7eb;border-radius:8px;overflow:hidden;}
 .att-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;background:#f9fafb;color:#888;border:none;font-family:inherit;}
 .att-tab.active{background:#fff7ed;color:#b45309;}
-.att-list{border:1.5px solid #e5e7eb;border-radius:8px;min-height:80px;padding:10px;}
-.att-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:13px;margin-bottom:4px;background:#f9fafb;}
-.att-item:last-child{margin-bottom:0;}
+.att-list{border:1.5px solid #e5e7eb;border-radius:8px;min-height:80px;overflow:hidden;}
 .att-remove{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:14px;padding:0 4px;}
+.att-table{width:100%;border-collapse:collapse;font-size:13px;}
+.att-table th{background:#fef3c7;padding:7px 10px;font-size:11px;color:#92400e;font-weight:700;text-align:right;border-bottom:1.5px solid #fde68a;}
+.att-table td{padding:7px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+.att-table tr:last-child td{border-bottom:none;}
+.att-table tr:hover td{background:#fffbeb;}
 .btn-add-att{background:#fff7ed;color:#b45309;border:1.5px dashed #fcd34d;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;width:100%;margin-top:8px;}
 .agenda-list,.decision-list{display:flex;flex-direction:column;gap:6px;}
 .agenda-item{display:flex;align-items:center;gap:8px;}
@@ -288,7 +292,7 @@ tr:hover td{background:#fffbeb;}
         </div>
         <div class="fr">
           <label>الموقع</label>
-          <input type="text" id="fLocation" placeholder="قاعة الاجتماعات، مقر الوزارة...">
+          <input type="text" id="fLocation" placeholder="قاعة رقم ... الدور ...">
         </div>
         <div class="fr">
           <label>التاريخ *</label>
@@ -425,7 +429,7 @@ tr:hover td{background:#fffbeb;}
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeDetail()">إغلاق</button>
-      <button class="btn btn-word" onclick="alert('قريباً: تصدير المحضر')"><i class="fa-solid fa-file-word"></i> تصدير المحضر</button>
+      <button class="btn btn-word" onclick="exportMoM()"><i class="fa-solid fa-file-word"></i> تصدير المحضر</button>
       <button class="btn btn-primary" onclick="openEdit()"><i class="fa-solid fa-pen"></i> تعديل</button>
     </div>
   </div>
@@ -457,6 +461,7 @@ let formActions = [];
 let editingId = null;
 let activeAttTab = 'internal';
 let currentMeetingId = null;
+let currentMeeting = null;
 
 async function init() {
   document.getElementById('topUser').textContent = user.name || '';
@@ -637,20 +642,26 @@ function renderAttendees() {
   const extList = document.getElementById('attListExternal');
   const internal = formAttendees.filter(a => a.kind !== 'external');
   const external = formAttendees.filter(a => a.kind === 'external');
-  intList.innerHTML = internal.length
-    ? internal.map(a => `
-        <div class="att-item">
-          <span>${a.name}${a.title ? ' <span style="color:#888;font-size:11px;">— ' + a.title + '</span>' : ''}</span>
-          <button class="att-remove" onclick="removeAttendee(${formAttendees.indexOf(a)})">×</button>
-        </div>`).join('')
-    : '<div style="color:#aaa;font-size:13px;padding:8px;">لا يوجد حضور داخلي</div>';
-  extList.innerHTML = external.length
-    ? external.map(a => `
-        <div class="att-item">
-          <span>${a.name}${a.org ? ' <span style="color:#888;font-size:11px;">— ' + a.org + '</span>' : ''}</span>
-          <button class="att-remove" onclick="removeAttendee(${formAttendees.indexOf(a)})">×</button>
-        </div>`).join('')
-    : '<div style="color:#aaa;font-size:13px;padding:8px;">لا يوجد حضور خارجي</div>';
+
+  const buildTable = (list, fixedOrg) => {
+    if (!list.length) return `<div style="color:#aaa;font-size:13px;padding:12px;">لا يوجد حضور</div>`;
+    return `<table class="att-table">
+      <thead><tr><th>الاسم</th><th>المنصب</th><th>الجهة</th><th style="width:30px;"></th></tr></thead>
+      <tbody>${list.map(a => {
+        const idx = formAttendees.indexOf(a);
+        const org = fixedOrg || a.org || '—';
+        return `<tr>
+          <td>${a.name}</td>
+          <td>${a.title || '—'}</td>
+          <td>${org}</td>
+          <td><button class="att-remove" onclick="removeAttendee(${idx})">×</button></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  };
+
+  intList.innerHTML = buildTable(internal, 'الهيئة السعودية للمياه');
+  extList.innerHTML = buildTable(external, null);
 }
 
 function addAgendaItem() {
@@ -743,6 +754,7 @@ async function saveMeeting() {
 async function openDetail(id) {
   currentMeetingId = id;
   const m = await api('GET', `/meetings/${id}`);
+  currentMeeting = m;
   document.getElementById('dSubject').textContent = m.subject;
   document.getElementById('dNumber').textContent = m.meeting_number;
   document.getElementById('dType').innerHTML = `<span class="badge-type ${TYPE_CSS[m.type] || 't-nm'}">${TYPE_NAMES[m.type] || m.type}</span>`;
@@ -880,6 +892,245 @@ async function submitCreateTask() {
       alert(e.message);
     }
   }
+}
+
+// ── Export MoM to Word ────────────────────────────────────────────────────────
+async function exportMoM() {
+  const m = currentMeeting;
+  if (!m) return;
+
+  const F  = 'IBM Plex Sans Arabic';         // headers / blue labels
+  const FM = 'IBM Plex Sans Arabic Medium';   // body data cells
+  const FS = 'IBM Plex Sans Arabic SemiBold'; // numbered items
+
+  const xe = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // ── OOXML primitives ──────────────────────────────────────────────────────
+  const rp = (font, sz=22, bold=false, color='3A3A3A') =>
+    `<w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:cs="${font}"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="${color}"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/><w:rtl/>`;
+
+  const run = (text, font=FM, sz=22, bold=false, color='3A3A3A') =>
+    `<w:r><w:rPr>${rp(font,sz,bold,color)}</w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r>`;
+
+  const p = (inner, {center=false, font=FM, sz=22, bold=false, color='3A3A3A', before=0, after=80}={}) => {
+    const jc = center ? '<w:jc w:val="center"/>' : '<w:jc w:val="both"/>';
+    return `<w:p><w:pPr><w:bidi/><w:spacing w:before="${before}" w:after="${after}"/>${jc}<w:rPr>${rp(font,sz,bold,color)}</w:rPr></w:pPr>${inner}</w:p>`;
+  };
+
+  const emptyP = () => `<w:p><w:pPr><w:bidi/><w:spacing w:before="0" w:after="80"/></w:pPr></w:p>`;
+
+  // Numbered list paragraph (for agenda / decisions / actions inside cells)
+  const numItem = (text, i, font=FS) =>
+    `<w:p><w:pPr><w:bidi/><w:spacing w:before="0" w:after="120"/><w:rPr>${rp(font,22,false,'3A3A3A')}</w:rPr></w:pPr>` +
+    `<w:r><w:rPr>${rp(font,22,false,'3A3A3A')}</w:rPr><w:t xml:space="preserve">${xe(`${i+1}. ${text}`)}</w:t></w:r></w:p>`;
+
+  const blankCellP = () =>
+    `<w:p><w:pPr><w:bidi/><w:spacing w:before="60" w:after="60"/></w:pPr></w:p>`;
+
+  // ── Table builders ────────────────────────────────────────────────────────
+  const BORDERS =
+    '<w:tblBorders>' +
+    '<w:top w:val="single" w:sz="4" w:space="0" w:color="auto"/>' +
+    '<w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/>' +
+    '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto"/>' +
+    '<w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/>' +
+    '<w:insideH w:val="single" w:sz="4" w:space="0" w:color="auto"/>' +
+    '<w:insideV w:val="single" w:sz="4" w:space="0" w:color="auto"/>' +
+    '</w:tblBorders>';
+
+  const CELL_MAR =
+    '<w:tblCellMar>' +
+    '<w:top w:w="43" w:type="dxa"/><w:left w:w="108" w:type="dxa"/>' +
+    '<w:bottom w:w="43" w:type="dxa"/><w:right w:w="108" w:type="dxa"/>' +
+    '</w:tblCellMar>';
+
+  const mkTblPr = (w, ind='-545') =>
+    `<w:tblPr><w:tblStyle w:val="TableGrid"/><w:bidiVisual/>` +
+    `<w:tblW w:w="${w}" w:type="dxa"/><w:tblInd w:w="${ind}" w:type="dxa"/>` +
+    `${BORDERS}${CELL_MAR}` +
+    `<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr>`;
+
+  const mkGrid = (...widths) =>
+    `<w:tblGrid>${widths.map(w=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>`;
+
+  const mkTbl = (tblPr, grid, rows) => `<w:tbl>${tblPr}${grid}${rows}</w:tbl>`;
+
+  const trH = (h, ...cells) =>
+    `<w:tr><w:trPr><w:trHeight w:val="${h}"/><w:jc w:val="center"/></w:trPr>${cells.join('')}</w:tr>`;
+
+  // Blue header cell (white text, 0066CC bg)
+  const thBlue = (text, w, span=1) => {
+    const sp = span > 1 ? `<w:gridSpan w:val="${span}"/>` : '';
+    return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${sp}` +
+      `<w:shd w:val="clear" w:color="auto" w:fill="0066CC"/><w:vAlign w:val="center"/></w:tcPr>` +
+      `<w:p><w:pPr><w:bidi/><w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr></w:pPr>` +
+      `<w:r><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r></w:p></w:tc>`;
+  };
+
+  // Section label cell (grey bg, blue text)
+  const thSection = (text, w, span=1) => {
+    const sp = span > 1 ? `<w:gridSpan w:val="${span}"/>` : '';
+    return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${sp}` +
+      `<w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/><w:vAlign w:val="center"/></w:tcPr>` +
+      `<w:p><w:pPr><w:bidi/><w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/><w:rPr>${rp(F,22,true,'0070C0')}</w:rPr></w:pPr>` +
+      `<w:r><w:rPr>${rp(F,22,true,'0070C0')}</w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r></w:p></w:tc>`;
+  };
+
+  // Data cell with plain text
+  const tdTxt = (text, w, {center=true, bold=false, font=FM}={}) =>
+    `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>` +
+    `<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="center"/></w:tcPr>` +
+    `<w:p><w:pPr><w:bidi/><w:spacing w:before="60" w:after="60"/>` +
+    `${center?'<w:jc w:val="center"/>':'<w:jc w:val="both"/>'}<w:rPr>${rp(font,22,bold,'3A3A3A')}</w:rPr></w:pPr>` +
+    `<w:r><w:rPr>${rp(font,22,bold,'3A3A3A')}</w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r></w:p></w:tc>`;
+
+  // Data cell with raw OOXML inner content (for lists)
+  const tdXml = (innerXml, w) =>
+    `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>` +
+    `<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="top"/></w:tcPr>${innerXml}</w:tc>`;
+
+  // ── Build content ─────────────────────────────────────────────────────────
+
+  // TITLE: "محضر اجتماع [subject]"
+  const titlePara = p(
+    `<w:r><w:rPr>${rp(F,28,true,'3A3A3A')}</w:rPr><w:t xml:space="preserve">محضر اجتماع ${xe(m.subject||'')}</w:t></w:r>`,
+    {center:true, before:0, after:120}
+  );
+
+  // INFO TABLE (3 cols): التاريخ | الوقت | الموقع
+  // Widths: 4325 | 2415 | 3610  (total 10350)
+  const infoTable = mkTbl(
+    mkTblPr(10350),
+    mkGrid(4325, 2415, 3610),
+    trH(576, thBlue('التاريخ',4325), thBlue('الوقت',2415), thBlue('الموقع',3610)) +
+    trH(694, tdTxt(m.date||'—',4325,{bold:true}), tdTxt(m.time||'—',2415), tdTxt(m.location||'—',3610))
+  );
+
+  // ATTENDEES TABLE: section header (merged 3) + col headers + data rows
+  // Cols: الاسم | الجهة | المنصب  (widths: 4327 | 3006 | 3006 = 10339)
+  const attDataRows = (m.attendees||[]).map(a =>
+    trH(489,
+      tdTxt(a.name||'',4327,{bold:true}),
+      tdTxt(a.kind==='external'?(a.org||'خارجي'):'الهيئة السعودية للمياه',3006),
+      tdTxt(a.title||'—',3006)
+    )
+  ).join('');
+  const attTable = mkTbl(
+    mkTblPr(10339, '-455'),
+    mkGrid(4327, 3006, 3006),
+    trH(432, thSection('الحضور', 10339, 3)) +
+    trH(576, thBlue('الاسم',4327), thBlue('الجهة',3006), thBlue('المنصب',3006)) +
+    (attDataRows || trH(489, tdTxt('',4327), tdTxt('',3006), tdTxt('',3006))) +
+    // bottom spacer row
+    `<w:tr><w:trPr><w:trHeight w:val="288"/></w:trPr>` +
+    `<w:tc><w:tcPr><w:tcW w:w="10339" w:type="dxa"/><w:gridSpan w:val="3"/>` +
+    `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="auto"/>` +
+    `<w:left w:val="nil"/><w:right w:val="nil"/></w:tcBorders></w:tcPr>` +
+    `<w:p><w:pPr><w:bidi/></w:pPr></w:p></w:tc></w:tr>`
+  );
+
+  // AGENDA TABLE: "جدول الأعمال" — full width, blue header + numbered list
+  const agendaXml = (m.agenda||[]).length
+    ? m.agenda.map((a,i) => numItem(a.text||a, i)).join('')
+    : blankCellP();
+
+  const agendaTable = mkTbl(
+    mkTblPr(10350),
+    mkGrid(10350),
+    trH(576, thBlue('جدول الأعمال', 10350)) +
+    `<w:tr><w:trPr><w:trHeight w:val="1459"/></w:trPr>${tdXml(agendaXml, 10350)}</w:tr>`
+  );
+
+  // DECISIONS TABLE: "القرارات" — full width, blue header + numbered list
+  const decisionsXml = (m.decisions||[]).length
+    ? m.decisions.map((d,i) => numItem(d.text||d, i)).join('')
+    : blankCellP();
+
+  const decisionsTable = mkTbl(
+    mkTblPr(10350),
+    mkGrid(10350),
+    trH(576, thBlue('القرارات', 10350)) +
+    `<w:tr><w:trPr><w:trHeight w:val="2017"/></w:trPr>${tdXml(decisionsXml, 10350)}</w:tr>`
+  );
+
+  // ACTIONS TABLE: "بنود العمل" — 3 cols: البند | المسؤول | تاريخ الإنجاز
+  // Widths: 5760 | 2340 | 2250  (matching reference التوصيات table)
+  const actionDataRows = (m.actions||[]).map((ac,i) =>
+    trH(432,
+      tdTxt(`${i+1}. ${ac.description||''}`, 5760, {center:false, font:FS}),
+      tdTxt(ac.owner_name||'', 2340, {center:true, font:FM}),
+      tdTxt(ac.due_date||'', 2250, {center:true, font:FM})
+    )
+  ).join('');
+
+  const actionsTable = mkTbl(
+    mkTblPr(10350),
+    mkGrid(5760, 2340, 2250),
+    trH(576, thBlue('بنود العمل', 10350, 3)) +
+    trH(576, thBlue('البند', 5760), thBlue('المسؤول', 2340), thBlue('تاريخ الإنجاز', 2250)) +
+    (actionDataRows || trH(432, tdTxt('',5760), tdTxt('',2340), tdTxt('',2250)))
+  );
+
+  // ── Assemble document ────────────────────────────────────────────────────
+  const sectPr =
+    '<w:sectPr>' +
+    '<w:pgSz w:w="12240" w:h="15840"/>' +
+    '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="284" w:footer="720" w:gutter="0"/>' +
+    '<w:cols w:space="720"/><w:docGrid w:linePitch="360"/>' +
+    '</w:sectPr>';
+
+  const NS =
+    'xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" ' +
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
+    'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+    'xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" ' +
+    'xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" ' +
+    'mc:Ignorable="w14 w15"';
+
+  const docXml =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    `<w:document ${NS}><w:body>` +
+    emptyP() + titlePara + emptyP() +
+    infoTable + emptyP() +
+    attTable + emptyP() +
+    agendaTable + emptyP() +
+    decisionsTable + emptyP() +
+    actionsTable + emptyP() +
+    sectPr +
+    '</w:body></w:document>';
+
+  const contentTypes =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+    '</Types>';
+
+  const rels =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+    '</Relationships>';
+
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml', contentTypes);
+  zip.file('_rels/.rels', rels);
+  zip.file('word/document.xml', docXml);
+  zip.file('word/_rels/document.xml.rels',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>');
+
+  const blob = await zip.generateAsync({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `محضر_${(m.meeting_number||'اجتماع').replace(/[\\/:*?"<>|]/g,'_')}.docx`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 lucide.createIcons();

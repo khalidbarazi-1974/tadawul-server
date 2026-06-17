@@ -132,7 +132,16 @@ router.get('/workload', (req, res) => {
             txCounts[key] = (txCounts[key] || 0) + 1;
         });
 
-    res.json({ tasks: taskCounts, transactions: txCounts });
+    const trainingCounts = {};
+    const trainRows = year
+        ? db.prepare("SELECT employee_id FROM leaves WHERE type='دورة تدريبية' AND strftime('%Y', start_date) = ?").all(String(year))
+        : db.prepare("SELECT employee_id FROM leaves WHERE type='دورة تدريبية'").all();
+    trainRows.forEach(r => {
+        if (!r.employee_id) return;
+        trainingCounts[r.employee_id] = (trainingCounts[r.employee_id] || 0) + 1;
+    });
+
+    res.json({ tasks: taskCounts, transactions: txCounts, training: trainingCounts });
 });
 
 // ── Settings (target avg + band quotas) ───────────────────────────────────────

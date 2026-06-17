@@ -223,6 +223,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
             <th style="text-align:center;">الأهداف</th>
             <th style="text-align:center;" title="عدد المعاملات الحالية">معاملات</th>
             <th style="text-align:center;" title="عدد المواضيع المسندة">مواضيع</th>
+            <th style="text-align:center;" title="عدد الدورات التدريبية المنجزة">دورات</th>
             <th class="sortable" style="text-align:center;" id="th-savg" onclick="setStaffSort('avg')">المعدل</th>
             <th style="text-align:center;">التصنيف</th>
             <th id="actColH"></th>
@@ -576,7 +577,7 @@ function renderStaff(){
   document.getElementById('staffProgress').textContent=curCycleId?`مُقيَّم: ${scored} / ${rows.length}`:' ';
   const tb=document.getElementById('staffBody');
   if(!rows.length){
-    tb.innerHTML=`<tr><td colspan="11" class="empty">${curCycleId?'لا يوجد موظفون في هذه الدورة':'اختر دورة أولاً'}</td></tr>`;
+    tb.innerHTML=`<tr><td colspan="12" class="empty">${curCycleId?'لا يوجد موظفون في هذه الدورة':'اختر دورة أولاً'}</td></tr>`;
     return;
   }
   tb.innerHTML=rows.map((e,i)=>{
@@ -585,6 +586,7 @@ function renderStaff(){
     const sc=e.objectives.filter(o=>o.score!==null&&o.score!=='').length;
     const txCount=(workload.transactions||{})[e.employee_name]||0;
     const tskCount=(workload.tasks||{})[e.employee_name]||0;
+    const trainCount=(workload.training||{})[e.employee_id]||0;
     return `<tr>
       <td>${i+1}</td>
       <td style="display:${showDept?'':'none'};font-size:11px;color:#888;">${e.dept_name||''}</td>
@@ -594,6 +596,7 @@ function renderStaff(){
       <td style="text-align:center;font-size:12px;">${e.objectives.length} هدف (${sc} مقيَّم)</td>
       <td style="text-align:center;font-weight:700;color:${txCount?'#1565c0':'#bbb'};">${txCount||'—'}</td>
       <td style="text-align:center;font-weight:700;color:${tskCount?'#2e7d32':'#bbb'};">${tskCount||'—'}</td>
+      <td style="text-align:center;font-weight:700;color:${trainCount?'#8b5cf6':'#bbb'};">${trainCount||'—'}</td>
       <td style="text-align:center;">
         ${avg!==null?`<strong style="color:#1b5e20;">${avgStr}</strong> <span style="color:#f59f00;">★</span>`:'—'}
       </td>
