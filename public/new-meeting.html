@@ -615,7 +615,7 @@ async function exportMoMFromForm() {
     mkTblPr(10350),
     mkGrid(10350),
     trH(576, thBlue('جدول الأعمال', 10350)) +
-    `<w:tr><w:trPr><w:trHeight w:val="1459"/></w:trPr>${tdXml(agendaXml, 10350)}</w:tr>`
+    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/></w:trPr>${tdXml(agendaXml, 10350)}</w:tr>`
   );
 
   // Discussions (formerly decisions) table
@@ -626,7 +626,7 @@ async function exportMoMFromForm() {
     mkTblPr(10350),
     mkGrid(10350),
     trH(576, thBlue('المناقشة', 10350)) +
-    `<w:tr><w:trPr><w:trHeight w:val="2017"/></w:trPr>${tdXml(decisionsXml, 10350)}</w:tr>`
+    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/></w:trPr>${tdXml(decisionsXml, 10350)}</w:tr>`
   );
 
   // Recommendations (formerly actions) table
@@ -641,7 +641,7 @@ async function exportMoMFromForm() {
     mkTblPr(10350),
     mkGrid(5760, 2340, 2250),
     trH(576, thBlue('التوصيات', 10350, 3)) +
-    trH(576, thBlue('البند', 5760), thBlue('المسؤول', 2340), thBlue('تاريخ الإنجاز', 2250)) +
+    trH(576, thBlue('التوصية', 5760), thBlue('المسؤول', 2340), thBlue('تاريخ الإنجاز', 2250)) +
     (actionDataRows || trH(432, tdTxt('',5760), tdTxt('',2340), tdTxt('',2250)))
   );
 
