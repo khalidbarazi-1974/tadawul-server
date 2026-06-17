@@ -166,19 +166,32 @@ function computeDay() {
   document.getElementById('dayName').value = days[new Date(d).getDay()];
 }
 
+let _contactPool = [];
+
 function onSearch() {
   const q = document.getElementById('contactSearch').value.trim().toLowerCase();
   const res = document.getElementById('searchResults');
-  if (!q) { res.classList.remove('show'); return; }
-  const matches = allContacts.filter(c => c.name.toLowerCase().includes(q)).slice(0, 20);
+  const matches = q
+    ? allContacts.filter(c => c.name.toLowerCase().includes(q)).slice(0, 20)
+    : allContacts.slice(0, 40);
   if (!matches.length) { res.classList.remove('show'); return; }
-  res.innerHTML = matches.map(c =>
-    `<div class="sr-item" onclick="addFromContact(${JSON.stringify(c.id)})">
+  _contactPool = matches;
+  res.innerHTML = matches.map((c, i) =>
+    `<div class="sr-item" onclick="addFromPool(${i})">
       <div><div class="sr-name">${c.name}</div><div class="sr-sub">${c.sub}</div></div>
       <div style="font-size:10px;color:#0369a1;font-weight:700;">${c.kind==='external'?'خارجي':'داخلي'}</div>
     </div>`
   ).join('');
   res.classList.add('show');
+}
+
+function addFromPool(i) {
+  const c = _contactPool[i];
+  if (!c) return;
+  guests.push({ name: c.name, car_make: c.car_make||'', car_color: c.car_color||'', car_plate: c.car_plate||'' });
+  renderGuests();
+  document.getElementById('contactSearch').value = '';
+  document.getElementById('searchResults').classList.remove('show');
 }
 
 function addFromContact(id) {

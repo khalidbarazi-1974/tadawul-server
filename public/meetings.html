@@ -309,12 +309,15 @@ tr:hover td{background:#fffbeb;}
 
       <!-- Attendees -->
       <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
+      <div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:4px;">داخلي</div>
       <div class="att-list" id="attListInternal"></div>
-      <div class="att-list" id="attListExternal" style="display:none;"></div>
+      <div id="extSection" style="display:none;">
+        <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin:8px 0 4px;">خارجي</div>
+        <div class="att-list" id="attListExternal"></div>
+      </div>
       <div style="margin-top:8px;">
         <div class="att-tabs" id="attTabsM">
-          <button class="att-tab active" onclick="switchAttTabM('staff')">موظفو الهيئة</button>
-          <button class="att-tab" onclick="switchAttTabM('int')">داخلي</button>
+          <button class="att-tab active" onclick="switchAttTabM('int')">داخلي</button>
           <button class="att-tab" onclick="switchAttTabM('ext')">خارجي</button>
         </div>
         <input id="attFilterM" type="text" autocomplete="off" placeholder="فلترة بالاسم..."
@@ -564,7 +567,7 @@ async function goStep2() {
   renderAgenda();
   renderDecisions();
   renderActions();
-  activeAttTabM = 'staff';
+  activeAttTabM = 'int';
   document.getElementById('step1Ov').classList.remove('open');
   document.getElementById('step2Ov').classList.add('open');
   setTimeout(renderPickerM, 50);
@@ -579,46 +582,50 @@ function switchAttTab(tab) {}
 function populatePicker() { renderPickerM(); }
 function addAttendeeFromPicker() {}
 
-let activeAttTabM = 'staff';
+let activeAttTabM = 'int';
 
 function switchAttTabM(tab) {
   activeAttTabM = tab;
   const btns = document.getElementById('attTabsM').querySelectorAll('.att-tab');
-  btns[0].classList.toggle('active', tab === 'staff');
-  btns[1].classList.toggle('active', tab === 'int');
-  btns[2].classList.toggle('active', tab === 'ext');
+  btns[0].classList.toggle('active', tab === 'int');
+  btns[1].classList.toggle('active', tab === 'ext');
   if (document.getElementById('attFilterM')) document.getElementById('attFilterM').value = '';
   renderPickerM();
 }
+
+let _attPoolM = [];
 
 function renderPickerM() {
   const q = ((document.getElementById('attFilterM') || {}).value || '').toLowerCase().trim();
   const added = new Set(formAttendees.map(a => a.ref_id || a.name));
   let pool = [];
-  if (activeAttTabM === 'staff') {
-    pool = allStaff.filter(e => !added.has(String(e.id))).map(e => {
+  if (activeAttTabM === 'int') {
+    const staffPart = allStaff.filter(e => !added.has(String(e.id))).map(e => {
       const t = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
       return { kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: t, org: '' };
     });
-  } else if (activeAttTabM === 'int') {
-    pool = intContacts.filter(c => !added.has(String(c.id))).map(c =>
+    const intPart = intContacts.filter(c => !added.has(String(c.id))).map(c =>
       ({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '' }));
+    pool = [...staffPart, ...intPart];
   } else {
     pool = extContacts.filter(c => !added.has(String(c.id))).map(c =>
       ({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'' }));
   }
   if (q) pool = pool.filter(p => p.name.toLowerCase().includes(q));
+  _attPoolM = pool;
   const el = document.getElementById('attPickerListM');
   if (!el) return;
   if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
-  el.innerHTML = pool.map(p =>
+  el.innerHTML = pool.map((p, i) =>
     `<div style="padding:7px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
-         onclick="addAttendeeItemM(${JSON.stringify(p)})">
+         onclick="addFromAttPoolM(${i})">
       <span style="font-weight:600;">${p.name}</span>
       <span style="font-size:11px;color:#92400e;">${p.title || p.org || ''}</span>
     </div>`
   ).join('');
 }
+
+function addFromAttPoolM(i) { addAttendeeItemM(_attPoolM[i]); }
 
 function addAttendeeItemM(p) {
   formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
@@ -637,6 +644,7 @@ function removeAttendee(idx) {
 function renderAttendees() {
   const intList = document.getElementById('attListInternal');
   const extList = document.getElementById('attListExternal');
+  const extSection = document.getElementById('extSection');
   const internal = formAttendees.filter(a => a.kind !== 'external');
   const external = formAttendees.filter(a => a.kind === 'external');
 
@@ -659,6 +667,7 @@ function renderAttendees() {
 
   intList.innerHTML = buildTable(internal, 'الهيئة السعودية للمياه');
   extList.innerHTML = buildTable(external, null);
+  extSection.style.display = external.length ? '' : 'none';
 }
 
 function addAgendaItem() {
@@ -996,20 +1005,20 @@ async function exportMoM() {
     `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>` +
     `${CB}<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="top"/></w:tcPr>${innerXml}</w:tc>`;
 
-  // Full-width helpers (100% pct) — for single-column tables to prevent border overflow
+  // Full-width helpers (exact dxa=9360) — text area = page 12240 - margins 1440×2
   const mkTblPrFull = () =>
-    `<w:tblPr><w:bidiVisual/><w:tblW w:w="5000" w:type="pct"/>` +
+    `<w:tblPr><w:bidiVisual/><w:tblW w:w="9360" w:type="dxa"/><w:tblInd w:w="0" w:type="dxa"/>` +
     `${BORDERS}${CELL_MAR}` +
     `<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr>`;
 
   const thBlueFull = (text) =>
-    `<w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/>` +
+    `<w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/>` +
     `${CB}<w:shd w:val="clear" w:color="auto" w:fill="0066CC"/><w:vAlign w:val="center"/></w:tcPr>` +
     `<w:p><w:pPr><w:bidi/><w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr></w:pPr>` +
     `<w:r><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r></w:p></w:tc>`;
 
   const tdXmlFull = (innerXml) =>
-    `<w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/>` +
+    `<w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/>` +
     `${CB}<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="top"/></w:tcPr>${innerXml}</w:tc>`;
 
   // ── Build content ─────────────────────────────────────────────────────────
@@ -1080,7 +1089,7 @@ async function exportMoM() {
 
   const agendaTable = mkTbl(
     mkTblPrFull(),
-    mkGrid(10350),
+    mkGrid(9360),
     trH(576, thBlueFull('جدول الأعمال')) +
     `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXmlFull(agendaXml)}</w:tr>`
   );
@@ -1092,7 +1101,7 @@ async function exportMoM() {
 
   const decisionsTable = mkTbl(
     mkTblPrFull(),
-    mkGrid(10350),
+    mkGrid(9360),
     trH(576, thBlueFull('المناقشة')) +
     `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXmlFull(decisionsXml)}</w:tr>`
   );

@@ -164,8 +164,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
     <div id="attListAll" class="att-list" style="min-height:60px;"></div>
     <div style="margin-top:10px;">
       <div class="att-tabs" id="attTabs">
-        <button class="att-tab active" onclick="switchAttTabNM('staff')">موظفو الهيئة</button>
-        <button class="att-tab" onclick="switchAttTabNM('int')">داخلي</button>
+        <button class="att-tab active" onclick="switchAttTabNM('int')">داخلي</button>
         <button class="att-tab" onclick="switchAttTabNM('ext')">خارجي</button>
       </div>
       <input id="attFilter" type="text" autocomplete="off" placeholder="فلترة بالاسم..."
@@ -292,46 +291,50 @@ function switchAttTab() {}
 function populatePicker() { renderPickerNM(); }
 function addAttendeeFromPicker() {}
 
-let activeAttTabNM = 'staff';
+let activeAttTabNM = 'int';
 
 function switchAttTabNM(tab) {
   activeAttTabNM = tab;
   const btns = document.getElementById('attTabs').querySelectorAll('.att-tab');
-  btns[0].classList.toggle('active', tab === 'staff');
-  btns[1].classList.toggle('active', tab === 'int');
-  btns[2].classList.toggle('active', tab === 'ext');
+  btns[0].classList.toggle('active', tab === 'int');
+  btns[1].classList.toggle('active', tab === 'ext');
   if (document.getElementById('attFilter')) document.getElementById('attFilter').value = '';
   renderPickerNM();
 }
+
+let _attPoolNM = [];
 
 function renderPickerNM() {
   const q = ((document.getElementById('attFilter') || {}).value || '').toLowerCase().trim();
   const added = new Set(formAttendees.map(a => a.ref_id || a.name));
   let pool = [];
-  if (activeAttTabNM === 'staff') {
-    pool = allStaff.filter(e => !added.has(String(e.id))).map(e => {
+  if (activeAttTabNM === 'int') {
+    const staffPart = allStaff.filter(e => !added.has(String(e.id))).map(e => {
       const t = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
       return { kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: t, org: '' };
     });
-  } else if (activeAttTabNM === 'int') {
-    pool = intContacts.filter(c => !added.has(String(c.id))).map(c =>
+    const intPart = intContacts.filter(c => !added.has(String(c.id))).map(c =>
       ({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '' }));
+    pool = [...staffPart, ...intPart];
   } else {
     pool = extContacts.filter(c => !added.has(String(c.id))).map(c =>
       ({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'' }));
   }
   if (q) pool = pool.filter(p => p.name.toLowerCase().includes(q));
+  _attPoolNM = pool;
   const el = document.getElementById('attPickerList');
   if (!el) return;
   if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
-  el.innerHTML = pool.map(p =>
+  el.innerHTML = pool.map((p, i) =>
     `<div style="padding:7px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
-         onclick="addAttendeeItem(${JSON.stringify(p)})">
+         onclick="addFromAttPoolNM(${i})">
       <span style="font-weight:600;">${p.name}</span>
       <span style="font-size:11px;color:#92400e;">${p.title || p.org || ''}</span>
     </div>`
   ).join('');
 }
+
+function addFromAttPoolNM(i) { addAttendeeItem(_attPoolNM[i]); }
 
 function addAttendeeItem(p) {
   formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
