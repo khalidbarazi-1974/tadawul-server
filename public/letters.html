@@ -51,6 +51,21 @@ body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;backg
 .btn-rm{width:28px;height:28px;border:none;background:#fee2e2;color:#dc2626;border-radius:6px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .btn-add{padding:6px 12px;border:1.5px dashed #006b5c;background:transparent;color:#006b5c;border-radius:7px;cursor:pointer;font-family:inherit;font-size:.84rem;font-weight:600;display:inline-flex;align-items:center;gap:5px}
 .btn-add:hover{background:#f0fdf9}
+.recip-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px;min-height:4px;}
+.recip-chip{display:inline-flex;align-items:center;gap:4px;background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:3px 10px;border-radius:20px;font-size:.82rem;font-weight:600;cursor:default;}
+.recip-chip button{background:none;border:none;color:#065f46;cursor:pointer;padding:0 2px;font-size:12px;display:flex;align-items:center;line-height:1;}
+.recip-chip button:hover{color:#b91c1c;}
+.picker-controls{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
+.picker-list{border:1.5px solid #e5e7eb;border-radius:8px;max-height:170px;overflow-y:auto;margin-bottom:6px;background:#fff;}
+.picker-item{padding:7px 12px;cursor:pointer;font-size:.86rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f3f4f6;}
+.picker-item:last-child{border-bottom:none;}
+.picker-item:hover{background:#f0fdf4;}
+.picker-item.selected{background:#d1fae5;}
+.picker-item .pi-name{font-weight:600;}
+.picker-item .pi-org{font-size:.78rem;color:#6b7280;margin-top:1px;}
+.picker-manual{display:flex;gap:6px;margin-top:4px;}
+.picker-manual input{flex:1;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.84rem;direction:rtl;}
+.picker-manual input:focus{outline:none;border-color:#006b5c;}
 .actions{margin-top:14px;display:flex;gap:10px;flex-direction:row-reverse;align-items:center;flex-wrap:wrap;position:relative}
 .btn-gen{padding:8px 22px;background:#006b5c;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
 .btn-gen:hover{background:#005a4c}
@@ -205,16 +220,26 @@ body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;backg
       </div></div>
 
       <div id="sec-to"><div class="sec">المُرسَل إليه <span style="color:#dc2626">*</span></div>
-      <div style="margin-bottom:8px;display:flex;gap:20px;align-items:center;font-size:13px;color:#374151;">
-        <label style="cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="radio" name="recipType" value="ext" checked onchange="onRecipTypeChange()"> خارجي</label>
-        <label style="cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="radio" name="recipType" value="int" onchange="onRecipTypeChange()"> داخلي</label>
+      <div class="recip-chips" id="toChips"></div>
+      <div class="picker-controls">
+        <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.84rem;color:#374151;"><input type="radio" name="recipType" value="ext" checked onchange="onRecipTypeChange()"> خارجي</label>
+        <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.84rem;color:#374151;"><input type="radio" name="recipType" value="int" onchange="onRecipTypeChange()"> داخلي</label>
+        <select id="toOrgFilter" onchange="filterToList()" style="padding:5px 8px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.83rem;max-width:150px;"><option value="">كل الجهات</option></select>
+        <input id="toSearch" type="text" oninput="filterToList()" placeholder="بحث بالاسم..." style="flex:1;min-width:120px;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.84rem;direction:rtl;">
       </div>
-      <div class="cc-list" id="toList"></div>
-      <button class="btn-add" type="button" onclick="addTo()"><i data-lucide="plus"></i> إضافة مُرسَل إليه</button></div>
+      <div class="picker-list" id="toPickerList"></div>
+      <div class="picker-manual">
+        <input id="toManual" type="text" placeholder="أو أدخل اسم مستلم يدوياً...">
+        <button class="btn-add" type="button" onclick="addToManual()" style="flex-shrink:0;white-space:nowrap;"><i data-lucide="plus"></i> إضافة</button>
+      </div></div>
 
       <div id="sec-cc"><div class="sec">نسخ إلى (اختياري)</div>
-      <div class="cc-list" id="ccList"></div>
-      <button class="btn-add" type="button" onclick="addCC()"><i data-lucide="plus"></i> إضافة نسخة</button></div>
+      <div class="recip-chips" id="ccChips"></div>
+      <div class="picker-manual" style="margin-bottom:4px;">
+        <input id="ccSearch" type="text" placeholder="ابحث لإضافة نسخة..." oninput="filterCCList()" style="flex:1;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.84rem;direction:rtl;position:relative;">
+        <button class="btn-add" type="button" onclick="addCCManual()" style="flex-shrink:0;white-space:nowrap;"><i data-lucide="plus"></i> يدوياً</button>
+      </div>
+      <div class="picker-list" id="ccPickerList" style="display:none;max-height:140px;"></div></div>
 
       <div id="sec-ref"><div class="sec">الإشارة / المرجع (اختياري)</div>
       <div class="row2">
@@ -448,78 +473,122 @@ function switchTab(tab, btn) {
   showMsg('','');
 }
 
-function addCC() {
-  const list = document.getElementById('ccList');
-  const id   = 'cc' + Date.now();
-  const div  = document.createElement('div');
-  div.className = 'cc-item'; div.id = id;
-  div.innerHTML =
-    `<select onchange="handleOtherSel(this)">
-      <option value="">— اختر نسخة —</option>
-      ${RECIPIENTS.map((r,i) => `<option value="${i}">${r.title}</option>`).join('')}
-      <option value="other">أخرى...</option>
-    </select>
-    <input type="text" class="other-input" placeholder="اكتب اسم المستلم..." style="display:none;" />
-    <button class="btn-rm" onclick="document.getElementById('${id}').remove()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>`;
-  list.appendChild(div);
-  div.querySelector('select').focus();
+// ── Searchable multi-select pickers ──────────────────────────────────────────
+
+let toSelected = [];   // [{title, suffix, org}]
+let ccSelected = [];   // [{title, suffix}]
+
+function rebuildOrgFilter() {
+  const sel = document.getElementById('toOrgFilter');
+  if (!sel) return;
+  const orgs = [...new Set(RECIPIENTS.map(r => r.org).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">كل الجهات</option>' +
+    orgs.map(o => `<option value="${o}">${o}</option>`).join('');
 }
 
-function getCCLines() {
-  return [...document.querySelectorAll('#ccList .cc-item')]
-    .map(item => {
-      const sel = item.querySelector('select');
-      if (!sel || sel.value === '') return null;
-      if (sel.value === 'other') {
-        const txt = (item.querySelector('.other-input')?.value || '').trim();
-        return txt ? { title: txt, suffix: '' } : null;
-      }
-      return RECIPIENTS[+sel.value];
-    }).filter(Boolean);
+function filterToList() {
+  const orgF = (document.getElementById('toOrgFilter')?.value || '').toLowerCase();
+  const q    = (document.getElementById('toSearch')?.value || '').toLowerCase();
+  const list = document.getElementById('toPickerList');
+  if (!list) return;
+  const filtered = RECIPIENTS.filter(r =>
+    (!orgF || (r.org||'').toLowerCase() === orgF) &&
+    (!q    || r.title.toLowerCase().includes(q))
+  );
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:10px 14px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
+    return;
+  }
+  list.innerHTML = filtered.map((r, i) => {
+    const idx   = RECIPIENTS.indexOf(r);
+    const isSel = toSelected.some(s => s.title === r.title);
+    return `<div class="picker-item${isSel?' selected':''}" onclick="toggleToItem(${idx})">
+      <div><div class="pi-name">${r.title}</div>${r.org ? `<div class="pi-org">${r.org}</div>` : ''}</div>
+      ${isSel ? '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#065f46" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+    </div>`;
+  }).join('');
 }
 
-function refreshToRemoveBtns() {
-  const items = document.querySelectorAll('#toList .btn-rm');
-  items.forEach((btn, i) => { btn.style.visibility = items.length > 1 ? 'visible' : 'hidden'; });
+function toggleToItem(idx) {
+  const r = RECIPIENTS[idx];
+  if (!r) return;
+  const pos = toSelected.findIndex(s => s.title === r.title);
+  if (pos >= 0) toSelected.splice(pos, 1); else toSelected.push(r);
+  renderToChips();
+  filterToList();
 }
 
-function handleOtherSel(sel) {
-  const input = sel.parentElement.querySelector('.other-input');
-  if (!input) return;
-  input.style.display = sel.value === 'other' ? '' : 'none';
-  if (sel.value === 'other') input.focus();
+function renderToChips() {
+  const el = document.getElementById('toChips');
+  if (!el) return;
+  el.innerHTML = toSelected.map((r, i) =>
+    `<span class="recip-chip">${r.title}<button type="button" onclick="toSelected.splice(${i},1);renderToChips();filterToList();">✕</button></span>`
+  ).join('');
 }
 
-function addTo() {
-  const list = document.getElementById('toList');
-  const id   = 'to' + Date.now();
-  const div  = document.createElement('div');
-  div.className = 'cc-item'; div.id = id;
-  div.innerHTML =
-    '<select onchange="handleOtherSel(this)">' +
-    '<option value="">— اختر المُرسَل إليه —</option>' +
-    RECIPIENTS.map((r,i) => '<option value="' + i + '">' + r.title + '</option>').join('') +
-    '<option value="other">أخرى...</option>' +
-    '</select>' +
-    '<input type="text" class="other-input" placeholder="اكتب اسم المستلم..." style="display:none;" />' +
-    '<button class="btn-rm" onclick="document.getElementById(\'' + id + '\').remove();refreshToRemoveBtns()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>';
-  list.appendChild(div);
-  div.querySelector('select').focus();
-  refreshToRemoveBtns();
+function addToManual() {
+  const inp = document.getElementById('toManual');
+  const v   = (inp?.value || '').trim();
+  if (!v) return;
+  toSelected.push({ title: v, suffix: '' });
+  renderToChips();
+  if (inp) inp.value = '';
 }
 
-function getToLines() {
-  return [...document.querySelectorAll('#toList .cc-item')]
-    .map(item => {
-      const sel = item.querySelector('select');
-      if (!sel || sel.value === '') return null;
-      if (sel.value === 'other') {
-        const txt = (item.querySelector('.other-input')?.value || '').trim();
-        return txt ? { title: txt, suffix: '' } : null;
-      }
-      return RECIPIENTS[+sel.value];
-    }).filter(Boolean);
+function getToLines() { return toSelected.length ? toSelected : []; }
+
+// CC picker
+function filterCCList() {
+  const q    = (document.getElementById('ccSearch')?.value || '').toLowerCase();
+  const list = document.getElementById('ccPickerList');
+  if (!list) return;
+  if (!q) { list.style.display = 'none'; return; }
+  list.style.display = '';
+  const all = [...extContacts, ...intContacts];
+  const filtered = all.filter(r => r.title.toLowerCase().includes(q)).slice(0, 15);
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:8px 12px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(r => {
+    const isSel = ccSelected.some(s => s.title === r.title);
+    return `<div class="picker-item${isSel?' selected':''}" onclick="toggleCCItem(${JSON.stringify(r)})">
+      <div><div class="pi-name">${r.title}</div>${r.org ? `<div class="pi-org">${r.org}</div>` : ''}</div>
+      ${isSel ? '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#065f46" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+    </div>`;
+  }).join('');
 }
+
+function toggleCCItem(r) {
+  const pos = ccSelected.findIndex(s => s.title === r.title);
+  if (pos >= 0) ccSelected.splice(pos, 1); else ccSelected.push(r);
+  renderCCChips();
+  filterCCList();
+}
+
+function renderCCChips() {
+  const el = document.getElementById('ccChips');
+  if (!el) return;
+  el.innerHTML = ccSelected.map((r, i) =>
+    `<span class="recip-chip">${r.title}<button type="button" onclick="ccSelected.splice(${i},1);renderCCChips();filterCCList();">✕</button></span>`
+  ).join('');
+}
+
+function addCCManual() {
+  const inp = document.getElementById('ccSearch');
+  const v   = (inp?.value || '').trim();
+  if (!v) return;
+  ccSelected.push({ title: v, suffix: '' });
+  renderCCChips();
+  if (inp) { inp.value = ''; document.getElementById('ccPickerList').style.display='none'; }
+}
+
+function getCCLines() { return ccSelected; }
+
+function refreshToRemoveBtns() {}
+function handleOtherSel() {}
+function addTo() {}
+function addCC() {}
 
 function showMsg(type, text) {
   const el = document.getElementById('msgBox');
@@ -570,18 +639,21 @@ async function loadContacts() {
       fetch('/api/contacts/external', { headers: h }).then(r => r.json()),
       fetch('/api/contacts/internal', { headers: h }).then(r => r.json())
     ]);
-    extContacts = ext.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '' }));
-    intContacts = int_.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '' }));
+    extContacts = ext.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '', org: c.org || '' }));
+    intContacts = int_.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '', org: c.sector || c.dept || '' }));
     RECIPIENTS = activeRecipients();
+    rebuildOrgFilter();
+    filterToList();
     rebuildDropdowns();
   } catch(e) { console.error('contacts load failed', e); }
 }
 
 function onRecipTypeChange() {
   RECIPIENTS = activeRecipients();
-  document.getElementById('toList').innerHTML = '';
-  document.getElementById('ccList').innerHTML = '';
-  addTo();
+  toSelected = [];
+  renderToChips();
+  rebuildOrgFilter();
+  filterToList();
 }
 
 function rebuildDropdowns() {
@@ -592,20 +664,6 @@ function rebuildDropdowns() {
     sel.innerHTML = '<option value="">— اختر المسمى —</option>' +
       SENDERS.map((s, i) => `<option value="${i}">${s.title}</option>`).join('');
     if (prev !== '' && +prev < SENDERS.length) sel.value = prev;
-  });
-  document.querySelectorAll('#toList .cc-item select').forEach(sel => {
-    const prev = sel.value;
-    sel.innerHTML = '<option value="">— اختر المُرسَل إليه —</option>' +
-      RECIPIENTS.map((r, i) => `<option value="${i}">${r.title}</option>`).join('') +
-      '<option value="other">أخرى...</option>';
-    if (prev === 'other' || (prev !== '' && +prev < RECIPIENTS.length)) sel.value = prev;
-  });
-  document.querySelectorAll('#ccList .cc-item select').forEach(sel => {
-    const prev = sel.value;
-    sel.innerHTML = '<option value="">— اختر نسخة —</option>' +
-      RECIPIENTS.map((r, i) => `<option value="${i}">${r.title}</option>`).join('') +
-      '<option value="other">أخرى...</option>';
-    if (prev === 'other' || (prev !== '' && +prev < RECIPIENTS.length)) sel.value = prev;
   });
   renderCurrentLists();
 }
@@ -880,8 +938,8 @@ function resetForm() {
   if (actEl) actEl.checked = false;
   const nameEl = document.getElementById('l_sig_name');
   if (nameEl) nameEl.readOnly = true;
-  document.getElementById('toList').innerHTML = ''; addTo();
-  document.getElementById('ccList').innerHTML = '';
+  toSelected = []; renderToChips(); filterToList();
+  ccSelected = []; renderCCChips();
   const mActEl = document.getElementById('m_acting');
   if (mActEl) mActEl.checked = false;
   document.querySelectorAll('input[name="m_req"]').forEach(cb => { cb.checked = false; });
@@ -1136,15 +1194,9 @@ function buildNomTableOOXML() {
 // ── Generate ──────────────────────────────────────────────────────────────
 // ── Archive ───────────────────────────────────────────────────────────────────
 function getArchiveItems(listId) {
-  return [...document.querySelectorAll(listId + ' .cc-item')].map(item => {
-    const sel = item.querySelector('select');
-    if (!sel || sel.value === '') return null;
-    if (sel.value === 'other') {
-      const txt = (item.querySelector('.other-input')?.value || '').trim();
-      return txt ? {type:'other', text:txt} : null;
-    }
-    return {type:'index', idx:sel.value};
-  }).filter(Boolean);
+  if (listId === '#toList') return toSelected.map(r => ({ type:'chip', title: r.title, suffix: r.suffix||'' }));
+  if (listId === '#ccList') return ccSelected.map(r => ({ type:'chip', title: r.title, suffix: r.suffix||'' }));
+  return [];
 }
 
 function saveToArchive() {
@@ -1180,24 +1232,14 @@ function saveToArchive() {
   localStorage.setItem(arcKey(), JSON.stringify(archive));
 }
 
-function restoreArchiveItems(listId, items, addFn) {
-  const list = document.getElementById(listId);
-  list.innerHTML = '';
-  if (!items || !items.length) { addFn(); return; }
-  items.forEach(item => {
-    addFn();
-    const lastItem = list.lastElementChild;
-    const sel = lastItem?.querySelector('select');
-    if (!sel) return;
-    if (item.type === 'other') {
-      sel.value = 'other'; handleOtherSel(sel);
-      const inp = lastItem.querySelector('.other-input');
-      if (inp) inp.value = item.text;
-    } else {
-      sel.value = item.idx;
-    }
-  });
-  if (listId === 'toList') refreshToRemoveBtns();
+function restoreArchiveItems(listId, items) {
+  if (listId === 'toList') {
+    toSelected = (items||[]).map(i => ({ title: i.title||i.text||'', suffix: i.suffix||'' })).filter(i=>i.title);
+    renderToChips(); filterToList();
+  } else if (listId === 'ccList') {
+    ccSelected = (items||[]).map(i => ({ title: i.title||i.text||'', suffix: i.suffix||'' })).filter(i=>i.title);
+    renderCCChips();
+  }
 }
 
 function deleteFromArchive(idx) {
@@ -1226,8 +1268,8 @@ function loadFromArchive(idx) {
     sv('l_ref_num', f.refNum || ''); sv('l_ref_date', f.refDate || '');
     sv('l_ref_subj', f.refSubj || ''); sv('l_ref_req', f.refReq || '');
     sv('l_body', f.body || '');
-    restoreArchiveItems('toList', f.to, addTo);
-    restoreArchiveItems('ccList', f.cc, addCC);
+    restoreArchiveItems('toList', f.to);
+    restoreArchiveItems('ccList', f.cc);
   } else {
     sv('m_subject', f.subject || '');
     document.querySelectorAll('input[name="m_cls"]').forEach(cb => { cb.checked = (f.cls||[]).includes(cb.value); });
@@ -1668,7 +1710,6 @@ async function generate() {
 
 // initialise dropdowns from loaded lists
 rebuildDropdowns();
-addTo();
 loadContacts();
 showDraftUI(null);
 lucide.createIcons();

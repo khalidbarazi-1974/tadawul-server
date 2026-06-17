@@ -178,6 +178,9 @@ tr:hover td{background:#fffbeb;}
     <button class="btn-new" onclick="location.href='/new-meeting.html'">
       <i class="fa-solid fa-plus"></i> اجتماع جديد
     </button>
+    <button class="btn-new" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);" onclick="location.href='/permit.html'">
+      <i class="fa-solid fa-id-card"></i> تصريح دخول
+    </button>
   </div>
 
   <!-- Meetings Table -->
@@ -306,15 +309,16 @@ tr:hover td{background:#fffbeb;}
 
       <!-- Attendees -->
       <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
-      <div class="att-tabs">
-        <button class="att-tab active" id="attTabInternal" onclick="switchAttTab('internal')">داخلي (موظفون وزملاء)</button>
-        <button class="att-tab" id="attTabExternal" onclick="switchAttTab('external')">خارجي (جهات خارجية)</button>
-      </div>
       <div class="att-list" id="attListInternal"></div>
       <div class="att-list" id="attListExternal" style="display:none;"></div>
-      <select id="attPicker" onchange="addAttendeeFromPicker()" style="width:100%;margin-top:8px;padding:7px 10px;border:1.5px solid #fcd34d;border-radius:7px;font-family:inherit;font-size:13px;background:#fffbeb;">
-        <option value="">-- اختر حاضراً للإضافة --</option>
-      </select>
+      <div style="position:relative;margin-top:8px;" id="attSearchWrapM">
+        <i class="fa-solid fa-magnifying-glass" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none;"></i>
+        <input id="attSearchM" type="text" autocomplete="off"
+               placeholder="ابحث باسم الحاضر للإضافة..."
+               oninput="onAttSearchM()" onfocus="onAttSearchM()"
+               style="width:100%;padding:9px 38px 9px 12px;border:1.5px solid #fcd34d;border-radius:8px;font-family:inherit;font-size:13px;background:#fffbeb;">
+        <div id="attSearchResultsM" style="display:none;position:absolute;right:0;left:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:200;max-height:220px;overflow-y:auto;"></div>
+      </div>
 
       <!-- Agenda -->
       <div class="section-title"><i class="fa-solid fa-list-check"></i> جدول الأعمال</div>
@@ -568,74 +572,66 @@ function goBack() {
 }
 
 function switchAttTab(tab) {
-  activeAttTab = tab;
   document.getElementById('attListInternal').style.display = tab === 'internal' ? '' : 'none';
   document.getElementById('attListExternal').style.display = tab === 'external' ? '' : 'none';
-  document.getElementById('attTabInternal').classList.toggle('active', tab === 'internal');
-  document.getElementById('attTabExternal').classList.toggle('active', tab === 'external');
-  populatePicker();
 }
+function populatePicker() {}
+function addAttendeeFromPicker() {}
 
-function populatePicker() {
-  const sel = document.getElementById('attPicker');
-  sel.innerHTML = '<option value="">-- اختر حاضراً للإضافة --</option>';
-  const addedRefs = new Set(formAttendees.map(a => a.ref_id || a.name));
-  if (activeAttTab === 'internal') {
-    allStaff.forEach(e => {
-      if (!addedRefs.has(String(e.id))) {
-        const label = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
-        const opt = new Option(`${e.name} — ${label}`, e.id);
-        opt.dataset.kind = 'internal_staff';
-        opt.dataset.name = e.name;
-        opt.dataset.title = label;
-        sel.add(opt);
-      }
-    });
-    intContacts.forEach(c => {
-      if (!addedRefs.has(String(c.id))) {
-        const opt = new Option(`${c.name} — ${c.sector || 'خارج الوكالة'}`, c.id);
-        opt.dataset.kind = 'internal_contact';
-        opt.dataset.name = c.name;
-        opt.dataset.title = c.title || '';
-        sel.add(opt);
-      }
-    });
-  } else {
-    extContacts.forEach(c => {
-      if (!addedRefs.has(String(c.id))) {
-        const opt = new Option(`${c.name} — ${c.org || ''}`, c.id);
-        opt.dataset.kind = 'external';
-        opt.dataset.name = c.name;
-        opt.dataset.title = c.title || '';
-        opt.dataset.org = c.org || '';
-        sel.add(opt);
-      }
-    });
-  }
-}
-
-function addAttendeeFromPicker() {
-  const sel = document.getElementById('attPicker');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt.value) return;
-  formAttendees.push({
-    kind:   opt.dataset.kind,
-    ref_id: opt.value,
-    name:   opt.dataset.name,
-    title:  opt.dataset.title,
-    org:    opt.dataset.org || ''
+function buildAttPoolM() {
+  const added = new Set(formAttendees.map(a => a.ref_id || a.name));
+  const pool = [];
+  allStaff.forEach(e => {
+    if (added.has(String(e.id))) return;
+    const label = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
+    pool.push({ kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: label, org: '', sub: label });
   });
-  sel.value = '';
+  intContacts.forEach(c => {
+    if (added.has(String(c.id))) return;
+    pool.push({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '', sub: c.sector||'داخلي' });
+  });
+  extContacts.forEach(c => {
+    if (added.has(String(c.id))) return;
+    pool.push({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'', sub: c.org||'خارجي' });
+  });
+  return pool;
+}
+
+function onAttSearchM() {
+  const q   = (document.getElementById('attSearchM').value || '').toLowerCase().trim();
+  const res = document.getElementById('attSearchResultsM');
+  if (!q) { res.style.display = 'none'; return; }
+  const matches = buildAttPoolM().filter(p => p.name.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { res.style.display = 'none'; return; }
+  res.style.display = '';
+  res.innerHTML = matches.map(p =>
+    `<div style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
+         onmousedown="addAttendeeItemM(${JSON.stringify(p)})">
+      <div><div style="font-weight:600;">${p.name}</div><div style="font-size:11px;color:#888;">${p.sub}</div></div>
+      <div style="font-size:10px;color:#b45309;font-weight:700;">${p.kind==='external'?'خارجي':'داخلي'}</div>
+    </div>`
+  ).join('');
+}
+
+function addAttendeeItemM(p) {
+  formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
+  document.getElementById('attSearchM').value = '';
+  document.getElementById('attSearchResultsM').style.display = 'none';
   renderAttendees();
-  populatePicker();
+  renderActions();
 }
 
 function removeAttendee(idx) {
   formAttendees.splice(idx, 1);
   renderAttendees();
-  populatePicker();
   renderActions();
 }
+
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('attSearchWrapM');
+  if (wrap && !wrap.contains(e.target))
+    document.getElementById('attSearchResultsM').style.display = 'none';
+});
 
 function renderAttendees() {
   const intList = document.getElementById('attListInternal');

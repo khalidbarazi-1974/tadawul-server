@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مسودة تصريح دخول</title>
+<link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/vendor/fonts/cairo.css">
+<script src="/vendor/jszip.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100vh;}
+
+.topbar{background:linear-gradient(135deg,#0369a1 0%,#0ea5e9 100%);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-left i{font-size:20px;opacity:.9;}
+.topbar h2{font-size:17px;font-weight:700;}
+.btn-top{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;gap:6px;}
+.btn-top:hover{background:rgba(255,255,255,.25);}
+
+.page{max-width:860px;margin:0 auto;padding:28px 20px 80px;}
+.section-card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.08);padding:22px 26px;margin-bottom:18px;}
+.section-title{font-size:13px;font-weight:700;color:#0369a1;margin-bottom:14px;padding-bottom:8px;border-bottom:1.5px solid #bae6fd;display:flex;align-items:center;gap:7px;}
+
+.fr{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.fr label{font-size:13px;font-weight:600;color:#555;}
+.fr input,.fr textarea,.fr select{padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;}
+.fr input:focus,.fr textarea:focus,.fr select:focus{outline:none;border-color:#0ea5e9;}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+.search-wrap{position:relative;margin-bottom:12px;}
+.search-wrap input{width:100%;padding:9px 40px 9px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;}
+.search-wrap input:focus{outline:none;border-color:#0ea5e9;}
+.search-wrap .si{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none;}
+.search-results{position:absolute;right:0;left:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:100;max-height:240px;overflow-y:auto;display:none;}
+.search-results.show{display:block;}
+.sr-item{padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;}
+.sr-item:last-child{border-bottom:none;}
+.sr-item:hover{background:#f0f9ff;}
+.sr-item .sr-name{font-weight:600;}
+.sr-item .sr-sub{font-size:11px;color:#888;}
+
+.guests-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
+.guests-table th{background:#e0f2fe;padding:8px 10px;font-size:11px;color:#0c4a6e;font-weight:700;text-align:center;border-bottom:1.5px solid #bae6fd;}
+.guests-table td{padding:5px 6px;border-bottom:1px solid #f5f5f5;text-align:center;}
+.guests-table td input{width:100%;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:12px;text-align:right;}
+.guests-table td input:focus{outline:none;border-color:#0ea5e9;}
+.guests-table tr:last-child td{border-bottom:none;}
+.btn-remove{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:14px;padding:0 6px;}
+.btn-add-row{background:#f0f9ff;color:#0369a1;border:1.5px dashed #7dd3fc;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;width:100%;margin-top:6px;}
+.btn-add-row:hover{background:#e0f2fe;}
+
+.bottom-bar{position:fixed;bottom:0;right:0;left:0;background:#fff;border-top:1px solid #e5e7eb;padding:12px 24px;display:flex;justify-content:flex-end;gap:10px;box-shadow:0 -2px 8px rgba(0,0,0,.07);}
+.btn{padding:9px 22px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;}
+.btn-primary:hover{opacity:.9;}
+.btn-secondary{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;}
+.btn-secondary:hover{background:#e2e8f0;}
+
+@media(max-width:640px){.f2,.f3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <i class="fa-solid fa-id-card"></i>
+    <h2>مسودة تصريح دخول</h2>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="btn-top" onclick="location.href='/meetings.html'"><i class="fa-solid fa-arrow-right" style="font-size:12px;"></i> العودة</button>
+    <button class="btn-top" onclick="logout()"><i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i> خروج</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-envelope-open-text"></i> بيانات الطلب</div>
+    <div class="fr">
+      <label>الجهة المرسل إليها</label>
+      <input id="recipient" value="سعادة الأستاذ/ باسل الصالح  سلمه الله،">
+    </div>
+    <div class="f3">
+      <div class="fr" style="margin-bottom:0;">
+        <label>اليوم</label>
+        <input id="dayName" readonly placeholder="يُحسب تلقائياً" style="background:#f9fafb;color:#666;">
+      </div>
+      <div class="fr" style="margin-bottom:0;">
+        <label>التاريخ</label>
+        <input type="date" id="eventDate" oninput="computeDay()">
+      </div>
+      <div class="fr" style="margin-bottom:0;">
+        <label>الوقت</label>
+        <input type="time" id="eventTime">
+      </div>
+    </div>
+    <div class="fr" style="margin-top:16px;margin-bottom:0;">
+      <label>مكان الاجتماع</label>
+      <input id="location" value="وكالة الشؤون الاقتصادية والتميز">
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title"><i class="fa-solid fa-users"></i> الزوار</div>
+    <div class="search-wrap" id="searchWrap">
+      <i class="fa-solid fa-magnifying-glass si"></i>
+      <input id="contactSearch" placeholder="ابحث باسم الضيف لإضافته من جهات الاتصال..."
+             autocomplete="off" oninput="onSearch()" onfocus="onSearch()">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+    <table class="guests-table">
+      <thead>
+        <tr>
+          <th>اسم الضيف</th>
+          <th>المركبة</th>
+          <th>اللون</th>
+          <th>رقم اللوحة</th>
+          <th style="width:36px;"></th>
+        </tr>
+      </thead>
+      <tbody id="guestsTbody"></tbody>
+    </table>
+    <button class="btn-add-row" onclick="addGuestRow()">
+      <i class="fa-solid fa-plus"></i> إضافة ضيف يدوياً
+    </button>
+  </div>
+
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" onclick="location.href='/meetings.html'">
+    <i class="fa-solid fa-arrow-right"></i> رجوع
+  </button>
+  <button class="btn btn-primary" onclick="exportPermit()">
+    <i class="fa-solid fa-file-word"></i> تصدير Word
+  </button>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) location.href = '/';
+
+let allContacts = [];
+let guests = [];
+
+async function init() {
+  const h = { 'Authorization': 'Bearer ' + token };
+  try {
+    const [ext, int_] = await Promise.all([
+      fetch('/api/contacts/external', { headers: h }).then(r => r.json()),
+      fetch('/api/contacts/internal', { headers: h }).then(r => r.json())
+    ]);
+    allContacts = [
+      ...ext.map(c => ({ ...c, kind: 'external', sub: c.org || c.title || '' })),
+      ...int_.map(c => ({ ...c, kind: 'internal', sub: c.dept || c.sector || '' }))
+    ];
+  } catch(e) { console.error(e); }
+}
+
+function computeDay() {
+  const d = document.getElementById('eventDate').value;
+  if (!d) { document.getElementById('dayName').value = ''; return; }
+  const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  document.getElementById('dayName').value = days[new Date(d).getDay()];
+}
+
+function onSearch() {
+  const q = document.getElementById('contactSearch').value.trim().toLowerCase();
+  const res = document.getElementById('searchResults');
+  if (!q) { res.classList.remove('show'); return; }
+  const matches = allContacts.filter(c => c.name.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { res.classList.remove('show'); return; }
+  res.innerHTML = matches.map(c =>
+    `<div class="sr-item" onclick="addFromContact(${JSON.stringify(c.id)})">
+      <div><div class="sr-name">${c.name}</div><div class="sr-sub">${c.sub}</div></div>
+      <div style="font-size:10px;color:#0369a1;font-weight:700;">${c.kind==='external'?'خارجي':'داخلي'}</div>
+    </div>`
+  ).join('');
+  res.classList.add('show');
+}
+
+function addFromContact(id) {
+  const c = allContacts.find(x => x.id === id);
+  if (!c) return;
+  guests.push({ name: c.name, car_make: c.car_make||'', car_color: c.car_color||'', car_plate: c.car_plate||'' });
+  renderGuests();
+  document.getElementById('contactSearch').value = '';
+  document.getElementById('searchResults').classList.remove('show');
+}
+
+function addGuestRow() {
+  guests.push({ name: '', car_make: '', car_color: '', car_plate: '' });
+  renderGuests();
+}
+
+function removeGuest(i) {
+  guests.splice(i, 1);
+  renderGuests();
+}
+
+function renderGuests() {
+  document.getElementById('guestsTbody').innerHTML = guests.map((g, i) =>
+    `<tr>
+      <td><input value="${esc(g.name)}" oninput="guests[${i}].name=this.value" placeholder="اسم الضيف"></td>
+      <td><input value="${esc(g.car_make)}" oninput="guests[${i}].car_make=this.value" placeholder="الماركة"></td>
+      <td><input value="${esc(g.car_color)}" oninput="guests[${i}].car_color=this.value" placeholder="اللون"></td>
+      <td><input value="${esc(g.car_plate)}" oninput="guests[${i}].car_plate=this.value" placeholder="رقم اللوحة"></td>
+      <td><button class="btn-remove" onclick="removeGuest(${i})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`
+  ).join('');
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('searchWrap').contains(e.target))
+    document.getElementById('searchResults').classList.remove('show');
+});
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  location.href = '/';
+}
+
+// ── Word Export ──────────────────────────────────────────────────────────────
+
+function formatDateAr(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+}
+
+function formatTimeAr(s) {
+  if (!s) return '';
+  const [hStr, mStr] = s.split(':');
+  let h = parseInt(hStr);
+  const period = h < 12 ? 'صباحاً' : 'مساءً';
+  if (h === 0) h = 12; else if (h > 12) h -= 12;
+  return `${h}:${mStr} ${period}`;
+}
+
+function xe(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const CB = '<w:tcBorders>' +
+  '<w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/>' +
+  '<w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/>' +
+  '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/>' +
+  '<w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/>' +
+  '</w:tcBorders>';
+
+function mkPara(text) {
+  return `<w:p><w:pPr><w:bidi/><w:rPr><w:rtl/></w:rPr></w:pPr>` +
+    `<w:r><w:rPr><w:rtl/></w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r></w:p>`;
+}
+
+function mkEmpty() { return `<w:p><w:pPr><w:bidi/></w:pPr></w:p>`; }
+
+function mkTblRow(cells, isHeader) {
+  const shade = isHeader ? '<w:shd w:val="clear" w:color="auto" w:fill="E0F2FE"/>' : '';
+  const bold  = isHeader ? '<w:b/><w:bCs/>' : '';
+  return `<w:tr>${cells.map(c =>
+    `<w:tc><w:tcPr><w:tcW w:w="2340" w:type="dxa"/>${CB}${shade}</w:tcPr>` +
+    `<w:p><w:pPr><w:bidi/><w:jc w:val="center"/><w:rPr><w:rtl/>${bold}</w:rPr></w:pPr>` +
+    `<w:r><w:rPr><w:rtl/>${bold}</w:rPr><w:t>${xe(c)}</w:t></w:r></w:p></w:tc>`
+  ).join('')}</w:tr>`;
+}
+
+async function exportPermit() {
+  const recipient = document.getElementById('recipient').value.trim() || 'سعادة الأستاذ/ باسل الصالح  سلمه الله،';
+  const day  = document.getElementById('dayName').value.trim();
+  const date = formatDateAr(document.getElementById('eventDate').value);
+  const time = formatTimeAr(document.getElementById('eventTime').value);
+  const loc  = document.getElementById('location').value.trim() || 'وكالة الشؤون الاقتصادية والتميز';
+
+  let bodyText = `أرجو التكرم بطلب تصريح دخول للزوار التالية بياناتهم لحضور اجتماع لدى ${loc}`;
+  if (day)  bodyText += ` يوم ${day}`;
+  if (date) bodyText += ` الموافق ${date}م`;
+  if (time) bodyText += `، الساعة ${time}`;
+  bodyText += '.';
+
+  const tblRows = [
+    mkTblRow(['اسم الضيف','المركبة','اللون','رقم اللوحة'], true),
+    ...(guests.length ? guests : [{ name:'', car_make:'', car_color:'', car_plate:'' }])
+      .map(g => mkTblRow([g.name, g.car_make, g.car_color, g.car_plate], false))
+  ];
+
+  const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document ${NS}><w:body>
+${mkPara(recipient)}
+${mkEmpty()}
+${mkPara('السلام عليكم ورحمة الله وبركاته،')}
+${mkEmpty()}
+${mkPara(bodyText)}
+<w:tbl><w:tblPr><w:bidiVisual/><w:tblW w:w="9360" w:type="dxa"/></w:tblPr>
+<w:tblGrid><w:gridCol w:w="2340"/><w:gridCol w:w="2340"/><w:gridCol w:w="2340"/><w:gridCol w:w="2340"/></w:tblGrid>
+${tblRows.join('')}</w:tbl>
+${mkEmpty()}
+${mkPara('مع الشكر والتقدير،،،')}
+<w:sectPr>
+  <w:pgSz w:w="12240" w:h="15840"/>
+  <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
+</w:sectPr>
+</w:body></w:document>`;
+
+  const cTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml', cTypes);
+  zip.file('_rels/.rels', rels);
+  zip.file('word/document.xml', docXml);
+  zip.file('word/_rels/document.xml.rels',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>`);
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `تصريح-دخول${date ? '-'+date.replace(/\//g,'-') : ''}.docx`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+init();
+</script>
+</body>
+</html>
