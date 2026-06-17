@@ -85,17 +85,21 @@ tr:hover td{background:#fffbeb;}
 
 /* ── Step 2 sections ── */
 .section-title{font-size:13px;font-weight:700;color:#b45309;margin:18px 0 10px;padding-bottom:6px;border-bottom:1.5px solid #fde68a;display:flex;align-items:center;gap:7px;}
-.att-tabs{display:flex;gap:0;margin-bottom:12px;border:1.5px solid #e5e7eb;border-radius:8px;overflow:hidden;}
-.att-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;background:#f9fafb;color:#888;border:none;font-family:inherit;}
-.att-tab.active{background:#fff7ed;color:#b45309;}
-.att-list{border:1.5px solid #e5e7eb;border-radius:8px;min-height:80px;overflow:hidden;}
-.att-remove{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:14px;padding:0 4px;}
-.att-table{width:100%;border-collapse:collapse;font-size:13px;}
-.att-table th{background:#fef3c7;padding:7px 10px;font-size:11px;color:#92400e;font-weight:700;text-align:right;border-bottom:1.5px solid #fde68a;}
-.att-table td{padding:7px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
-.att-table tr:last-child td{border-bottom:none;}
-.att-table tr:hover td{background:#fffbeb;}
-.btn-add-att{background:#fff7ed;color:#b45309;border:1.5px dashed #fcd34d;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;width:100%;margin-top:8px;}
+.att-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:4px;}
+.att-chip{display:inline-flex;align-items:center;gap:4px;background:#fff7ed;color:#b45309;border:1px solid #fcd34d;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.att-chip button{background:none;border:none;color:#b45309;cursor:pointer;padding:0 2px;font-size:12px;line-height:1;}
+.att-chip button:hover{color:#dc2626;}
+.att-picker-ctrl{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
+.att-picker-ctrl label{cursor:pointer;display:flex;align-items:center;gap:4px;font-size:13px;color:#374151;}
+.att-picker-ctrl select,.att-picker-ctrl input[type=text]{padding:5px 8px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;}
+.att-picker-ctrl input[type=text]{flex:1;min-width:100px;}
+.att-picker-list{border:1.5px solid #e5e7eb;border-radius:8px;max-height:180px;overflow-y:auto;margin-bottom:6px;background:#fff;}
+.att-picker-item{padding:7px 12px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f3f4f6;}
+.att-picker-item:last-child{border-bottom:none;}
+.att-picker-item:hover{background:#fffbeb;}
+.att-picker-item.sel{background:#fff7ed;}
+.att-pi-name{font-weight:600;}
+.att-pi-sub{font-size:11px;color:#888;margin-top:1px;}
 .agenda-list,.decision-list{display:flex;flex-direction:column;gap:6px;}
 .agenda-item{display:flex;align-items:center;gap:8px;}
 .agenda-item input{flex:1;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px;}
@@ -309,21 +313,17 @@ tr:hover td{background:#fffbeb;}
 
       <!-- Attendees -->
       <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
-      <div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:4px;">داخلي</div>
-      <div class="att-list" id="attListInternal"></div>
-      <div id="extSection" style="display:none;">
-        <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin:8px 0 4px;">خارجي</div>
-        <div class="att-list" id="attListExternal"></div>
+      <div class="att-chips" id="attChipsM"></div>
+      <div class="att-picker-ctrl">
+        <label><input type="radio" name="attTypeM" value="int" checked onchange="switchAttTabM('int')"> داخلي</label>
+        <label><input type="radio" name="attTypeM" value="ext" onchange="switchAttTabM('ext')"> خارجي</label>
+        <select id="attOrgM" onchange="renderPickerM()" style="display:none;max-width:130px;"><option value="">كل الجهات</option></select>
+        <input id="attFilterM" type="text" autocomplete="off" oninput="renderPickerM()" placeholder="بحث بالاسم...">
       </div>
-      <div style="margin-top:8px;">
-        <div class="att-tabs" id="attTabsM">
-          <button class="att-tab active" onclick="switchAttTabM('int')">داخلي</button>
-          <button class="att-tab" onclick="switchAttTabM('ext')">خارجي</button>
-        </div>
-        <input id="attFilterM" type="text" autocomplete="off" placeholder="فلترة بالاسم..."
-               oninput="renderPickerM()"
-               style="width:100%;padding:7px 12px;border:1.5px solid #fcd34d;border-top:none;font-family:inherit;font-size:13px;background:#fffbeb;">
-        <div id="attPickerListM" style="border:1.5px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;background:#fff;"></div>
+      <div class="att-picker-list" id="attPickerListM"></div>
+      <div style="display:flex;gap:6px;margin-top:2px;">
+        <input id="attManualM" type="text" placeholder="أو أدخل اسم يدوياً..." style="flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;">
+        <button onclick="addAttManualM()" style="padding:6px 12px;border:1.5px dashed #d97706;background:transparent;color:#b45309;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap;"><i class="fa-solid fa-plus"></i> يدوي</button>
       </div>
 
       <!-- Agenda -->
@@ -563,7 +563,7 @@ async function goStep2() {
     document.getElementById('step2Num').textContent = formType + '-???';
   });
   document.getElementById('fMSubject').value = formSubject;
-  renderAttendees();
+  renderChipsM();
   renderAgenda();
   renderDecisions();
   renderActions();
@@ -583,91 +583,95 @@ function populatePicker() { renderPickerM(); }
 function addAttendeeFromPicker() {}
 
 let activeAttTabM = 'int';
+let _attPoolM = [];
 
 function switchAttTabM(tab) {
   activeAttTabM = tab;
-  const btns = document.getElementById('attTabsM').querySelectorAll('.att-tab');
-  btns[0].classList.toggle('active', tab === 'int');
-  btns[1].classList.toggle('active', tab === 'ext');
-  if (document.getElementById('attFilterM')) document.getElementById('attFilterM').value = '';
+  const el = document.getElementById('attFilterM');
+  if (el) el.value = '';
   renderPickerM();
 }
 
-let _attPoolM = [];
-
 function renderPickerM() {
   const q = ((document.getElementById('attFilterM') || {}).value || '').toLowerCase().trim();
-  const added = new Set(formAttendees.map(a => a.ref_id || a.name));
+  const orgSel = document.getElementById('attOrgM');
+  const orgF = (orgSel?.value || '').toLowerCase();
   let pool = [];
   if (activeAttTabM === 'int') {
-    const staffPart = allStaff.filter(e => !added.has(String(e.id))).map(e => {
+    const staffPart = allStaff.map(e => {
       const t = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
       return { kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: t, org: '' };
     });
-    const intPart = intContacts.filter(c => !added.has(String(c.id))).map(c =>
+    const intPart = intContacts.map(c =>
       ({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '' }));
     pool = [...staffPart, ...intPart];
+    if (orgSel) orgSel.style.display = 'none';
   } else {
-    pool = extContacts.filter(c => !added.has(String(c.id))).map(c =>
+    pool = extContacts.map(c =>
       ({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'' }));
+    if (orgSel) {
+      orgSel.style.display = '';
+      const cur = orgSel.value;
+      const orgs = [...new Set(pool.map(p => p.org).filter(Boolean))].sort();
+      orgSel.innerHTML = '<option value="">كل الجهات</option>' +
+        orgs.map(o => `<option value="${o}"${cur===o?' selected':''}>${o}</option>`).join('');
+      if (orgF) pool = pool.filter(p => (p.org||'').toLowerCase() === orgF);
+    }
   }
   if (q) pool = pool.filter(p => p.name.toLowerCase().includes(q));
   _attPoolM = pool;
   const el = document.getElementById('attPickerListM');
   if (!el) return;
   if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
-  el.innerHTML = pool.map((p, i) =>
-    `<div style="padding:7px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
-         onclick="addFromAttPoolM(${i})">
-      <span style="font-weight:600;">${p.name}</span>
-      <span style="font-size:11px;color:#92400e;">${p.title || p.org || ''}</span>
-    </div>`
+  const addedIds = new Set(formAttendees.filter(a => a.ref_id).map(a => a.ref_id));
+  const addedNames = new Set(formAttendees.filter(a => !a.ref_id).map(a => a.name));
+  el.innerHTML = pool.map((p, i) => {
+    const isSel = p.ref_id ? addedIds.has(p.ref_id) : addedNames.has(p.name);
+    return `<div class="att-picker-item${isSel?' sel':''}" onclick="toggleAttItemM(${i})">
+      <div><div class="att-pi-name">${p.name}</div>${p.title||p.org ? `<div class="att-pi-sub">${[p.title,p.org].filter(Boolean).join(' · ')}</div>` : ''}</div>
+      ${isSel ? '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#b45309" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleAttItemM(i) {
+  const p = _attPoolM[i];
+  if (!p) return;
+  const pos = formAttendees.findIndex(a => a.ref_id ? a.ref_id === p.ref_id : a.name === p.name);
+  if (pos >= 0) formAttendees.splice(pos, 1);
+  else formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
+  renderChipsM();
+  renderPickerM();
+  renderActions();
+}
+
+function renderChipsM() {
+  const el = document.getElementById('attChipsM');
+  if (!el) return;
+  if (!formAttendees.length) {
+    el.innerHTML = '<div style="color:#aaa;font-size:12px;padding:2px 0;">لم يُضف حضور بعد</div>';
+    return;
+  }
+  el.innerHTML = formAttendees.map((a, i) =>
+    `<span class="att-chip">${a.name}<button type="button" onclick="removeAttendee(${i})">✕</button></span>`
   ).join('');
 }
 
-function addFromAttPoolM(i) { addAttendeeItemM(_attPoolM[i]); }
-
-function addAttendeeItemM(p) {
-  formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
+function addAttManualM() {
+  const inp = document.getElementById('attManualM');
+  const v = (inp?.value || '').trim();
+  if (!v) return;
+  formAttendees.push({ kind: 'manual', ref_id: null, name: v, title: '', org: '' });
+  renderChipsM();
   renderPickerM();
-  renderAttendees();
-  renderActions();
+  if (inp) inp.value = '';
 }
 
 function removeAttendee(idx) {
   formAttendees.splice(idx, 1);
+  renderChipsM();
   renderPickerM();
-  renderAttendees();
   renderActions();
-}
-
-function renderAttendees() {
-  const intList = document.getElementById('attListInternal');
-  const extList = document.getElementById('attListExternal');
-  const extSection = document.getElementById('extSection');
-  const internal = formAttendees.filter(a => a.kind !== 'external');
-  const external = formAttendees.filter(a => a.kind === 'external');
-
-  const buildTable = (list, fixedOrg) => {
-    if (!list.length) return `<div style="color:#aaa;font-size:13px;padding:12px;">لا يوجد حضور</div>`;
-    return `<table class="att-table">
-      <thead><tr><th>الاسم</th><th>المنصب</th><th>الجهة</th><th style="width:30px;"></th></tr></thead>
-      <tbody>${list.map(a => {
-        const idx = formAttendees.indexOf(a);
-        const org = fixedOrg || a.org || '—';
-        return `<tr>
-          <td>${a.name}</td>
-          <td>${a.title || '—'}</td>
-          <td>${org}</td>
-          <td><button class="att-remove" onclick="removeAttendee(${idx})">×</button></td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`;
-  };
-
-  intList.innerHTML = buildTable(internal, 'الهيئة السعودية للمياه');
-  extList.innerHTML = buildTable(external, null);
-  extSection.style.display = external.length ? '' : 'none';
 }
 
 function addAgendaItem() {
@@ -1005,21 +1009,6 @@ async function exportMoM() {
     `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>` +
     `${CB}<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="top"/></w:tcPr>${innerXml}</w:tc>`;
 
-  // Full-width helpers (exact dxa=9360) — text area = page 12240 - margins 1440×2
-  const mkTblPrFull = () =>
-    `<w:tblPr><w:bidiVisual/><w:tblW w:w="9360" w:type="dxa"/><w:tblInd w:w="0" w:type="dxa"/>` +
-    `${BORDERS}${CELL_MAR}` +
-    `<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr>`;
-
-  const thBlueFull = (text) =>
-    `<w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/>` +
-    `${CB}<w:shd w:val="clear" w:color="auto" w:fill="0066CC"/><w:vAlign w:val="center"/></w:tcPr>` +
-    `<w:p><w:pPr><w:bidi/><w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr></w:pPr>` +
-    `<w:r><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r></w:p></w:tc>`;
-
-  const tdXmlFull = (innerXml) =>
-    `<w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/>` +
-    `${CB}<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="top"/></w:tcPr>${innerXml}</w:tc>`;
 
   // ── Build content ─────────────────────────────────────────────────────────
 
@@ -1088,10 +1077,10 @@ async function exportMoM() {
     : blankCellP();
 
   const agendaTable = mkTbl(
-    mkTblPrFull(),
-    mkGrid(9360),
-    trH(576, thBlueFull('جدول الأعمال')) +
-    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXmlFull(agendaXml)}</w:tr>`
+    mkTblPr(10350),
+    mkGrid(10350),
+    trH(576, thBlue('جدول الأعمال', 10350)) +
+    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXml(agendaXml, 10350)}</w:tr>`
   );
 
   // DECISIONS TABLE: "المناقشة" — full width, blue header + numbered list
@@ -1100,10 +1089,10 @@ async function exportMoM() {
     : blankCellP();
 
   const decisionsTable = mkTbl(
-    mkTblPrFull(),
-    mkGrid(9360),
-    trH(576, thBlueFull('المناقشة')) +
-    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXmlFull(decisionsXml)}</w:tr>`
+    mkTblPr(10350),
+    mkGrid(10350),
+    trH(576, thBlue('المناقشة', 10350)) +
+    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXml(decisionsXml, 10350)}</w:tr>`
   );
 
   // ACTIONS TABLE: "التوصيات" — 3 cols: البند | المسؤول | تاريخ الإنجاز

@@ -29,17 +29,16 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
 
-.search-wrap{position:relative;margin-bottom:12px;}
-.search-wrap input{width:100%;padding:9px 40px 9px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;}
-.search-wrap input:focus{outline:none;border-color:#0ea5e9;}
-.search-wrap .si{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none;}
-.search-results{position:absolute;right:0;left:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:100;max-height:240px;overflow-y:auto;display:none;}
-.search-results.show{display:block;}
-.sr-item{padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;}
-.sr-item:last-child{border-bottom:none;}
-.sr-item:hover{background:#f0f9ff;}
-.sr-item .sr-name{font-weight:600;}
-.sr-item .sr-sub{font-size:11px;color:#888;}
+.cnt-picker-ctrl{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
+.cnt-picker-ctrl label{cursor:pointer;display:flex;align-items:center;gap:4px;font-size:13px;color:#374151;}
+.cnt-picker-ctrl select,.cnt-picker-ctrl input[type=text]{padding:5px 8px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;}
+.cnt-picker-ctrl input[type=text]{flex:1;min-width:100px;}
+.cnt-picker-list{border:1.5px solid #bae6fd;border-radius:8px;max-height:200px;overflow-y:auto;margin-bottom:10px;background:#fff;}
+.cnt-picker-item{padding:8px 12px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f3f4f6;}
+.cnt-picker-item:last-child{border-bottom:none;}
+.cnt-picker-item:hover{background:#f0f9ff;}
+.cnt-pi-name{font-weight:600;}
+.cnt-pi-sub{font-size:11px;color:#888;margin-top:1px;}
 
 .guests-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
 .guests-table th{background:#e0f2fe;padding:8px 10px;font-size:11px;color:#0c4a6e;font-weight:700;text-align:center;border-bottom:1.5px solid #bae6fd;}
@@ -104,12 +103,13 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 
   <div class="section-card">
     <div class="section-title"><i class="fa-solid fa-users"></i> الزوار</div>
-    <div class="search-wrap" id="searchWrap">
-      <i class="fa-solid fa-magnifying-glass si"></i>
-      <input id="contactSearch" placeholder="ابحث باسم الضيف لإضافته من جهات الاتصال..."
-             autocomplete="off" oninput="onSearch()" onfocus="onSearch()">
-      <div class="search-results" id="searchResults"></div>
+    <div class="cnt-picker-ctrl">
+      <label><input type="radio" name="cntType" value="all" checked onchange="switchCntType('all')"> الكل</label>
+      <label><input type="radio" name="cntType" value="int" onchange="switchCntType('int')"> داخلي</label>
+      <label><input type="radio" name="cntType" value="ext" onchange="switchCntType('ext')"> خارجي</label>
+      <input id="contactSearch" type="text" autocomplete="off" oninput="renderCntPicker()" placeholder="بحث بالاسم...">
     </div>
+    <div class="cnt-picker-list" id="cntPickerList"></div>
     <table class="guests-table">
       <thead>
         <tr>
@@ -156,6 +156,7 @@ async function init() {
       ...ext.map(c => ({ ...c, kind: 'external', sub: c.org || c.title || '' })),
       ...int_.map(c => ({ ...c, kind: 'internal', sub: c.dept || c.sector || '' }))
     ];
+    renderCntPicker();
   } catch(e) { console.error(e); }
 }
 
@@ -166,41 +167,39 @@ function computeDay() {
   document.getElementById('dayName').value = days[new Date(d).getDay()];
 }
 
-let _contactPool = [];
+let _cntPool = [];
+let activeCntType = 'all';
 
-function onSearch() {
-  const q = document.getElementById('contactSearch').value.trim().toLowerCase();
-  const res = document.getElementById('searchResults');
-  const matches = q
-    ? allContacts.filter(c => c.name.toLowerCase().includes(q)).slice(0, 20)
-    : allContacts.slice(0, 40);
-  if (!matches.length) { res.classList.remove('show'); return; }
-  _contactPool = matches;
-  res.innerHTML = matches.map((c, i) =>
-    `<div class="sr-item" onclick="addFromPool(${i})">
-      <div><div class="sr-name">${c.name}</div><div class="sr-sub">${c.sub}</div></div>
-      <div style="font-size:10px;color:#0369a1;font-weight:700;">${c.kind==='external'?'خارجي':'داخلي'}</div>
+function switchCntType(t) {
+  activeCntType = t;
+  const el = document.getElementById('contactSearch');
+  if (el) el.value = '';
+  renderCntPicker();
+}
+
+function renderCntPicker() {
+  const q = ((document.getElementById('contactSearch') || {}).value || '').toLowerCase().trim();
+  let pool = activeCntType === 'all' ? allContacts
+    : activeCntType === 'int' ? allContacts.filter(c => c.kind === 'internal')
+    : allContacts.filter(c => c.kind === 'external');
+  if (q) pool = pool.filter(c => c.name.toLowerCase().includes(q));
+  _cntPool = pool;
+  const el = document.getElementById('cntPickerList');
+  if (!el) return;
+  if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
+  el.innerHTML = pool.map((c, i) =>
+    `<div class="cnt-picker-item" onclick="addFromCntPool(${i})">
+      <div><div class="cnt-pi-name">${c.name}</div>${c.sub ? `<div class="cnt-pi-sub">${c.sub}</div>` : ''}</div>
+      <span style="font-size:10px;color:#0369a1;font-weight:700;white-space:nowrap;">${c.kind==='external'?'خارجي':'داخلي'}</span>
     </div>`
   ).join('');
-  res.classList.add('show');
 }
 
-function addFromPool(i) {
-  const c = _contactPool[i];
+function addFromCntPool(i) {
+  const c = _cntPool[i];
   if (!c) return;
   guests.push({ name: c.name, car_make: c.car_make||'', car_color: c.car_color||'', car_plate: c.car_plate||'' });
   renderGuests();
-  document.getElementById('contactSearch').value = '';
-  document.getElementById('searchResults').classList.remove('show');
-}
-
-function addFromContact(id) {
-  const c = allContacts.find(x => x.id === id);
-  if (!c) return;
-  guests.push({ name: c.name, car_make: c.car_make||'', car_color: c.car_color||'', car_plate: c.car_plate||'' });
-  renderGuests();
-  document.getElementById('contactSearch').value = '';
-  document.getElementById('searchResults').classList.remove('show');
 }
 
 function addGuestRow() {
@@ -227,10 +226,6 @@ function renderGuests() {
 
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-document.addEventListener('click', e => {
-  if (!document.getElementById('searchWrap').contains(e.target))
-    document.getElementById('searchResults').classList.remove('show');
-});
 
 function logout() {
   sessionStorage.removeItem('token');
