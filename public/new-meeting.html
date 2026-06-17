@@ -132,9 +132,15 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
   <!-- Basic Info -->
   <div class="section-card">
     <div class="section-title"><i class="fa-solid fa-circle-info"></i> بيانات الاجتماع</div>
-    <div class="fr">
-      <label>موضوع الاجتماع * &nbsp;<span id="meetingNumBadge" class="meeting-num-badge" style="display:none;"></span></label>
-      <input type="text" id="fSubject" placeholder="أدخل موضوع الاجتماع..." oninput="updateNum()">
+    <div class="f2" style="align-items:end;">
+      <div class="fr" style="margin-bottom:0;">
+        <label>موضوع الاجتماع *</label>
+        <input type="text" id="fSubject" placeholder="أدخل موضوع الاجتماع..." oninput="updateNum()">
+      </div>
+      <div class="fr" style="margin-bottom:0;">
+        <label>رقم الاجتماع</label>
+        <div id="meetingNumBadge" style="padding:9px 12px;border:1.5px solid #fcd34d;border-radius:8px;background:#fffbeb;font-family:monospace;font-size:14px;font-weight:700;color:#b45309;">—</div>
+      </div>
     </div>
     <div class="f3">
       <div class="fr">
@@ -274,7 +280,6 @@ function updateNum() {
       const r = await api('GET', `/meetings/next-number/${formType}`);
       const badge = document.getElementById('meetingNumBadge');
       badge.textContent = r.number;
-      badge.style.display = '';
     } catch(e) {}
   }, 300);
 }
