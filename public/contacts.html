@@ -55,10 +55,11 @@ tr:hover td{background:#f5f3ff;}
 .empty{text-align:center;color:#aaa;padding:60px;font-size:13px;}
 
 /* ── Action Buttons ── */
-.btn-edit{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;margin-left:4px;}
+.btn-edit{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:4px 9px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;line-height:1;margin-left:4px;}
 .btn-edit:hover{background:#e0e7ff;}
-.btn-del{background:#fff1f2;color:#be123c;border:1px solid #fecdd3;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;}
+.btn-del{background:#fff1f2;color:#be123c;border:1px solid #fecdd3;padding:4px 9px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;line-height:1;}
 .btn-del:hover{background:#ffe4e6;}
+.act-cell{white-space:nowrap;}
 
 /* ── Overlay / Modal ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;}
@@ -116,6 +117,7 @@ tr:hover td{background:#f5f3ff;}
 .contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
 .contact-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1.5px solid #e5e7eb;transition:all .2s;}
 .contact-card:hover{border-color:#6366f1;box-shadow:0 4px 16px rgba(99,102,241,.12);}
+.cc-clickable{cursor:pointer;}
 .cc-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;}
 .cc-avatar.ext{background:linear-gradient(135deg,#0369a1,#0ea5e9);}
 .cc-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
@@ -124,7 +126,14 @@ tr:hover td{background:#f5f3ff;}
 .cc-body{font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:6px;}
 .cc-row{display:flex;align-items:center;gap:8px;}
 .cc-row i{width:14px;color:#6366f1;flex-shrink:0;}
-.cc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;}
+.cc-actions{display:flex;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;}
+
+/* ── View Modal ── */
+.view-field{display:flex;flex-direction:column;gap:3px;margin-bottom:14px;}
+.view-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;}
+.view-value{font-size:14px;color:#1e293b;font-weight:500;}
+.view-section{font-size:12px;font-weight:700;color:#4338ca;margin:16px 0 10px;padding-bottom:5px;border-bottom:1.5px solid #c7d2fe;}
+.view-row{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
 </style>
 </head>
 <body>
@@ -332,6 +341,22 @@ tr:hover td{background:#f5f3ff;}
 </div>
 
 
+<!-- ══ VIEW MODAL ══ -->
+<div class="overlay" id="modalView">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="viewModalIcon"><i class="fa-solid fa-user"></i> <span id="viewModalTitle"></span></h3>
+      <button class="btn-close" onclick="closeModal('modalView')">×</button>
+    </div>
+    <div class="modal-body" id="viewModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modalView')">إغلاق</button>
+      <button class="btn btn-primary" id="viewEditBtn"><i class="fa-solid fa-pen"></i> تعديل</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- ══ CONFLICT RESOLUTION MODAL ══ -->
 <div class="overlay" id="conflictModal">
   <div class="modal" style="width:680px;">
@@ -397,14 +422,14 @@ function renderExt() {
 
   document.getElementById('listExtBody').innerHTML = filtered.length
     ? filtered.map((c, i) => `
-      <tr>
+      <tr style="cursor:pointer;" onclick="openViewExt('${c.id}')">
         <td style="color:#aaa;font-size:12px;">${i + 1}</td>
         <td style="font-weight:600;">${c.name}</td>
         <td style="color:#64748b;">${c.title || '—'}</td>
         <td><span class="org-badge">${c.org || '—'}</span></td>
         <td style="font-size:12px;">${c.mobile || '—'}</td>
         <td style="font-size:12px;color:#6366f1;">${c.email || '—'}</td>
-        <td>
+        <td class="act-cell" onclick="event.stopPropagation()">
           <button class="btn-edit" onclick="openEditExt('${c.id}')"><i class="fa-solid fa-pen"></i></button>
           <button class="btn-del" onclick="delContact('ext','${c.id}')"><i class="fa-solid fa-trash"></i></button>
         </td>
@@ -426,7 +451,7 @@ function renderInt() {
 
   document.getElementById('listIntBody').innerHTML = filtered.length
     ? filtered.map((c, i) => `
-      <tr>
+      <tr style="cursor:pointer;" onclick="openViewInt('${c.id}')">
         <td style="color:#aaa;font-size:12px;">${i + 1}</td>
         <td style="font-weight:600;">${c.name}</td>
         <td style="color:#64748b;">${c.title || '—'}</td>
@@ -434,7 +459,7 @@ function renderInt() {
         <td style="font-size:12px;">${c.mobile || '—'}</td>
         <td style="font-size:12px;">${c.extension || '—'}</td>
         <td style="font-size:12px;color:#6366f1;">${c.email || '—'}</td>
-        <td>
+        <td class="act-cell" onclick="event.stopPropagation()">
           <button class="btn-edit" onclick="openEditInt('${c.id}')"><i class="fa-solid fa-pen"></i></button>
           <button class="btn-del" onclick="delContact('int','${c.id}')"><i class="fa-solid fa-trash"></i></button>
         </td>
@@ -446,22 +471,24 @@ function extCard(c) {
   const letter = (c.name || '؟')[0];
   return `
     <div class="contact-card">
-      <div class="cc-header">
-        <div class="cc-avatar ext">${letter}</div>
-        <div>
-          <div class="cc-name">${c.name}</div>
-          <div class="cc-title">${c.title || ''}</div>
+      <div class="cc-clickable" onclick="openViewExt('${c.id}')">
+        <div class="cc-header">
+          <div class="cc-avatar ext">${letter}</div>
+          <div>
+            <div class="cc-name">${c.name}</div>
+            <div class="cc-title">${c.title || ''}</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          ${c.org ? `<div class="cc-row"><i class="fa-solid fa-building"></i> <span class="org-badge">${c.org}</span></div>` : ''}
+          ${c.mobile ? `<div class="cc-row"><i class="fa-solid fa-phone"></i> ${c.mobile}</div>` : ''}
+          ${c.email ? `<div class="cc-row"><i class="fa-solid fa-envelope"></i> ${c.email}</div>` : ''}
+          ${c.city ? `<div class="cc-row"><i class="fa-solid fa-location-dot"></i> ${c.city}</div>` : ''}
         </div>
       </div>
-      <div class="cc-body">
-        ${c.org ? `<div class="cc-row"><i class="fa-solid fa-building"></i> <span class="org-badge">${c.org}</span></div>` : ''}
-        ${c.mobile ? `<div class="cc-row"><i class="fa-solid fa-phone"></i> ${c.mobile}</div>` : ''}
-        ${c.email ? `<div class="cc-row"><i class="fa-solid fa-envelope"></i> ${c.email}</div>` : ''}
-        ${c.city ? `<div class="cc-row"><i class="fa-solid fa-location-dot"></i> ${c.city}</div>` : ''}
-      </div>
       <div class="cc-actions">
-        <button class="btn-edit" onclick="openEditExt('${c.id}')"><i class="fa-solid fa-pen"></i> تعديل</button>
-        <button class="btn-del" onclick="delContact('ext','${c.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
+        <button class="btn-edit" onclick="openEditExt('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-del" onclick="delContact('ext','${c.id}')"><i class="fa-solid fa-trash"></i></button>
       </div>
     </div>`;
 }
@@ -470,22 +497,24 @@ function intCard(c) {
   const letter = (c.name || '؟')[0];
   return `
     <div class="contact-card">
-      <div class="cc-header">
-        <div class="cc-avatar">${letter}</div>
-        <div>
-          <div class="cc-name">${c.name}</div>
-          <div class="cc-title">${c.title || ''}</div>
+      <div class="cc-clickable" onclick="openViewInt('${c.id}')">
+        <div class="cc-header">
+          <div class="cc-avatar">${letter}</div>
+          <div>
+            <div class="cc-name">${c.name}</div>
+            <div class="cc-title">${c.title || ''}</div>
+          </div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">${c.sector || ''}${c.dept ? ' / ' + c.dept : ''}</span></div>
+          ${c.extension ? `<div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي ${c.extension}</div>` : ''}
+          ${c.mobile ? `<div class="cc-row"><i class="fa-solid fa-mobile-screen"></i> ${c.mobile}</div>` : ''}
+          ${c.email ? `<div class="cc-row"><i class="fa-solid fa-envelope"></i> ${c.email}</div>` : ''}
         </div>
       </div>
-      <div class="cc-body">
-        <div class="cc-row"><i class="fa-solid fa-sitemap"></i> <span class="dept-badge">${c.sector || ''}${c.dept ? ' / ' + c.dept : ''}</span></div>
-        ${c.extension ? `<div class="cc-row"><i class="fa-solid fa-phone"></i> داخلي ${c.extension}</div>` : ''}
-        ${c.mobile ? `<div class="cc-row"><i class="fa-solid fa-mobile-screen"></i> ${c.mobile}</div>` : ''}
-        ${c.email ? `<div class="cc-row"><i class="fa-solid fa-envelope"></i> ${c.email}</div>` : ''}
-      </div>
       <div class="cc-actions">
-        <button class="btn-edit" onclick="openEditInt('${c.id}')"><i class="fa-solid fa-pen"></i> تعديل</button>
-        <button class="btn-del" onclick="delContact('int','${c.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
+        <button class="btn-edit" onclick="openEditInt('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-del" onclick="delContact('int','${c.id}')"><i class="fa-solid fa-trash"></i></button>
       </div>
     </div>`;
 }
@@ -794,6 +823,89 @@ async function applyConflictResolutions() {
     closeModal('conflictModal');
     alert(`تم تحديث ${result.updated} جهة اتصال.`);
   } catch(e) { alert(e.message); }
+}
+
+function vf(label, value) {
+  if (!value) return '';
+  return `<div class="view-field"><div class="view-label">${label}</div><div class="view-value">${value}</div></div>`;
+}
+
+function openViewExt(id) {
+  const c = extData.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('viewModalTitle').textContent = c.name;
+  document.getElementById('viewEditBtn').onclick = () => { closeModal('modalView'); openEditExt(id); };
+  const hasVehicle = c.car_plate || c.car_make || c.car_color;
+  document.getElementById('viewModalBody').innerHTML = `
+    <div class="view-section"><i class="fa-solid fa-user"></i> بيانات الشخص</div>
+    <div class="view-row">
+      ${vf('الاسم الكامل', c.name)}
+      ${vf('اللقب', c.prefix)}
+    </div>
+    <div class="view-row">
+      ${vf('المسمى الوظيفي', c.title)}
+      ${vf('الدعاء', c.suffix)}
+    </div>
+    <div class="view-section"><i class="fa-solid fa-building"></i> الجهة</div>
+    <div class="view-row">
+      ${vf('اسم الجهة', c.org)}
+      ${vf('المدينة', c.city)}
+    </div>
+    <div class="view-section"><i class="fa-solid fa-phone"></i> التواصل</div>
+    <div class="view-row">
+      ${vf('الجوال', c.mobile)}
+      ${vf('البريد الإلكتروني', c.email)}
+    </div>
+    ${c.notes ? vf('ملاحظات', c.notes) : ''}
+    ${hasVehicle ? `
+    <div class="view-section"><i class="fa-solid fa-car"></i> المركبة</div>
+    <div class="view-row">
+      ${vf('رقم اللوحة', c.car_plate)}
+      ${vf('اللون', c.car_color)}
+    </div>
+    ${vf('الماركة / الموديل', c.car_make)}` : ''}
+  `;
+  document.getElementById('modalView').classList.add('open');
+}
+
+function openViewInt(id) {
+  const c = intData.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('viewModalTitle').textContent = c.name;
+  document.getElementById('viewEditBtn').onclick = () => { closeModal('modalView'); openEditInt(id); };
+  const hasVehicle = c.car_plate || c.car_make || c.car_color;
+  document.getElementById('viewModalBody').innerHTML = `
+    <div class="view-section"><i class="fa-solid fa-user-tie"></i> بيانات الموظف</div>
+    <div class="view-row">
+      ${vf('الاسم الكامل', c.name)}
+      ${vf('الرقم الوظيفي', c.emp_id || c.employee_id)}
+    </div>
+    <div class="view-row">
+      ${vf('اللقب', c.prefix)}
+      ${vf('الدعاء', c.suffix)}
+    </div>
+    ${vf('المسمى الوظيفي', c.title)}
+    <div class="view-section"><i class="fa-solid fa-sitemap"></i> القطاع / الإدارة</div>
+    <div class="view-row">
+      ${vf('القطاع / الوكالة', c.sector)}
+      ${vf('الإدارة / الوحدة', c.dept)}
+    </div>
+    <div class="view-section"><i class="fa-solid fa-phone"></i> التواصل</div>
+    <div class="view-row">
+      ${vf('الجوال', c.mobile)}
+      ${vf('الداخلي', c.extension)}
+    </div>
+    ${vf('البريد الإلكتروني', c.email)}
+    ${c.notes ? vf('ملاحظات', c.notes) : ''}
+    ${hasVehicle ? `
+    <div class="view-section"><i class="fa-solid fa-car"></i> المركبة</div>
+    <div class="view-row">
+      ${vf('رقم اللوحة', c.car_plate)}
+      ${vf('اللون', c.car_color)}
+    </div>
+    ${vf('الماركة / الموديل', c.car_make)}` : ''}
+  `;
+  document.getElementById('modalView').classList.add('open');
 }
 
 lucide.createIcons();

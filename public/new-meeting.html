@@ -162,15 +162,17 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
   <div class="section-card">
     <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
     <div id="attListAll" class="att-list" style="min-height:60px;"></div>
-    <div style="position:relative;margin-top:10px;" id="attSearchWrap">
-      <i class="fa-solid fa-magnifying-glass" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none;"></i>
-      <input id="attSearch" type="text" autocomplete="off"
-             placeholder="ابحث باسم الحاضر للإضافة (داخلي أو خارجي)..."
-             oninput="onAttSearch()" onfocus="onAttSearch()"
-             style="width:100%;padding:9px 38px 9px 12px;border:1.5px solid #fcd34d;border-radius:8px;font-family:inherit;font-size:13px;background:#fffbeb;">
-      <div id="attSearchResults" style="display:none;position:absolute;right:0;left:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:100;max-height:220px;overflow-y:auto;"></div>
+    <div style="margin-top:10px;">
+      <div class="att-tabs" id="attTabs">
+        <button class="att-tab active" onclick="switchAttTabNM('staff')">موظفو الهيئة</button>
+        <button class="att-tab" onclick="switchAttTabNM('int')">داخلي</button>
+        <button class="att-tab" onclick="switchAttTabNM('ext')">خارجي</button>
+      </div>
+      <input id="attFilter" type="text" autocomplete="off" placeholder="فلترة بالاسم..."
+             oninput="renderPickerNM()"
+             style="width:100%;padding:7px 12px;border:1.5px solid #fcd34d;border-top:none;font-family:inherit;font-size:13px;background:#fffbeb;">
+      <div id="attPickerList" style="border:1.5px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;background:#fff;"></div>
     </div>
-    <button class="btn-add-att" style="margin-top:8px;" onclick="addManualAttendee()"><i class="fa-solid fa-user-plus"></i> إضافة يدوياً</button>
   </div>
 
   <!-- Agenda -->
@@ -263,7 +265,7 @@ async function init() {
     api('GET', '/contacts/internal').catch(() => [])
   ]);
   renderAttendees();
-  populatePicker();
+  renderPickerNM();
   updateNum();
 }
 
@@ -286,76 +288,64 @@ function updateNum() {
   }, 300);
 }
 
-function switchAttTab() {}   // kept for compatibility
-function populatePicker() {} // kept for compatibility
+function switchAttTab() {}
+function populatePicker() { renderPickerNM(); }
+function addAttendeeFromPicker() {}
 
-function buildAttPool() {
-  const added = new Set(formAttendees.map(a => a.ref_id || a.name));
-  const pool = [];
-  allStaff.forEach(e => {
-    if (added.has(String(e.id))) return;
-    const label = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
-    pool.push({ kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: label, org: '', sub: label });
-  });
-  intContacts.forEach(c => {
-    if (added.has(String(c.id))) return;
-    pool.push({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '', sub: c.sector||'داخلي' });
-  });
-  extContacts.forEach(c => {
-    if (added.has(String(c.id))) return;
-    pool.push({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'', sub: c.org||'خارجي' });
-  });
-  return pool;
+let activeAttTabNM = 'staff';
+
+function switchAttTabNM(tab) {
+  activeAttTabNM = tab;
+  const btns = document.getElementById('attTabs').querySelectorAll('.att-tab');
+  btns[0].classList.toggle('active', tab === 'staff');
+  btns[1].classList.toggle('active', tab === 'int');
+  btns[2].classList.toggle('active', tab === 'ext');
+  if (document.getElementById('attFilter')) document.getElementById('attFilter').value = '';
+  renderPickerNM();
 }
 
-function onAttSearch() {
-  const q   = (document.getElementById('attSearch').value || '').toLowerCase().trim();
-  const res = document.getElementById('attSearchResults');
-  if (!q) { res.style.display = 'none'; return; }
-  const matches = buildAttPool().filter(p => p.name.toLowerCase().includes(q)).slice(0, 20);
-  if (!matches.length) { res.style.display = 'none'; return; }
-  res.style.display = '';
-  res.innerHTML = matches.map((p, i) =>
-    `<div style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
-         onmousedown="addAttendeeItem(${JSON.stringify(p)})">
-      <div><div style="font-weight:600;">${p.name}</div><div style="font-size:11px;color:#888;">${p.sub}</div></div>
-      <div style="font-size:10px;color:#b45309;font-weight:700;">${p.kind==='external'?'خارجي':'داخلي'}</div>
+function renderPickerNM() {
+  const q = ((document.getElementById('attFilter') || {}).value || '').toLowerCase().trim();
+  const added = new Set(formAttendees.map(a => a.ref_id || a.name));
+  let pool = [];
+  if (activeAttTabNM === 'staff') {
+    pool = allStaff.filter(e => !added.has(String(e.id))).map(e => {
+      const t = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
+      return { kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: t, org: '' };
+    });
+  } else if (activeAttTabNM === 'int') {
+    pool = intContacts.filter(c => !added.has(String(c.id))).map(c =>
+      ({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '' }));
+  } else {
+    pool = extContacts.filter(c => !added.has(String(c.id))).map(c =>
+      ({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'' }));
+  }
+  if (q) pool = pool.filter(p => p.name.toLowerCase().includes(q));
+  const el = document.getElementById('attPickerList');
+  if (!el) return;
+  if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
+  el.innerHTML = pool.map(p =>
+    `<div style="padding:7px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
+         onclick="addAttendeeItem(${JSON.stringify(p)})">
+      <span style="font-weight:600;">${p.name}</span>
+      <span style="font-size:11px;color:#92400e;">${p.title || p.org || ''}</span>
     </div>`
   ).join('');
 }
 
 function addAttendeeItem(p) {
   formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
-  document.getElementById('attSearch').value = '';
-  document.getElementById('attSearchResults').style.display = 'none';
+  renderPickerNM();
   renderAttendees();
   renderActions();
 }
-
-function addManualAttendee() {
-  const inp = document.getElementById('attSearch');
-  const name = (inp.value || '').trim();
-  if (!name) return;
-  formAttendees.push({ kind: 'external', ref_id: '', name, title: '', org: '' });
-  inp.value = '';
-  document.getElementById('attSearchResults').style.display = 'none';
-  renderAttendees();
-  renderActions();
-}
-
-function addAttendeeFromPicker() {} // kept for compatibility
 
 function removeAttendee(idx) {
   formAttendees.splice(idx, 1);
+  renderPickerNM();
   renderAttendees();
   renderActions();
 }
-
-document.addEventListener('click', e => {
-  const wrap = document.getElementById('attSearchWrap');
-  if (wrap && !wrap.contains(e.target))
-    document.getElementById('attSearchResults').style.display = 'none';
-});
 
 function getSortedAttendees() {
   const deputies = formAttendees.filter(a => a.kind === 'internal_staff' && a.title === 'وكيل');

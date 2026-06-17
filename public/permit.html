@@ -139,7 +139,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 </div>
 
 <script>
-const token = localStorage.getItem('token');
+const token = sessionStorage.getItem('token');
 if (!token) location.href = '/';
 
 let allContacts = [];
@@ -220,8 +220,8 @@ document.addEventListener('click', e => {
 });
 
 function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
   location.href = '/';
 }
 

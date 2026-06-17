@@ -311,13 +311,16 @@ tr:hover td{background:#fffbeb;}
       <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
       <div class="att-list" id="attListInternal"></div>
       <div class="att-list" id="attListExternal" style="display:none;"></div>
-      <div style="position:relative;margin-top:8px;" id="attSearchWrapM">
-        <i class="fa-solid fa-magnifying-glass" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none;"></i>
-        <input id="attSearchM" type="text" autocomplete="off"
-               placeholder="ابحث باسم الحاضر للإضافة..."
-               oninput="onAttSearchM()" onfocus="onAttSearchM()"
-               style="width:100%;padding:9px 38px 9px 12px;border:1.5px solid #fcd34d;border-radius:8px;font-family:inherit;font-size:13px;background:#fffbeb;">
-        <div id="attSearchResultsM" style="display:none;position:absolute;right:0;left:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:200;max-height:220px;overflow-y:auto;"></div>
+      <div style="margin-top:8px;">
+        <div class="att-tabs" id="attTabsM">
+          <button class="att-tab active" onclick="switchAttTabM('staff')">موظفو الهيئة</button>
+          <button class="att-tab" onclick="switchAttTabM('int')">داخلي</button>
+          <button class="att-tab" onclick="switchAttTabM('ext')">خارجي</button>
+        </div>
+        <input id="attFilterM" type="text" autocomplete="off" placeholder="فلترة بالاسم..."
+               oninput="renderPickerM()"
+               style="width:100%;padding:7px 12px;border:1.5px solid #fcd34d;border-top:none;font-family:inherit;font-size:13px;background:#fffbeb;">
+        <div id="attPickerListM" style="border:1.5px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;background:#fff;"></div>
       </div>
 
       <!-- Agenda -->
@@ -561,9 +564,10 @@ async function goStep2() {
   renderAgenda();
   renderDecisions();
   renderActions();
-  populatePicker();
+  activeAttTabM = 'staff';
   document.getElementById('step1Ov').classList.remove('open');
   document.getElementById('step2Ov').classList.add('open');
+  setTimeout(renderPickerM, 50);
 }
 
 function goBack() {
@@ -571,67 +575,64 @@ function goBack() {
   document.getElementById('step1Ov').classList.add('open');
 }
 
-function switchAttTab(tab) {
-  document.getElementById('attListInternal').style.display = tab === 'internal' ? '' : 'none';
-  document.getElementById('attListExternal').style.display = tab === 'external' ? '' : 'none';
-}
-function populatePicker() {}
+function switchAttTab(tab) {}
+function populatePicker() { renderPickerM(); }
 function addAttendeeFromPicker() {}
 
-function buildAttPoolM() {
-  const added = new Set(formAttendees.map(a => a.ref_id || a.name));
-  const pool = [];
-  allStaff.forEach(e => {
-    if (added.has(String(e.id))) return;
-    const label = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
-    pool.push({ kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: label, org: '', sub: label });
-  });
-  intContacts.forEach(c => {
-    if (added.has(String(c.id))) return;
-    pool.push({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '', sub: c.sector||'داخلي' });
-  });
-  extContacts.forEach(c => {
-    if (added.has(String(c.id))) return;
-    pool.push({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'', sub: c.org||'خارجي' });
-  });
-  return pool;
+let activeAttTabM = 'staff';
+
+function switchAttTabM(tab) {
+  activeAttTabM = tab;
+  const btns = document.getElementById('attTabsM').querySelectorAll('.att-tab');
+  btns[0].classList.toggle('active', tab === 'staff');
+  btns[1].classList.toggle('active', tab === 'int');
+  btns[2].classList.toggle('active', tab === 'ext');
+  if (document.getElementById('attFilterM')) document.getElementById('attFilterM').value = '';
+  renderPickerM();
 }
 
-function onAttSearchM() {
-  const q   = (document.getElementById('attSearchM').value || '').toLowerCase().trim();
-  const res = document.getElementById('attSearchResultsM');
-  if (!q) { res.style.display = 'none'; return; }
-  const matches = buildAttPoolM().filter(p => p.name.toLowerCase().includes(q)).slice(0, 20);
-  if (!matches.length) { res.style.display = 'none'; return; }
-  res.style.display = '';
-  res.innerHTML = matches.map(p =>
-    `<div style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
-         onmousedown="addAttendeeItemM(${JSON.stringify(p)})">
-      <div><div style="font-weight:600;">${p.name}</div><div style="font-size:11px;color:#888;">${p.sub}</div></div>
-      <div style="font-size:10px;color:#b45309;font-weight:700;">${p.kind==='external'?'خارجي':'داخلي'}</div>
+function renderPickerM() {
+  const q = ((document.getElementById('attFilterM') || {}).value || '').toLowerCase().trim();
+  const added = new Set(formAttendees.map(a => a.ref_id || a.name));
+  let pool = [];
+  if (activeAttTabM === 'staff') {
+    pool = allStaff.filter(e => !added.has(String(e.id))).map(e => {
+      const t = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
+      return { kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: t, org: '' };
+    });
+  } else if (activeAttTabM === 'int') {
+    pool = intContacts.filter(c => !added.has(String(c.id))).map(c =>
+      ({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '' }));
+  } else {
+    pool = extContacts.filter(c => !added.has(String(c.id))).map(c =>
+      ({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'' }));
+  }
+  if (q) pool = pool.filter(p => p.name.toLowerCase().includes(q));
+  const el = document.getElementById('attPickerListM');
+  if (!el) return;
+  if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
+  el.innerHTML = pool.map(p =>
+    `<div style="padding:7px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;"
+         onclick="addAttendeeItemM(${JSON.stringify(p)})">
+      <span style="font-weight:600;">${p.name}</span>
+      <span style="font-size:11px;color:#92400e;">${p.title || p.org || ''}</span>
     </div>`
   ).join('');
 }
 
 function addAttendeeItemM(p) {
   formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
-  document.getElementById('attSearchM').value = '';
-  document.getElementById('attSearchResultsM').style.display = 'none';
+  renderPickerM();
   renderAttendees();
   renderActions();
 }
 
 function removeAttendee(idx) {
   formAttendees.splice(idx, 1);
+  renderPickerM();
   renderAttendees();
   renderActions();
 }
-
-document.addEventListener('click', e => {
-  const wrap = document.getElementById('attSearchWrapM');
-  if (wrap && !wrap.contains(e.target))
-    document.getElementById('attSearchResultsM').style.display = 'none';
-});
 
 function renderAttendees() {
   const intList = document.getElementById('attListInternal');
@@ -995,6 +996,22 @@ async function exportMoM() {
     `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>` +
     `${CB}<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="top"/></w:tcPr>${innerXml}</w:tc>`;
 
+  // Full-width helpers (100% pct) — for single-column tables to prevent border overflow
+  const mkTblPrFull = () =>
+    `<w:tblPr><w:bidiVisual/><w:tblW w:w="5000" w:type="pct"/>` +
+    `${BORDERS}${CELL_MAR}` +
+    `<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr>`;
+
+  const thBlueFull = (text) =>
+    `<w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/>` +
+    `${CB}<w:shd w:val="clear" w:color="auto" w:fill="0066CC"/><w:vAlign w:val="center"/></w:tcPr>` +
+    `<w:p><w:pPr><w:bidi/><w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr></w:pPr>` +
+    `<w:r><w:rPr>${rp(F,22,true,'FFFFFF')}</w:rPr><w:t xml:space="preserve">${xe(text)}</w:t></w:r></w:p></w:tc>`;
+
+  const tdXmlFull = (innerXml) =>
+    `<w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/>` +
+    `${CB}<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/><w:vAlign w:val="top"/></w:tcPr>${innerXml}</w:tc>`;
+
   // ── Build content ─────────────────────────────────────────────────────────
 
   // LOGO
@@ -1062,10 +1079,10 @@ async function exportMoM() {
     : blankCellP();
 
   const agendaTable = mkTbl(
-    mkTblPr(10350),
+    mkTblPrFull(),
     mkGrid(10350),
-    trH(576, thBlue('جدول الأعمال', 10350)) +
-    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/></w:trPr>${tdXml(agendaXml, 10350)}</w:tr>`
+    trH(576, thBlueFull('جدول الأعمال')) +
+    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXmlFull(agendaXml)}</w:tr>`
   );
 
   // DECISIONS TABLE: "المناقشة" — full width, blue header + numbered list
@@ -1074,10 +1091,10 @@ async function exportMoM() {
     : blankCellP();
 
   const decisionsTable = mkTbl(
-    mkTblPr(10350),
+    mkTblPrFull(),
     mkGrid(10350),
-    trH(576, thBlue('المناقشة', 10350)) +
-    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/></w:trPr>${tdXml(decisionsXml, 10350)}</w:tr>`
+    trH(576, thBlueFull('المناقشة')) +
+    `<w:tr><w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:jc w:val="center"/></w:trPr>${tdXmlFull(decisionsXml)}</w:tr>`
   );
 
   // ACTIONS TABLE: "التوصيات" — 3 cols: البند | المسؤول | تاريخ الإنجاز
