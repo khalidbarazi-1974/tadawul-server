@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -29,16 +29,36 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
 
-.cnt-picker-ctrl{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
-.cnt-picker-ctrl label{cursor:pointer;display:flex;align-items:center;gap:4px;font-size:13px;color:#374151;}
-.cnt-picker-ctrl select,.cnt-picker-ctrl input[type=text]{padding:5px 8px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;}
-.cnt-picker-ctrl input[type=text]{flex:1;min-width:100px;}
-.cnt-picker-list{border:1.5px solid #bae6fd;border-radius:8px;max-height:200px;overflow-y:auto;margin-bottom:10px;background:#fff;}
-.cnt-picker-item{padding:8px 12px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f3f4f6;}
-.cnt-picker-item:last-child{border-bottom:none;}
-.cnt-picker-item:hover{background:#f0f9ff;}
-.cnt-pi-name{font-weight:600;}
-.cnt-pi-sub{font-size:11px;color:#888;margin-top:1px;}
+.dp-wrap{position:relative;margin-bottom:12px;}
+.btn-from-list{background:#f0f9ff;color:#0369a1;border:1.5px solid #7dd3fc;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;}
+.btn-from-list:hover{background:#e0f2fe;}
+.dp-panel{position:absolute;top:calc(100% + 4px);right:0;left:0;background:#fff;border:1.5px solid #bae6fd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:200;padding:12px;}
+.dp-ctrl{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;}
+.dp-ctrl label{cursor:pointer;display:flex;align-items:center;gap:4px;font-size:13px;color:#374151;}
+.dp-ctrl select{padding:5px 9px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;}
+.dp-ctrl select:focus{outline:none;border-color:#0ea5e9;}
+.dp-combo{position:relative;flex:1;min-width:140px;}
+.dp-combo-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;color:#374151;}
+.dp-combo-btn:hover{border-color:#0ea5e9;}
+.dp-combo-drop{position:absolute;top:calc(100% + 3px);right:0;left:0;background:#fff;border:1.5px solid #bae6fd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:300;}
+.dp-combo-search{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1.5px solid #e5e7eb;background:#f9fafb;border-radius:7px 7px 0 0;}
+.dp-combo-search i{color:#9ca3af;font-size:13px;flex-shrink:0;}
+.dp-combo-search input{flex:1;border:none;outline:none;font-family:inherit;font-size:13px;background:transparent;}
+.dp-list{max-height:220px;overflow-y:auto;background:#fff;border-radius:0 0 7px 7px;}
+.dp-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid #f3f4f6;}
+.dp-item:last-child{border-bottom:none;}
+.dp-item:hover{background:#f0f9ff;}
+.dp-item.sel{background:#eff6ff;}
+.dp-chk{width:18px;color:#0369a1;font-size:13px;flex-shrink:0;text-align:center;}
+.dp-info{flex:1;min-width:0;}
+.dp-name{font-weight:600;font-size:13px;}
+.dp-title{font-size:11px;color:#6b7280;margin-top:1px;}
+.dp-org{font-size:11px;color:#0369a1;background:#e0f2fe;padding:2px 8px;border-radius:12px;white-space:nowrap;flex-shrink:0;}
+.dp-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-top:1.5px solid #e5e7eb;background:#f9fafb;border-radius:0 0 7px 7px;}
+.dp-sel-count{font-size:12px;color:#6b7280;}
+.btn-dp-confirm{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-dp-confirm:hover{opacity:.9;}
+.btn-dp-confirm:disabled{opacity:.5;cursor:default;}
 
 .guests-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
 .guests-table th{background:#e0f2fe;padding:8px 10px;font-size:11px;color:#0c4a6e;font-weight:700;text-align:center;border-bottom:1.5px solid #bae6fd;}
@@ -68,7 +88,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
     <h2>مسودة تصريح دخول</h2>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
-    <button class="btn-top" onclick="location.href='/meetings.html'"><i class="fa-solid fa-arrow-right" style="font-size:12px;"></i> العودة</button>
+    <button class="btn-top" onclick="location.href='/hub.html'"><i class="fa-solid fa-house" style="font-size:12px;"></i> الرئيسية</button>
     <button class="btn-top" onclick="logout()"><i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i> خروج</button>
   </div>
 </div>
@@ -103,13 +123,35 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 
   <div class="section-card">
     <div class="section-title"><i class="fa-solid fa-users"></i> الزوار</div>
-    <div class="cnt-picker-ctrl">
-      <label><input type="radio" name="cntType" value="all" checked onchange="switchCntType('all')"> الكل</label>
-      <label><input type="radio" name="cntType" value="int" onchange="switchCntType('int')"> داخلي</label>
-      <label><input type="radio" name="cntType" value="ext" onchange="switchCntType('ext')"> خارجي</label>
-      <input id="contactSearch" type="text" autocomplete="off" oninput="renderCntPicker()" placeholder="بحث بالاسم...">
+    <div class="dp-wrap" id="dpWrap">
+      <button class="btn-from-list" onclick="toggleDp()"><i class="fa-solid fa-magnifying-glass"></i> إضافة من القائمة</button>
+      <div class="dp-panel" id="dpPanel" style="display:none;">
+        <div class="dp-ctrl">
+          <label><input type="radio" name="dpType" value="int" checked onchange="switchDpType('int')"> داخلي</label>
+          <label><input type="radio" name="dpType" value="ext" onchange="switchDpType('ext')"> خارجي</label>
+          <select id="dpOrg" onchange="renderDpList()" style="display:none;" data-no-ss><option value="">كل الجهات</option></select>
+          <div class="dp-combo" id="dpCombo">
+            <button class="dp-combo-btn" onclick="toggleCombo(event)">
+              <span id="dpComboLabel">اختر الأشخاص...</span>
+              <i class="fa-solid fa-chevron-down" style="font-size:11px;color:#9ca3af;"></i>
+            </button>
+            <div class="dp-combo-drop" id="dpComboDrop" style="display:none;">
+              <div class="dp-combo-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="dpSearch" type="text" autocomplete="off" oninput="renderDpList()" placeholder="بحث...">
+              </div>
+              <div class="dp-list" id="dpList"></div>
+              <div class="dp-footer">
+                <span class="dp-sel-count" id="dpSelCount"></span>
+                <button class="btn-dp-confirm" id="dpConfirmBtn" onclick="confirmDp()" disabled>
+                  <i class="fa-solid fa-check"></i> إضافة المحددين
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="cnt-picker-list" id="cntPickerList"></div>
     <table class="guests-table">
       <thead>
         <tr>
@@ -130,9 +172,6 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 </div>
 
 <div class="bottom-bar">
-  <button class="btn btn-secondary" onclick="location.href='/meetings.html'">
-    <i class="fa-solid fa-arrow-right"></i> رجوع
-  </button>
   <button class="btn btn-primary" onclick="exportPermit()">
     <i class="fa-solid fa-file-word"></i> تصدير Word
   </button>
@@ -153,10 +192,9 @@ async function init() {
       fetch('/api/contacts/internal', { headers: h }).then(r => r.json())
     ]);
     allContacts = [
-      ...ext.map(c => ({ ...c, kind: 'external', sub: c.org || c.title || '' })),
-      ...int_.map(c => ({ ...c, kind: 'internal', sub: c.dept || c.sector || '' }))
+      ...ext.map(c => ({ ...c, kind: 'external' })),
+      ...int_.map(c => ({ ...c, kind: 'internal' }))
     ];
-    renderCntPicker();
   } catch(e) { console.error(e); }
 }
 
@@ -167,38 +205,116 @@ function computeDay() {
   document.getElementById('dayName').value = days[new Date(d).getDay()];
 }
 
-let _cntPool = [];
-let activeCntType = 'all';
+// ── Dropdown Picker ──────────────────────────────────────────────────────────
+let activeDpType = 'int';
+let _dpPool = [];
+let dpSel = new Set(); // Set of contact object references
 
-function switchCntType(t) {
-  activeCntType = t;
-  const el = document.getElementById('contactSearch');
-  if (el) el.value = '';
-  renderCntPicker();
+function toggleDp() {
+  const panel = document.getElementById('dpPanel');
+  if (panel.style.display === 'none') {
+    dpSel.clear();
+    panel.style.display = 'block';
+    document.getElementById('dpSearch').value = '';
+    document.getElementById('dpOrg').value = '';
+    document.getElementById('dpOrg').style.display = 'none';
+    document.getElementById('dpComboDrop').style.display = 'block';
+    document.querySelector('input[name="dpType"][value="int"]').checked = true;
+    activeDpType = 'int';
+    renderDpList();
+    document.getElementById('dpSearch').focus();
+  } else {
+    panel.style.display = 'none';
+  }
 }
 
-function renderCntPicker() {
-  const q = ((document.getElementById('contactSearch') || {}).value || '').toLowerCase().trim();
-  let pool = activeCntType === 'all' ? allContacts
-    : activeCntType === 'int' ? allContacts.filter(c => c.kind === 'internal')
-    : allContacts.filter(c => c.kind === 'external');
-  if (q) pool = pool.filter(c => c.name.toLowerCase().includes(q));
-  _cntPool = pool;
-  const el = document.getElementById('cntPickerList');
-  if (!el) return;
-  if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
-  el.innerHTML = pool.map((c, i) =>
-    `<div class="cnt-picker-item" onclick="addFromCntPool(${i})">
-      <div><div class="cnt-pi-name">${c.name}</div>${c.sub ? `<div class="cnt-pi-sub">${c.sub}</div>` : ''}</div>
-      <span style="font-size:10px;color:#0369a1;font-weight:700;white-space:nowrap;">${c.kind==='external'?'خارجي':'داخلي'}</span>
-    </div>`
-  ).join('');
+function toggleCombo(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('dpComboDrop');
+  drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+  if (drop.style.display === 'block') document.getElementById('dpSearch').focus();
 }
 
-function addFromCntPool(i) {
-  const c = _cntPool[i];
+function closeDp() {
+  const panel = document.getElementById('dpPanel');
+  if (panel) panel.style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('dpWrap');
+  if (wrap && !e.composedPath().includes(wrap)) closeDp();
+});
+
+function switchDpType(t) {
+  activeDpType = t;
+  dpSel.clear();
+  document.getElementById('dpSearch').value = '';
+  const orgSel = document.getElementById('dpOrg');
+  if (t === 'ext') {
+    const orgs = [...new Set(allContacts.filter(c => c.kind === 'external' && c.org).map(c => c.org))].sort();
+    orgSel.innerHTML = '<option value="">كل الجهات</option>' + orgs.map(o => `<option value="${o}">${o}</option>`).join('');
+    orgSel.style.display = '';
+  } else {
+    orgSel.style.display = 'none';
+    orgSel.value = '';
+  }
+  document.getElementById('dpComboDrop').style.display = 'block';
+  document.getElementById('dpSearch').focus();
+  renderDpList();
+}
+
+function renderDpList() {
+  const q = document.getElementById('dpSearch').value.toLowerCase().trim();
+  const org = document.getElementById('dpOrg').value.trim();
+  let pool = allContacts.filter(c => c.kind === (activeDpType === 'int' ? 'internal' : 'external'));
+  if (org) pool = pool.filter(c => c.org === org);
+  if (q) pool = pool.filter(c =>
+    (c.name||'').toLowerCase().includes(q) ||
+    (c.title||'').toLowerCase().includes(q) ||
+    (c.org||'').toLowerCase().includes(q)
+  );
+  _dpPool = pool;
+  const el = document.getElementById('dpList');
+  if (!pool.length) {
+    el.innerHTML = '<div style="padding:12px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>';
+    updateDpCount();
+    return;
+  }
+  el.innerHTML = pool.map((c, i) => {
+    const isSel = dpSel.has(c);
+    const orgBadge = activeDpType === 'ext' && c.org ? `<div class="dp-org">${c.org}</div>` : '';
+    return `<div class="dp-item${isSel?' sel':''}" onclick="toggleDpItem(${i})">
+      <span class="dp-chk">${isSel ? '<i class="fa-solid fa-check"></i>' : ''}</span>
+      <div class="dp-info">
+        <div class="dp-name">${c.name}</div>
+        ${c.title ? `<div class="dp-title">${c.title}</div>` : ''}
+      </div>
+      ${orgBadge}
+    </div>`;
+  }).join('');
+  updateDpCount();
+}
+
+function toggleDpItem(i) {
+  const c = _dpPool[i];
   if (!c) return;
-  guests.push({ name: c.name, car_make: c.car_make||'', car_color: c.car_color||'', car_plate: c.car_plate||'' });
+  if (dpSel.has(c)) dpSel.delete(c); else dpSel.add(c);
+  renderDpList();
+}
+
+function updateDpCount() {
+  const n = dpSel.size;
+  document.getElementById('dpSelCount').textContent = n > 0 ? `تم تحديد ${n}` : '';
+  document.getElementById('dpConfirmBtn').disabled = n === 0;
+  document.getElementById('dpComboLabel').textContent = n > 0 ? `تم تحديد ${n} شخص` : 'اختر الأشخاص...';
+}
+
+function confirmDp() {
+  dpSel.forEach(c => {
+    guests.push({ name: c.name, car_make: c.car_make||'', car_color: c.car_color||'', car_plate: c.car_plate||'' });
+  });
+  dpSel.clear();
+  closeDp();
   renderGuests();
 }
 
@@ -345,5 +461,6 @@ ${mkPara('مع الشكر والتقدير،،،')}
 
 init();
 </script>
+<script src="/js/ss.js"></script>
 </body>
 </html>

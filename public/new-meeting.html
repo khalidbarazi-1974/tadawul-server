@@ -40,21 +40,42 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
 
 .meeting-num-badge{display:inline-block;font-family:monospace;font-size:15px;font-weight:700;background:#fff7ed;color:#b45309;border:1.5px solid #fcd34d;padding:4px 14px;border-radius:6px;}
 
-.att-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:4px;}
-.att-chip{display:inline-flex;align-items:center;gap:4px;background:#fff7ed;color:#b45309;border:1px solid #fcd34d;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
-.att-chip button{background:none;border:none;color:#b45309;cursor:pointer;padding:0 2px;font-size:12px;line-height:1;}
-.att-chip button:hover{color:#dc2626;}
-.att-picker-ctrl{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
-.att-picker-ctrl label{cursor:pointer;display:flex;align-items:center;gap:4px;font-size:13px;color:#374151;}
-.att-picker-ctrl select,.att-picker-ctrl input[type=text]{padding:5px 8px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;}
-.att-picker-ctrl input[type=text]{flex:1;min-width:100px;}
-.att-picker-list{border:1.5px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;margin-bottom:6px;background:#fff;}
-.att-picker-item{padding:7px 12px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f3f4f6;}
-.att-picker-item:last-child{border-bottom:none;}
-.att-picker-item:hover{background:#fffbeb;}
-.att-picker-item.sel{background:#fff7ed;}
-.att-pi-name{font-weight:600;}
-.att-pi-sub{font-size:11px;color:#888;margin-top:1px;}
+.att-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
+.att-table th{background:#fff7ed;padding:8px 10px;font-size:11px;color:#92400e;font-weight:700;text-align:right;border-bottom:1.5px solid #fcd34d;}
+.att-table td{padding:7px 10px;border-bottom:1px solid #f5f5f5;font-size:13px;}
+.att-table tr:last-child td{border-bottom:none;}
+.att-remove{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:13px;padding:0 4px;}
+.dp-wrap{position:relative;margin-bottom:10px;}
+.btn-from-list{background:#fff7ed;color:#b45309;border:1.5px solid #fcd34d;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;}
+.btn-from-list:hover{background:#fef3c7;}
+.dp-panel{position:absolute;top:calc(100% + 4px);right:0;left:0;background:#fff;border:1.5px solid #fcd34d;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:200;padding:12px;}
+.dp-ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.dp-ctrl label{cursor:pointer;display:flex;align-items:center;gap:4px;font-size:13px;color:#374151;}
+.dp-ctrl select{padding:5px 9px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;}
+.dp-ctrl select:focus{outline:none;border-color:#d97706;}
+.dp-combo{position:relative;flex:1;min-width:140px;}
+.dp-combo-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;color:#374151;}
+.dp-combo-btn:hover{border-color:#d97706;}
+.dp-combo-drop{position:absolute;top:calc(100% + 3px);right:0;left:0;background:#fff;border:1.5px solid #fcd34d;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:300;}
+.dp-combo-search{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1.5px solid #e5e7eb;background:#fffbeb;border-radius:7px 7px 0 0;}
+.dp-combo-search i{color:#9ca3af;font-size:13px;flex-shrink:0;}
+.dp-combo-search input{flex:1;border:none;outline:none;font-family:inherit;font-size:13px;background:transparent;}
+.dp-list{max-height:220px;overflow-y:auto;background:#fff;}
+.dp-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid #f3f4f6;}
+.dp-item:last-child{border-bottom:none;}
+.dp-item:hover{background:#fffbeb;}
+.dp-item.sel{background:#fff7ed;}
+.dp-item.added{background:#f9fafb;cursor:default;opacity:.6;}
+.dp-chk{width:18px;color:#b45309;font-size:13px;flex-shrink:0;text-align:center;}
+.dp-info{flex:1;min-width:0;}
+.dp-name{font-weight:600;font-size:13px;}
+.dp-title{font-size:11px;color:#6b7280;margin-top:1px;}
+.dp-org{font-size:11px;color:#b45309;background:#fff7ed;padding:2px 8px;border-radius:12px;white-space:nowrap;flex-shrink:0;}
+.dp-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-top:1.5px solid #e5e7eb;background:#fffbeb;border-radius:0 0 7px 7px;}
+.dp-sel-count{font-size:12px;color:#6b7280;}
+.btn-dp-confirm{background:linear-gradient(135deg,#b45309,#d97706);color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.btn-dp-confirm:hover{opacity:.9;}
+.btn-dp-confirm:disabled{opacity:.5;cursor:default;}
 
 .agenda-list,.decision-list{display:flex;flex-direction:column;gap:6px;}
 .agenda-item{display:flex;align-items:center;gap:8px;}
@@ -165,15 +186,40 @@ body{font-family:'Cairo',sans-serif;background:#f4f6fb;color:#222;min-height:100
   <!-- Attendees -->
   <div class="section-card">
     <div class="section-title"><i class="fa-solid fa-users"></i> الحضور</div>
-    <div class="att-chips" id="attChipsNM"></div>
-    <div class="att-picker-ctrl">
-      <label><input type="radio" name="attTypeNM" value="int" checked onchange="switchAttTabNM('int')"> داخلي</label>
-      <label><input type="radio" name="attTypeNM" value="ext" onchange="switchAttTabNM('ext')"> خارجي</label>
-      <select id="attOrgNM" onchange="renderPickerNM()" style="display:none;max-width:130px;"><option value="">كل الجهات</option></select>
-      <input id="attFilter" type="text" autocomplete="off" oninput="renderPickerNM()" placeholder="بحث بالاسم...">
+    <table class="att-table" id="attendeesTable" style="display:none;">
+      <thead><tr><th>الاسم</th><th>المنصب</th><th>الجهة</th><th style="width:32px;"></th></tr></thead>
+      <tbody id="attendeesTbody"></tbody>
+    </table>
+    <div class="dp-wrap" id="dpWrap">
+      <button class="btn-from-list" onclick="toggleDp()"><i class="fa-solid fa-magnifying-glass"></i> إضافة حضور</button>
+      <div class="dp-panel" id="dpPanel" style="display:none;">
+        <div class="dp-ctrl">
+          <label><input type="radio" name="dpType" value="int" checked onchange="switchDpType('int')"> داخلي</label>
+          <label><input type="radio" name="dpType" value="ext" onchange="switchDpType('ext')"> خارجي</label>
+          <select id="dpOrg" onchange="renderDpList()" style="display:none;" data-no-ss><option value="">كل الجهات</option></select>
+          <div class="dp-combo">
+            <button class="dp-combo-btn" onclick="toggleCombo(event)">
+              <span id="dpComboLabel">اختر الحضور...</span>
+              <i class="fa-solid fa-chevron-down" style="font-size:11px;color:#9ca3af;"></i>
+            </button>
+            <div class="dp-combo-drop" id="dpComboDrop" style="display:none;">
+              <div class="dp-combo-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="dpSearch" type="text" autocomplete="off" oninput="renderDpList()" placeholder="بحث...">
+              </div>
+              <div class="dp-list" id="dpList"></div>
+              <div class="dp-footer">
+                <span class="dp-sel-count" id="dpSelCount"></span>
+                <button class="btn-dp-confirm" id="dpConfirmBtn" onclick="confirmDp()" disabled>
+                  <i class="fa-solid fa-check"></i> إضافة المحددين
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="att-picker-list" id="attPickerList"></div>
-    <div style="display:flex;gap:6px;margin-top:2px;">
+    <div style="display:flex;gap:6px;margin-top:8px;">
       <input id="attManualNM" type="text" placeholder="أو أدخل اسم يدوياً..." style="flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;">
       <button onclick="addAttManualNM()" style="padding:6px 12px;border:1.5px dashed #d97706;background:transparent;color:#b45309;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap;"><i class="fa-solid fa-plus"></i> يدوي</button>
     </div>
@@ -269,7 +315,7 @@ async function init() {
     api('GET', '/contacts/internal').catch(() => [])
   ]);
   renderChipsNM();
-  renderPickerNM();
+  renderDpList();
   updateNum();
 }
 
@@ -293,25 +339,71 @@ function updateNum() {
 }
 
 function switchAttTab() {}
-function populatePicker() { renderPickerNM(); }
+function populatePicker() {}
 function addAttendeeFromPicker() {}
 
-let activeAttTabNM = 'int';
-let _attPoolNM = [];
+let activeDpType = 'int';
+let _dpPool = [];
+let dpSel = new Set();
 
-function switchAttTabNM(tab) {
-  activeAttTabNM = tab;
-  const el = document.getElementById('attFilter');
-  if (el) el.value = '';
-  renderPickerNM();
+function toggleDp() {
+  const panel = document.getElementById('dpPanel');
+  if (panel.style.display === 'none') {
+    dpSel.clear();
+    panel.style.display = 'block';
+    document.getElementById('dpSearch').value = '';
+    document.getElementById('dpOrg').value = '';
+    document.getElementById('dpOrg').style.display = 'none';
+    document.getElementById('dpComboDrop').style.display = 'block';
+    document.querySelector('input[name="dpType"][value="int"]').checked = true;
+    activeDpType = 'int';
+    renderDpList();
+    document.getElementById('dpSearch').focus();
+  } else {
+    panel.style.display = 'none';
+  }
 }
 
-function renderPickerNM() {
-  const q = ((document.getElementById('attFilter') || {}).value || '').toLowerCase().trim();
-  const orgSel = document.getElementById('attOrgNM');
-  const orgF = (orgSel?.value || '').toLowerCase();
+function toggleCombo(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('dpComboDrop');
+  drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+  if (drop.style.display === 'block') document.getElementById('dpSearch').focus();
+}
+
+function closeDp() {
+  const panel = document.getElementById('dpPanel');
+  if (panel) panel.style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('dpWrap');
+  if (wrap && !e.composedPath().includes(wrap)) closeDp();
+});
+
+function switchDpType(t) {
+  activeDpType = t;
+  dpSel.clear();
+  document.getElementById('dpSearch').value = '';
+  const orgSel = document.getElementById('dpOrg');
+  if (t === 'ext') {
+    const orgs = [...new Set(extContacts.filter(c => c.org).map(c => c.org))].sort();
+    orgSel.innerHTML = '<option value="">كل الجهات</option>' + orgs.map(o => `<option value="${o}">${o}</option>`).join('');
+    orgSel.style.display = '';
+  } else {
+    orgSel.style.display = 'none';
+    orgSel.value = '';
+  }
+  document.getElementById('dpComboDrop').style.display = 'block';
+  document.getElementById('dpSearch').focus();
+  renderDpList();
+}
+
+function renderDpList() {
+  const q = document.getElementById('dpSearch').value.toLowerCase().trim();
+  const org = document.getElementById('dpOrg').value.trim();
   let pool = [];
-  if (activeAttTabNM === 'int') {
+  if (activeDpType === 'int') {
     const staffPart = allStaff.map(e => {
       const t = e.role === 'manager' ? 'مدير' : e.role === 'deputy' ? 'وكيل' : e.role === 'admin' ? 'مشرف' : 'موظف';
       return { kind: 'internal_staff', ref_id: String(e.id), name: e.name, title: t, org: '' };
@@ -319,57 +411,90 @@ function renderPickerNM() {
     const intPart = intContacts.map(c =>
       ({ kind: 'internal_contact', ref_id: String(c.id), name: c.name, title: c.title||'', org: '' }));
     pool = [...staffPart, ...intPart];
-    if (orgSel) orgSel.style.display = 'none';
   } else {
     pool = extContacts.map(c =>
       ({ kind: 'external', ref_id: String(c.id), name: c.name, title: c.title||'', org: c.org||'' }));
-    if (orgSel) {
-      orgSel.style.display = '';
-      const cur = orgSel.value;
-      const orgs = [...new Set(pool.map(p => p.org).filter(Boolean))].sort();
-      orgSel.innerHTML = '<option value="">كل الجهات</option>' +
-        orgs.map(o => `<option value="${o}"${cur===o?' selected':''}>${o}</option>`).join('');
-      if (orgF) pool = pool.filter(p => (p.org||'').toLowerCase() === orgF);
-    }
+    if (org) pool = pool.filter(p => p.org === org);
   }
-  if (q) pool = pool.filter(p => p.name.toLowerCase().includes(q));
-  _attPoolNM = pool;
-  const el = document.getElementById('attPickerList');
+  if (q) pool = pool.filter(p =>
+    (p.name||'').toLowerCase().includes(q) ||
+    (p.title||'').toLowerCase().includes(q)
+  );
+  _dpPool = pool;
+  const el = document.getElementById('dpList');
   if (!el) return;
-  if (!pool.length) { el.innerHTML = '<div style="padding:10px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>'; return; }
-  const addedIds = new Set(formAttendees.filter(a => a.ref_id).map(a => a.ref_id));
+  if (!pool.length) {
+    el.innerHTML = '<div style="padding:12px;text-align:center;color:#aaa;font-size:12px;">لا توجد نتائج</div>';
+    updateDpCount();
+    return;
+  }
+  const addedIds  = new Set(formAttendees.filter(a => a.ref_id).map(a => a.ref_id));
   const addedNames = new Set(formAttendees.filter(a => !a.ref_id).map(a => a.name));
   el.innerHTML = pool.map((p, i) => {
-    const isSel = p.ref_id ? addedIds.has(p.ref_id) : addedNames.has(p.name);
-    return `<div class="att-picker-item${isSel?' sel':''}" onclick="toggleAttItemNM(${i})">
-      <div><div class="att-pi-name">${p.name}</div>${p.title||p.org ? `<div class="att-pi-sub">${[p.title,p.org].filter(Boolean).join(' · ')}</div>` : ''}</div>
-      ${isSel ? '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#b45309" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+    const isAdded = addedIds.has(p.ref_id);
+    const isSel   = dpSel.has(p.ref_id);
+    const orgBadge = activeDpType === 'ext' && p.org ? `<div class="dp-org">${p.org}</div>` : '';
+    if (isAdded) {
+      return `<div class="dp-item added">
+        <span class="dp-chk"><i class="fa-solid fa-check" style="color:#9ca3af;"></i></span>
+        <div class="dp-info"><div class="dp-name">${p.name}</div>${p.title ? `<div class="dp-title">${p.title}</div>` : ''}</div>
+        ${orgBadge}
+      </div>`;
+    }
+    return `<div class="dp-item${isSel?' sel':''}" onclick="toggleDpItem(${i})">
+      <span class="dp-chk">${isSel ? '<i class="fa-solid fa-check"></i>' : ''}</span>
+      <div class="dp-info"><div class="dp-name">${p.name}</div>${p.title ? `<div class="dp-title">${p.title}</div>` : ''}</div>
+      ${orgBadge}
     </div>`;
   }).join('');
+  updateDpCount();
 }
 
-function toggleAttItemNM(i) {
-  const p = _attPoolNM[i];
+function toggleDpItem(i) {
+  const p = _dpPool[i];
   if (!p) return;
-  const pos = formAttendees.findIndex(a => a.ref_id ? a.ref_id === p.ref_id : a.name === p.name);
-  if (pos >= 0) formAttendees.splice(pos, 1);
-  else formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
-  renderChipsNM();
-  renderPickerNM();
+  if (dpSel.has(p.ref_id)) dpSel.delete(p.ref_id); else dpSel.add(p.ref_id);
+  renderDpList();
+}
+
+function updateDpCount() {
+  const n = dpSel.size;
+  document.getElementById('dpSelCount').textContent = n > 0 ? `تم تحديد ${n}` : '';
+  document.getElementById('dpConfirmBtn').disabled = n === 0;
+  document.getElementById('dpComboLabel').textContent = n > 0 ? `تم تحديد ${n}` : 'اختر الحضور...';
+}
+
+function confirmDp() {
+  _dpPool.filter(p => dpSel.has(p.ref_id)).forEach(p => {
+    if (!formAttendees.some(a => a.ref_id === p.ref_id))
+      formAttendees.push({ kind: p.kind, ref_id: p.ref_id, name: p.name, title: p.title, org: p.org });
+  });
+  dpSel.clear();
+  closeDp();
+  renderAttendeesTable();
   renderActions();
 }
 
-function renderChipsNM() {
-  const el = document.getElementById('attChipsNM');
-  if (!el) return;
-  if (!formAttendees.length) {
-    el.innerHTML = '<div style="color:#aaa;font-size:12px;padding:2px 0;">لم يُضف حضور بعد</div>';
-    return;
-  }
-  el.innerHTML = formAttendees.map((a, i) =>
-    `<span class="att-chip">${a.name}<button type="button" onclick="removeAttendee(${i})">✕</button></span>`
+function renderAttendeesTable() {
+  const tbl  = document.getElementById('attendeesTable');
+  const tbody = document.getElementById('attendeesTbody');
+  if (!tbl || !tbody) return;
+  if (!formAttendees.length) { tbl.style.display = 'none'; return; }
+  tbl.style.display = '';
+  tbody.innerHTML = formAttendees.map((a, i) =>
+    `<tr>
+      <td>${a.name}</td>
+      <td>${a.title || ''}</td>
+      <td>${a.kind === 'external' ? (a.org || '') : ''}</td>
+      <td><button class="att-remove" onclick="removeAttendee(${i})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`
   ).join('');
 }
+
+function renderChipsNM() {
+  renderAttendeesTable();
+}
+
 
 function addAttManualNM() {
   const inp = document.getElementById('attManualNM');
@@ -377,14 +502,14 @@ function addAttManualNM() {
   if (!v) return;
   formAttendees.push({ kind: 'manual', ref_id: null, name: v, title: '', org: '' });
   renderChipsNM();
-  renderPickerNM();
+  renderDpList();
   if (inp) inp.value = '';
 }
 
 function removeAttendee(idx) {
   formAttendees.splice(idx, 1);
   renderChipsNM();
-  renderPickerNM();
+  renderDpList();
   renderActions();
 }
 
@@ -441,7 +566,10 @@ function renderActions() {
     </tr>`).join('');
   formActions.forEach((ac, i) => {
     const sel = document.getElementById('actionTbody').rows[i]?.cells[2]?.querySelector('select');
-    if (sel && ac.owner_name) sel.value = ac.owner_name;
+    if (sel) {
+      if (ac.owner_name) sel.value = ac.owner_name;
+      window.initSearchableSelect?.(sel);
+    }
   });
 }
 
@@ -732,5 +860,6 @@ async function exportMoMFromForm() {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 </script>
+<script src="/js/ss.js"></script>
 </body>
 </html>

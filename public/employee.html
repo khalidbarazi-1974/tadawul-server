@@ -243,13 +243,13 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
       <p id="printMeta"></p>
     </div>
     <div class="filter-bar">
-      <select id="filterStatus" onchange="clearStatFilter();renderTasks()">
+      <select id="filterStatus" data-no-ss onchange="clearStatFilter();renderTasks()">
         <option value="">كل الحالات</option>
         <option>جديد</option>
         <option>قيد التنفيذ</option>
         <option>مكتمل</option>
       </select>
-      <select id="filterPriority" onchange="renderTasks()">
+      <select id="filterPriority" data-no-ss onchange="renderTasks()">
         <option value="">كل الأولويات</option>
         <option>عالية</option>
         <option>متوسطة</option>
@@ -333,7 +333,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
         </div>
         <div class="form-group">
           <label>الأولوية</label>
-          <select id="fPriority">
+          <select id="fPriority" data-no-ss>
             <option>عالية</option>
             <option selected>متوسطة</option>
             <option>منخفضة</option>
@@ -1007,5 +1007,6 @@ function printPage() {
 init();
 lucide.createIcons();
 </script>
+<script src="/js/ss.js"></script>
 </body>
 </html>

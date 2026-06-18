@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -184,7 +184,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
 <div class="content">
   <!-- Cycle bar -->
   <div class="cycle-bar">
-    <select id="cycleSelect" onchange="onCycleChange()">
+    <select id="cycleSelect" data-no-ss onchange="onCycleChange()">
       <option value="">— اختر دورة التقييم —</option>
     </select>
     <span id="cycleBadge"></span>
@@ -1019,5 +1019,6 @@ function printPage() {
 
 lucide.createIcons();
 </script>
+<script src="/js/ss.js"></script>
 </body>
 </html>

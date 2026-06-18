@@ -167,7 +167,7 @@ tr:hover td{background:#fffbeb;}
 
   <!-- Toolbar -->
   <div class="toolbar">
-    <select id="filterType" onchange="applyFilters()">
+    <select id="filterType" data-no-ss onchange="applyFilters()">
       <option value="">كل الأنواع</option>
       <option value="WK">أسبوعي — WK</option>
       <option value="MN">شهري — MN</option>
@@ -181,9 +181,6 @@ tr:hover td{background:#fffbeb;}
     <input id="searchInput" type="text" placeholder="بحث في الموضوع والقرارات والأجندة..." style="min-width:220px;" oninput="applyFilters()">
     <button class="btn-new" onclick="location.href='/new-meeting.html'">
       <i class="fa-solid fa-plus"></i> اجتماع جديد
-    </button>
-    <button class="btn-new" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);" onclick="location.href='/permit.html'">
-      <i class="fa-solid fa-id-card"></i> تصريح دخول
     </button>
   </div>
 
@@ -317,7 +314,7 @@ tr:hover td{background:#fffbeb;}
       <div class="att-picker-ctrl">
         <label><input type="radio" name="attTypeM" value="int" checked onchange="switchAttTabM('int')"> داخلي</label>
         <label><input type="radio" name="attTypeM" value="ext" onchange="switchAttTabM('ext')"> خارجي</label>
-        <select id="attOrgM" onchange="renderPickerM()" style="display:none;max-width:130px;"><option value="">كل الجهات</option></select>
+        <select id="attOrgM" data-no-ss onchange="renderPickerM()" style="display:none;max-width:130px;"><option value="">كل الجهات</option></select>
         <input id="attFilterM" type="text" autocomplete="off" oninput="renderPickerM()" placeholder="بحث بالاسم...">
       </div>
       <div class="att-picker-list" id="attPickerListM"></div>
@@ -367,8 +364,8 @@ tr:hover td{background:#fffbeb;}
 
     </div>
     <div class="modal-foot">
-      <button class="btn btn-secondary" onclick="goBack()">
-        <i class="fa-solid fa-arrow-right"></i> رجوع
+      <button class="btn btn-secondary" id="btnBackOrClose" onclick="backOrClose()">
+        <i class="fa-solid fa-arrow-right" id="backOrCloseIcon"></i> <span id="backOrCloseLabel">رجوع</span>
       </button>
       <button class="btn btn-primary" onclick="saveMeeting()"><i class="fa-solid fa-floppy-disk"></i> حفظ الاجتماع</button>
     </div>
@@ -568,6 +565,7 @@ async function goStep2() {
   renderDecisions();
   renderActions();
   activeAttTabM = 'int';
+  setBackOrCloseMode(false);
   document.getElementById('step1Ov').classList.remove('open');
   document.getElementById('step2Ov').classList.add('open');
   setTimeout(renderPickerM, 50);
@@ -576,6 +574,27 @@ async function goStep2() {
 function goBack() {
   document.getElementById('step2Ov').classList.remove('open');
   document.getElementById('step1Ov').classList.add('open');
+}
+
+function backOrClose() {
+  if (editingId) {
+    document.getElementById('step2Ov').classList.remove('open');
+  } else {
+    goBack();
+  }
+}
+
+function setBackOrCloseMode(isEdit) {
+  const icon = document.getElementById('backOrCloseIcon');
+  const label = document.getElementById('backOrCloseLabel');
+  if (!icon || !label) return;
+  if (isEdit) {
+    icon.className = 'fa-solid fa-xmark';
+    label.textContent = 'إغلاق';
+  } else {
+    icon.className = 'fa-solid fa-arrow-right';
+    label.textContent = 'رجوع';
+  }
 }
 
 function switchAttTab(tab) {}
@@ -819,11 +838,12 @@ async function openEdit() {
   document.getElementById('fDate').value = m.date;
   document.getElementById('fTime').value = m.time || '';
   document.getElementById('fNextDate').value = m.next_meeting_date || '';
-  renderAttendees();
+  renderChipsM();
   renderAgenda();
   renderDecisions();
   renderActions();
   populatePicker();
+  setBackOrCloseMode(true);
   document.getElementById('step2Ov').classList.add('open');
 }
 
@@ -1220,7 +1240,7 @@ init();
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">الأولوية</label>
-          <select id="ctPriority" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;">
+          <select id="ctPriority" data-no-ss style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;">
             <option value="عالية">عالية</option>
             <option value="متوسطة" selected>متوسطة</option>
             <option value="منخفضة">منخفضة</option>
@@ -1235,5 +1255,6 @@ init();
   </div>
 </div>
 
+<script src="/js/ss.js"></script>
 </body>
 </html>

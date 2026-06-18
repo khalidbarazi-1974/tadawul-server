@@ -301,7 +301,7 @@
         }
 
         .sidebar {
-            width: 310px;
+            width: 360px;
             background: var(--bg-white);
             padding: 16px;
             overflow-y: auto;
@@ -997,7 +997,7 @@
                 <div class="filter-row-4">
                     <div>
                         <label class="filter-label">نوع التاريخ</label>
-                        <select id="dateTypeFilter" onchange="refreshYearFilter();applyFilters();">
+                        <select id="dateTypeFilter" data-no-ss onchange="refreshYearFilter();applyFilters();">
                             <option value="create">الإنشاء</option>
                             <option value="reference">الإحالة</option>
                             <option value="complete">الإنجاز</option>
@@ -1005,19 +1005,19 @@
                     </div>
                     <div>
                         <label class="filter-label">السنة</label>
-                        <select id="yearFilter" onchange="applyFilters();">
+                        <select id="yearFilter" data-no-ss onchange="applyFilters();">
                             <option value="">الكل</option>
                         </select>
                     </div>
                     <div>
                         <label class="filter-label">الشهر</label>
-                        <select id="monthFilter" onchange="applyFilters();">
+                        <select id="monthFilter" data-no-ss onchange="applyFilters();">
                             <option value="">الكل</option>
                         </select>
                     </div>
                     <div>
                         <label class="filter-label">السنة الهجرية</label>
-                        <select id="hijriYearFilter" onchange="applyFilters();">
+                        <select id="hijriYearFilter" data-no-ss onchange="applyFilters();">
                             <option value="">الكل</option>
                         </select>
                     </div>
@@ -2860,5 +2860,6 @@ td{padding:4px;border:1px solid #ddd;text-align:right;font-size:10px;overflow:hi
     </div>
   </div>
 </div>
+<script src="/js/ss.js"></script>
 </body>
 </html>

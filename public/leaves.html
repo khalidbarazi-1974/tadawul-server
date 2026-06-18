@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -340,7 +340,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
   </div>
   <div class="fr">
     <label>نوع الإجازة</label>
-    <select id="fLTy" onchange="updateWorkDays()">
+    <select id="fLTy" data-no-ss onchange="updateWorkDays()">
       <option value="اعتيادية">اعتيادية (تُخصم من الرصيد)</option>
       <option value="خاصة">خاصة</option>
       <option value="مهمة رسمية">مهمة رسمية</option>
@@ -350,7 +350,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
   </div>
   <div class="fr">
     <label>الحالة</label>
-    <select id="fLStatus">
+    <select id="fLStatus" data-no-ss>
       <option value="planned">مخطط لها</option>
       <option value="approved">معتمدة</option>
     </select>
@@ -406,7 +406,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
   <div class="fr"><label>اسم الإجازة</label><input type="text" id="fHName" placeholder="مثال: عيد الفطر"></div>
   <div class="fr">
     <label>النوع</label>
-    <select id="fHType">
+    <select id="fHType" data-no-ss>
       <option value="إجازة رسمية">إجازة رسمية</option>
       <option value="عيد">عيد</option>
       <option value="حج">حج</option>
@@ -1194,5 +1194,6 @@ function printGantt() {
   window.addEventListener('afterprint', () => document.body.classList.remove('printing-gantt'), {once: true});
 }
 </script>
+<script src="/js/ss.js"></script>
 </body>
 </html>

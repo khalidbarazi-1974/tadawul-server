@@ -55,17 +55,40 @@ body{font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;background:#f0f4f8;c
 .recip-chip{display:inline-flex;align-items:center;gap:4px;background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:3px 10px;border-radius:20px;font-size:.82rem;font-weight:600;cursor:default;}
 .recip-chip button{background:none;border:none;color:#065f46;cursor:pointer;padding:0 2px;font-size:12px;display:flex;align-items:center;line-height:1;}
 .recip-chip button:hover{color:#b91c1c;}
-.picker-controls{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
-.picker-list{border:1.5px solid #e5e7eb;border-radius:8px;max-height:170px;overflow-y:auto;margin-bottom:6px;background:#fff;}
-.picker-item{padding:7px 12px;cursor:pointer;font-size:.86rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f3f4f6;}
-.picker-item:last-child{border-bottom:none;}
-.picker-item:hover{background:#f0fdf4;}
-.picker-item.selected{background:#d1fae5;}
-.picker-item .pi-name{font-weight:600;}
-.picker-item .pi-org{font-size:.78rem;color:#6b7280;margin-top:1px;}
 .picker-manual{display:flex;gap:6px;margin-top:4px;}
 .picker-manual input{flex:1;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.84rem;direction:rtl;}
 .picker-manual input:focus{outline:none;border-color:#006b5c;}
+.dp-wrap{position:relative;margin-bottom:8px;}
+.btn-from-list{background:#f0fdf4;color:#006b5c;border:1.5px solid #6ee7b7;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:.84rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+.btn-from-list:hover{background:#d1fae5;}
+.dp-panel{position:absolute;top:calc(100% + 4px);right:0;left:0;background:#fff;border:1.5px solid #6ee7b7;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:200;padding:10px;}
+.dp-ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.dp-ctrl label{cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.84rem;color:#374151;}
+.dp-ctrl select{padding:5px 8px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.83rem;}
+.dp-ctrl select:focus{outline:none;border-color:#006b5c;}
+.dp-combo{position:relative;flex:1;min-width:130px;}
+.dp-combo-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-size:.84rem;color:#374151;}
+.dp-combo-btn:hover{border-color:#006b5c;}
+.dp-combo-drop{position:absolute;top:calc(100% + 3px);right:0;left:0;background:#fff;border:1.5px solid #6ee7b7;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:300;}
+.dp-combo-search{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1.5px solid #e5e7eb;background:#f0fdf4;border-radius:7px 7px 0 0;}
+.dp-combo-search i{color:#9ca3af;font-size:12px;flex-shrink:0;}
+.dp-combo-search input{flex:1;border:none;outline:none;font-family:inherit;font-size:.84rem;background:transparent;}
+.dp-list{max-height:200px;overflow-y:auto;background:#fff;}
+.dp-item{display:flex;align-items:center;gap:8px;padding:7px 11px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:.84rem;}
+.dp-item:last-child{border-bottom:none;}
+.dp-item:hover{background:#f0fdf4;}
+.dp-item.sel{background:#d1fae5;}
+.dp-item.added{background:#f9fafb;cursor:default;opacity:.6;}
+.dp-chk{width:16px;color:#006b5c;font-size:12px;flex-shrink:0;text-align:center;}
+.dp-info{flex:1;min-width:0;}
+.dp-name{font-weight:600;}
+.dp-title{font-size:.77rem;color:#6b7280;margin-top:1px;}
+.dp-org{font-size:.77rem;color:#006b5c;background:#d1fae5;padding:2px 7px;border-radius:12px;white-space:nowrap;flex-shrink:0;}
+.dp-footer{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-top:1.5px solid #e5e7eb;background:#f0fdf4;border-radius:0 0 7px 7px;}
+.dp-sel-count{font-size:.8rem;color:#6b7280;}
+.btn-dp-confirm{background:linear-gradient(135deg,#006b5c,#059669);color:#fff;border:none;padding:7px 16px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:.84rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+.btn-dp-confirm:hover{opacity:.9;}
+.btn-dp-confirm:disabled{opacity:.5;cursor:default;}
 .actions{margin-top:14px;display:flex;gap:10px;flex-direction:row-reverse;align-items:center;flex-wrap:wrap;position:relative}
 .btn-gen{padding:8px 22px;background:#006b5c;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
 .btn-gen:hover{background:#005a4c}
@@ -209,13 +232,13 @@ body{font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;background:#f0f4f8;c
         </div>
         <div class="field">
           <label>التصنيف</label>
-          <select id="l_class">
+          <select id="l_class" data-no-ss>
             <option>مقيد</option><option>عام</option><option>سري</option><option>سري للغاية</option>
           </select>
         </div>
         <div class="field">
           <label>الأهمية</label>
-          <select id="l_priority">
+          <select id="l_priority" data-no-ss>
             <option value="">عادي</option><option value="حالاً">حالاً</option><option value="خلال يوم">خلال يوم</option><option value="خلال أسبوع">خلال أسبوع</option><option value="هام">هام</option><option value="هام جداً">هام جداً</option><option value="هام وعاجل">هام وعاجل</option><option value="عاجل">عاجل</option><option value="عاجل جداً">عاجل جداً</option>
           </select>
         </div>
@@ -223,25 +246,66 @@ body{font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;background:#f0f4f8;c
 
       <div id="sec-to"><div class="sec">المُرسَل إليه <span style="color:#dc2626">*</span></div>
       <div class="recip-chips" id="toChips"></div>
-      <div class="picker-controls">
-        <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.84rem;color:#374151;"><input type="radio" name="recipType" value="ext" checked onchange="onRecipTypeChange()"> خارجي</label>
-        <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.84rem;color:#374151;"><input type="radio" name="recipType" value="int" onchange="onRecipTypeChange()"> داخلي</label>
-        <select id="toOrgFilter" onchange="filterToList()" style="padding:5px 8px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.83rem;max-width:150px;"><option value="">كل الجهات</option></select>
-        <input id="toSearch" type="text" oninput="filterToList()" placeholder="بحث بالاسم..." style="flex:1;min-width:120px;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.84rem;direction:rtl;">
+      <div class="dp-wrap" id="dpWrapTo">
+        <button class="btn-from-list" onclick="toggleDpTo()"><i class="fa-solid fa-magnifying-glass"></i> إضافة مستلم</button>
+        <div class="dp-panel" id="dpPanelTo" style="display:none;">
+          <div class="dp-ctrl">
+            <label><input type="radio" name="recipType" value="ext" checked onchange="onRecipTypeChange()"> خارجي</label>
+            <label><input type="radio" name="recipType" value="int" onchange="onRecipTypeChange()"> داخلي</label>
+            <select id="toOrgFilter" onchange="filterToList()" style="display:none;" data-no-ss><option value="">كل الجهات</option></select>
+            <div class="dp-combo">
+              <button class="dp-combo-btn" onclick="toggleComboTo(event)">
+                <span id="dpComboLabelTo">اختر المستلم...</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:11px;color:#9ca3af;"></i>
+              </button>
+              <div class="dp-combo-drop" id="dpComboDropTo" style="display:none;">
+                <div class="dp-combo-search">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input id="toSearch" type="text" autocomplete="off" oninput="filterToList()" placeholder="بحث...">
+                </div>
+                <div class="dp-list" id="toPickerList"></div>
+                <div class="dp-footer">
+                  <span class="dp-sel-count" id="dpSelCountTo"></span>
+                  <button class="btn-dp-confirm" id="dpConfirmBtnTo" onclick="confirmDpTo()" disabled>
+                    <i class="fa-solid fa-check"></i> إضافة المحددين
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="picker-list" id="toPickerList"></div>
-      <div class="picker-manual">
-        <input id="toManual" type="text" placeholder="أو أدخل اسم مستلم يدوياً...">
-        <button class="btn-add" type="button" onclick="addToManual()" style="flex-shrink:0;white-space:nowrap;"><i data-lucide="plus"></i> إضافة</button>
-      </div></div>
+      </div>
 
       <div id="sec-cc"><div class="sec">نسخ إلى (اختياري)</div>
       <div class="recip-chips" id="ccChips"></div>
-      <div class="picker-manual" style="margin-bottom:4px;">
-        <input id="ccSearch" type="text" placeholder="ابحث لإضافة نسخة..." oninput="filterCCList()" style="flex:1;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.84rem;direction:rtl;position:relative;">
-        <button class="btn-add" type="button" onclick="addCCManual()" style="flex-shrink:0;white-space:nowrap;"><i data-lucide="plus"></i> يدوياً</button>
+      <div class="dp-wrap" id="dpWrapCC">
+        <button class="btn-from-list" onclick="toggleDpCC()"><i class="fa-solid fa-magnifying-glass"></i> إضافة نسخة</button>
+        <div class="dp-panel" id="dpPanelCC" style="display:none;">
+          <div class="dp-ctrl">
+            <div class="dp-combo" style="flex:1;">
+              <button class="dp-combo-btn" onclick="toggleComboCC(event)">
+                <span id="dpComboLabelCC">اختر جهة نسخ...</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:11px;color:#9ca3af;"></i>
+              </button>
+              <div class="dp-combo-drop" id="dpComboDropCC" style="display:none;">
+                <div class="dp-combo-search">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input id="ccSearch" type="text" autocomplete="off" oninput="filterCCList()" placeholder="بحث...">
+                </div>
+                <div class="dp-list" id="ccPickerList"></div>
+                <div class="dp-footer">
+                  <span class="dp-sel-count" id="dpSelCountCC"></span>
+                  <button class="btn-dp-confirm" id="dpConfirmBtnCC" onclick="confirmDpCC()" disabled>
+                    <i class="fa-solid fa-check"></i> إضافة المحددين
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="picker-list" id="ccPickerList" style="display:none;max-height:140px;"></div></div>
+      </div>
 
       <div id="sec-ref"><div class="sec">الإشارة / المرجع (اختياري)</div>
       <div class="row2">
@@ -479,13 +543,56 @@ function switchTab(tab, btn) {
 
 let toSelected = [];   // [{title, suffix, org}]
 let ccSelected = [];   // [{title, suffix}]
+let dpSelTo = new Set();
+let dpSelCC = new Set();
+let _ccPool  = [];
+
+// ── "To" picker ──
+function toggleDpTo() {
+  const panel = document.getElementById('dpPanelTo');
+  if (panel.style.display === 'none') {
+    dpSelTo.clear();
+    panel.style.display = 'block';
+    document.getElementById('toSearch').value = '';
+    document.getElementById('dpComboDropTo').style.display = 'block';
+    document.getElementById('toSearch').focus();
+    filterToList();
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function toggleComboTo(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('dpComboDropTo');
+  drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+  if (drop.style.display === 'block') document.getElementById('toSearch').focus();
+}
+
+function closeDpTo() {
+  const p = document.getElementById('dpPanelTo');
+  if (p) p.style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  const wTo = document.getElementById('dpWrapTo');
+  if (wTo && !e.composedPath().includes(wTo)) closeDpTo();
+  const wCC = document.getElementById('dpWrapCC');
+  if (wCC && !e.composedPath().includes(wCC)) closeDpCC();
+});
 
 function rebuildOrgFilter() {
   const sel = document.getElementById('toOrgFilter');
   if (!sel) return;
-  const orgs = [...new Set(RECIPIENTS.map(r => r.org).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="">كل الجهات</option>' +
-    orgs.map(o => `<option value="${o}">${o}</option>`).join('');
+  const isExt = document.querySelector('input[name="recipType"]:checked')?.value !== 'int';
+  if (isExt) {
+    const orgs = [...new Set(RECIPIENTS.map(r => r.org).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">كل الجهات</option>' + orgs.map(o => `<option value="${o}">${o}</option>`).join('');
+    sel.style.display = '';
+  } else {
+    sel.style.display = 'none';
+    sel.value = '';
+  }
 }
 
 function filterToList() {
@@ -499,23 +606,59 @@ function filterToList() {
   );
   if (!filtered.length) {
     list.innerHTML = '<div style="padding:10px 14px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
+    updateDpCountTo();
     return;
   }
-  list.innerHTML = filtered.map((r, i) => {
-    const idx   = RECIPIENTS.indexOf(r);
-    const isSel = toSelected.some(s => s.title === r.title);
-    return `<div class="picker-item${isSel?' selected':''}" onclick="toggleToItem(${idx})">
-      <div><div class="pi-name">${r.title}</div>${r.org ? `<div class="pi-org">${r.org}</div>` : ''}</div>
-      ${isSel ? '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#065f46" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+  list.innerHTML = filtered.map((r) => {
+    const idx    = RECIPIENTS.indexOf(r);
+    const isConf = toSelected.some(s => s.title === r.title);
+    const isSel  = dpSelTo.has(r);
+    const orgBadge = r.org && document.querySelector('input[name="recipType"]:checked')?.value !== 'int'
+      ? `<div class="dp-org">${r.org}</div>` : '';
+    if (isConf) {
+      return `<div class="dp-item added">
+        <span class="dp-chk"><i class="fa-solid fa-check" style="color:#9ca3af;"></i></span>
+        <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
+      </div>`;
+    }
+    return `<div class="dp-item${isSel?' sel':''}" onclick="toggleToItem(${idx})">
+      <span class="dp-chk">${isSel ? '<i class="fa-solid fa-check"></i>' : ''}</span>
+      <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
     </div>`;
   }).join('');
+  updateDpCountTo();
 }
 
 function toggleToItem(idx) {
   const r = RECIPIENTS[idx];
   if (!r) return;
-  const pos = toSelected.findIndex(s => s.title === r.title);
-  if (pos >= 0) toSelected.splice(pos, 1); else toSelected.push(r);
+  if (dpSelTo.has(r)) dpSelTo.delete(r); else dpSelTo.add(r);
+  filterToList();
+}
+
+function updateDpCountTo() {
+  const n = dpSelTo.size;
+  const cnt = document.getElementById('dpSelCountTo');
+  const btn = document.getElementById('dpConfirmBtnTo');
+  const lbl = document.getElementById('dpComboLabelTo');
+  if (cnt) cnt.textContent = n > 0 ? `تم تحديد ${n}` : '';
+  if (btn) btn.disabled = n === 0;
+  if (lbl) lbl.textContent = n > 0 ? `تم تحديد ${n}` : 'اختر المستلم...';
+}
+
+const _HONORIFICS = ['سعادة','معالي','فضيلة','صاحب السمو','صاحب المعالي','حضرة','سيادة'];
+function withHonorific(title) {
+  if (!title) return title;
+  return _HONORIFICS.some(h => title.startsWith(h)) ? title : 'سعادة ' + title;
+}
+
+function confirmDpTo() {
+  dpSelTo.forEach(r => {
+    if (!toSelected.some(s => s.title === r.title))
+      toSelected.push({ ...r, title: withHonorific(r.title) });
+  });
+  dpSelTo.clear();
+  closeDpTo();
   renderToChips();
   filterToList();
 }
@@ -539,33 +682,87 @@ function addToManual() {
 
 function getToLines() { return toSelected.length ? toSelected : []; }
 
-// CC picker
+// ── CC picker ──
+function toggleDpCC() {
+  const panel = document.getElementById('dpPanelCC');
+  if (panel.style.display === 'none') {
+    dpSelCC.clear();
+    panel.style.display = 'block';
+    document.getElementById('ccSearch').value = '';
+    document.getElementById('dpComboDropCC').style.display = 'block';
+    document.getElementById('ccSearch').focus();
+    filterCCList();
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function toggleComboCC(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('dpComboDropCC');
+  drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+  if (drop.style.display === 'block') document.getElementById('ccSearch').focus();
+}
+
+function closeDpCC() {
+  const p = document.getElementById('dpPanelCC');
+  if (p) p.style.display = 'none';
+}
+
 function filterCCList() {
   const q    = (document.getElementById('ccSearch')?.value || '').toLowerCase();
   const list = document.getElementById('ccPickerList');
   if (!list) return;
-  if (!q) { list.style.display = 'none'; return; }
-  list.style.display = '';
   const all = [...extContacts, ...intContacts];
-  const filtered = all.filter(r => r.title.toLowerCase().includes(q)).slice(0, 15);
-  if (!filtered.length) {
+  _ccPool = !q ? all.slice(0, 30) : all.filter(r => r.title.toLowerCase().includes(q)).slice(0, 30);
+  if (!_ccPool.length) {
     list.innerHTML = '<div style="padding:8px 12px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
+    updateDpCountCC();
     return;
   }
-  list.innerHTML = filtered.map(r => {
-    const isSel = ccSelected.some(s => s.title === r.title);
-    return `<div class="picker-item${isSel?' selected':''}" onclick="toggleCCItem(${JSON.stringify(r)})">
-      <div><div class="pi-name">${r.title}</div>${r.org ? `<div class="pi-org">${r.org}</div>` : ''}</div>
-      ${isSel ? '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#065f46" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+  list.innerHTML = _ccPool.map((r, i) => {
+    const isConf = ccSelected.some(s => s.title === r.title);
+    const isSel  = dpSelCC.has(r);
+    const orgBadge = r.org ? `<div class="dp-org">${r.org}</div>` : '';
+    if (isConf) {
+      return `<div class="dp-item added">
+        <span class="dp-chk"><i class="fa-solid fa-check" style="color:#9ca3af;"></i></span>
+        <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
+      </div>`;
+    }
+    return `<div class="dp-item${isSel?' sel':''}" onclick="toggleCCItem(${i})">
+      <span class="dp-chk">${isSel ? '<i class="fa-solid fa-check"></i>' : ''}</span>
+      <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
     </div>`;
   }).join('');
+  updateDpCountCC();
 }
 
-function toggleCCItem(r) {
-  const pos = ccSelected.findIndex(s => s.title === r.title);
-  if (pos >= 0) ccSelected.splice(pos, 1); else ccSelected.push(r);
-  renderCCChips();
+function toggleCCItem(i) {
+  const r = _ccPool[i];
+  if (!r) return;
+  if (dpSelCC.has(r)) dpSelCC.delete(r); else dpSelCC.add(r);
   filterCCList();
+}
+
+function updateDpCountCC() {
+  const n = dpSelCC.size;
+  const cnt = document.getElementById('dpSelCountCC');
+  const btn = document.getElementById('dpConfirmBtnCC');
+  const lbl = document.getElementById('dpComboLabelCC');
+  if (cnt) cnt.textContent = n > 0 ? `تم تحديد ${n}` : '';
+  if (btn) btn.disabled = n === 0;
+  if (lbl) lbl.textContent = n > 0 ? `تم تحديد ${n}` : 'اختر جهة نسخ...';
+}
+
+function confirmDpCC() {
+  dpSelCC.forEach(r => {
+    if (!ccSelected.some(s => s.title === r.title))
+      ccSelected.push({ ...r, title: withHonorific(r.title) });
+  });
+  dpSelCC.clear();
+  closeDpCC();
+  renderCCChips();
 }
 
 function renderCCChips() {
@@ -577,12 +774,12 @@ function renderCCChips() {
 }
 
 function addCCManual() {
-  const inp = document.getElementById('ccSearch');
+  const inp = document.getElementById('ccManual');
   const v   = (inp?.value || '').trim();
   if (!v) return;
   ccSelected.push({ title: v, suffix: '' });
   renderCCChips();
-  if (inp) { inp.value = ''; document.getElementById('ccPickerList').style.display='none'; }
+  if (inp) inp.value = '';
 }
 
 function getCCLines() { return ccSelected; }
@@ -653,9 +850,12 @@ async function loadContacts() {
 function onRecipTypeChange() {
   RECIPIENTS = activeRecipients();
   toSelected = [];
+  dpSelTo.clear();
   renderToChips();
   rebuildOrgFilter();
   filterToList();
+  document.getElementById('dpComboDropTo').style.display = 'block';
+  document.getElementById('toSearch').focus();
 }
 
 function rebuildDropdowns() {
@@ -1718,5 +1918,6 @@ lucide.createIcons();
 
 
 </script>
+<script src="/js/ss.js"></script>
 </body>
 </html>

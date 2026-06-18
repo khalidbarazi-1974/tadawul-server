@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -293,8 +293,8 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           </div>
         </div>
         <div class="filter-bar">
-          <select id="filterStatus" onchange="clearStatFilter();renderTasks()"><option value="">كل الحالات</option><option>جديد</option><option>قيد التنفيذ</option><option>مكتمل</option></select>
-          <select id="filterPriority" onchange="renderTasks()"><option value="">كل الأولويات</option><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select>
+          <select id="filterStatus" data-no-ss onchange="clearStatFilter();renderTasks()"><option value="">كل الحالات</option><option>جديد</option><option>قيد التنفيذ</option><option>مكتمل</option></select>
+          <select id="filterPriority" data-no-ss onchange="renderTasks()"><option value="">كل الأولويات</option><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select>
           <label style="font-size:12px;color:#888;margin:0 2px 0 4px;">من</label>
           <input type="date" id="filterDateFrom" onchange="renderTasks()" style="min-width:130px;">
           <label style="font-size:12px;color:#888;margin:0 2px 0 4px;">إلى</label>
@@ -344,8 +344,8 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
         <div class="form-group full"><label>الوصف</label><textarea id="fDesc" rows="3"></textarea></div>
         <div class="form-group"><label>الإدارة</label><select id="fDept" onchange="onDeptChange()"></select></div>
         <div class="form-group"><label>الإسناد</label><select id="fAssign"><option value="">— بدون إسناد —</option></select></div>
-        <div class="form-group"><label>الأولوية</label><select id="fPriority"><option>عالية</option><option selected>متوسطة</option><option>منخفضة</option></select></div>
-        <div class="form-group"><label>الحالة</label><select id="fStatus"><option>جديد</option><option>قيد التنفيذ</option><option>مكتمل</option></select></div>
+        <div class="form-group"><label>الأولوية</label><select id="fPriority" data-no-ss><option>عالية</option><option selected>متوسطة</option><option>منخفضة</option></select></div>
+        <div class="form-group"><label>الحالة</label><select id="fStatus" data-no-ss><option>جديد</option><option>قيد التنفيذ</option><option>مكتمل</option></select></div>
         <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="fDue"></div>
         <div class="form-group"><label>رقم الاجتماع المرجعي</label><input type="text" id="fMeetingRef" placeholder="مثال: BOD-001"></div>
       </div>
@@ -1277,5 +1277,6 @@ function updateSwDisplay() {
     </div>
   </div>
 </div>
+<script src="/js/ss.js"></script>
 </body>
 </html>
