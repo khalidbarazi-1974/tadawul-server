@@ -318,9 +318,13 @@ tr:hover td{background:#fffbeb;}
         <input id="attFilterM" type="text" autocomplete="off" oninput="renderPickerM()" placeholder="بحث بالاسم...">
       </div>
       <div class="att-picker-list" id="attPickerListM"></div>
-      <div style="display:flex;gap:6px;margin-top:2px;">
-        <input id="attManualM" type="text" placeholder="أو أدخل اسم يدوياً..." style="flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:13px;">
-        <button onclick="addAttManualM()" style="padding:6px 12px;border:1.5px dashed #d97706;background:transparent;color:#b45309;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap;"><i class="fa-solid fa-plus"></i> يدوي</button>
+      <div style="margin-top:6px;">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;">
+          <input id="attManualM" type="text" placeholder="الاسم *" onkeydown="if(event.key==='Enter'){addAttManualM();event.preventDefault();}" style="padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:13px;">
+          <input id="attManualTitleM" type="text" placeholder="المنصب" style="padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:13px;">
+          <input id="attManualOrgM" type="text" placeholder="الجهة" style="padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:13px;">
+          <button type="button" onclick="addAttManualM()" style="padding:6px 14px;background:#b45309;color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap;"><i class="fa-solid fa-plus"></i> إضافة</button>
+        </div>
       </div>
 
       <!-- Agenda -->
@@ -677,13 +681,18 @@ function renderChipsM() {
 }
 
 function addAttManualM() {
-  const inp = document.getElementById('attManualM');
+  const inp      = document.getElementById('attManualM');
+  const titleInp = document.getElementById('attManualTitleM');
+  const orgInp   = document.getElementById('attManualOrgM');
   const v = (inp?.value || '').trim();
   if (!v) return;
-  formAttendees.push({ kind: 'manual', ref_id: null, name: v, title: '', org: '' });
+  formAttendees.push({ kind: 'manual', ref_id: null, name: v, title: (titleInp?.value || '').trim(), org: (orgInp?.value || '').trim() });
   renderChipsM();
   renderPickerM();
-  if (inp) inp.value = '';
+  if (inp)      inp.value      = '';
+  if (titleInp) titleInp.value = '';
+  if (orgInp)   orgInp.value   = '';
+  document.getElementById('attChipsM')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function removeAttendee(idx) {

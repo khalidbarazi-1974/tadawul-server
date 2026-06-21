@@ -463,7 +463,7 @@ let _loading = false, _pendingLoad = false;
 async function safeLoad() {
     if (_loading) { _pendingLoad = true; return; }
     _loading = true; _pendingLoad = false;
-    try { await loadAll(); } finally {
+    try { await loadAll(true); } finally {
         _loading = false;
         if (_pendingLoad) safeLoad();
     }
@@ -498,13 +498,15 @@ async function init() {
     lucide.createIcons();
 }
 
-async function loadAll() {
-    showSkeleton();
+async function loadAll(silent = false) {
+    if (!silent) showSkeleton();
+    const prevSnapshot = silent ? JSON.stringify(tasks) + '|' + JSON.stringify(pending) : null;
     [tasks, pending] = await Promise.all([
         api('GET', `/tasks/dept/${user.deptId}`),
         api('GET', '/tasks/pending')
     ]);
     window._tasksLatestTs = tasks.reduce((m,t)=>{ const ts=t.createdAt?new Date(t.createdAt).getTime():0; return ts>m?ts:m; },0);
+    if (silent && prevSnapshot === JSON.stringify(tasks) + '|' + JSON.stringify(pending)) return;
     renderTasks();
     updateStats();
     renderApprovals();
