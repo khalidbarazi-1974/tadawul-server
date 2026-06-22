@@ -707,6 +707,30 @@ const EXT_FIELDS  = ['name','title','org','city','mobile','email','car_plate','c
 const INT_HEADERS = ['الاسم','الرقم الوظيفي','المسمى الوظيفي','القطاع / الوكالة','الإدارة','الجوال','الداخلي','البريد الإلكتروني','ملاحظات'];
 const INT_FIELDS  = ['name','employee_id','title','sector','dept','mobile','extension','email','notes'];
 
+// Alias maps for import — accepts both server export format and standalone جهات الاتصال format
+const INT_IMPORT_MAP = {
+  'الاسم':'name', 'الرقم الوظيفي':'employee_id',
+  'المسمى الوظيفي':'title', 'المسمى':'title',
+  'القطاع / الوكالة':'sector', 'القطاع':'sector', 'الوكالة':'sector',
+  'الإدارة':'dept',
+  'الجوال':'mobile', 'رقم الجوال':'mobile',
+  'الداخلي':'extension', 'رقم الداخلي':'extension',
+  'البريد الإلكتروني':'email', 'البريد':'email',
+  'ملاحظات':'notes'
+};
+const EXT_IMPORT_MAP = {
+  'الاسم':'name',
+  'المسمى الوظيفي':'title', 'المسمى':'title',
+  'الجهة':'org', 'المنظمة':'org', 'الشركة':'org',
+  'المدينة':'city',
+  'الجوال':'mobile', 'رقم الجوال':'mobile',
+  'البريد الإلكتروني':'email', 'البريد':'email',
+  'رقم اللوحة':'car_plate', 'لوحة السيارة':'car_plate',
+  'الماركة/الموديل':'car_make', 'ماركة السيارة':'car_make',
+  'اللون':'car_color', 'لون السيارة':'car_color',
+  'ملاحظات':'notes'
+};
+
 function exportContacts(type) {
   const data = type === 'ext' ? extData : intData;
   if (!data.length) return alert('لا توجد بيانات للتصدير');
@@ -732,26 +756,25 @@ async function importContacts(type, input) {
   reader.onload = async (e) => {
     try {
       const wb = XLSX.read(e.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
+      const names = wb.SheetNames;
+      // Pick sheet by name first; fall back to first sheet
+      const findSheet = (...keys) => {
+        for (const k of keys) { const f = names.find(n => n.trim() === k); if (f) return wb.Sheets[f]; }
+        return wb.Sheets[names[0]];
+      };
+      const ws = type === 'ext'
+        ? findSheet('خارجي', 'الجهات الخارجية')
+        : findSheet('داخلي', 'الزملاء', 'الموظفين');
       const raw = XLSX.utils.sheet_to_json(ws, { defval: '' });
       if (!raw.length) return alert('الملف فارغ أو لا يحتوي على بيانات.');
 
-      const fileHeaders = Object.keys(raw[0]);
-      const hasExtSig = fileHeaders.includes('الجهة');
-      const hasIntSig = fileHeaders.includes('الرقم الوظيفي') || fileHeaders.includes('الداخلي');
-      if (type === 'ext' && hasIntSig && !hasExtSig)
-        return alert('هذا الملف يبدو أنه قائمة زملاء (داخلي).\nاستخدم زر الاستيراد في تبويب "من الهيئة".');
-      if (type === 'int' && hasExtSig && !hasIntSig)
-        return alert('هذا الملف يبدو أنه قائمة جهات خارجية.\nاستخدم زر الاستيراد في تبويب "جهات خارجية".');
-
-      const headers = type === 'ext' ? EXT_HEADERS : INT_HEADERS;
-      const fields  = type === 'ext' ? EXT_FIELDS  : INT_FIELDS;
-      const map = {};
-      headers.forEach((h, i) => { map[h] = fields[i]; });
-
+      const aliasMap = type === 'ext' ? EXT_IMPORT_MAP : INT_IMPORT_MAP;
       const records = raw.map(row => {
         const rec = {};
-        Object.entries(map).forEach(([h, f]) => { rec[f] = String(row[h] || '').trim(); });
+        Object.entries(row).forEach(([h, v]) => {
+          const field = aliasMap[h.trim()];
+          if (field) rec[field] = String(v || '').trim();
+        });
         return rec;
       }).filter(r => r.name);
 
