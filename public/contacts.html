@@ -776,7 +776,7 @@ async function importContacts(type, input) {
           if (field) rec[field] = String(v || '').trim();
         });
         return rec;
-      }).filter(r => r.name);
+      }).filter(r => r.name || r.title);
 
       if (!records.length) return alert('لم يُعثر على بيانات صالحة. تأكد أن الملف يحتوي على رأس الجدول الصحيح.');
 

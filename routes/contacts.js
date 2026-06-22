@@ -97,8 +97,11 @@ router.post('/external/import', (req, res) => {
     db.transaction(() => {
         for (const r of records) {
             const name = (r.name || '').trim();
-            if (!name) continue;
-            const existing = db.prepare('SELECT * FROM contacts_external WHERE lower(trim(name))=lower(?)').get(name);
+            const title = (r.title || '').trim();
+            if (!name && !title) continue;
+            const existing = name
+                ? db.prepare('SELECT * FROM contacts_external WHERE lower(trim(name))=lower(?)').get(name)
+                : db.prepare("SELECT * FROM contacts_external WHERE name='' AND lower(trim(title))=lower(?)").get(title);
             if (existing) {
                 const diffs = Object.keys(FIELDS).filter(f =>
                     (r[f]||'').trim() !== '' && (r[f]||'').trim() !== (existing[f]||'').trim()
@@ -106,7 +109,7 @@ router.post('/external/import', (req, res) => {
                 if (diffs.length) conflicts.push({ existing, incoming: r, diffs, labels: FIELDS });
                 else skipped++;
             } else {
-                stmt.run(uid(), name, r.title||'', r.org||'', r.city||'',
+                stmt.run(uid(), name, title, r.org||'', r.city||'',
                          r.mobile||'', r.email||'', r.notes||'',
                          r.car_plate||'', r.car_make||'', r.car_color||'', req.user.id);
                 inserted++;
@@ -143,12 +146,14 @@ router.post('/internal/import', (req, res) => {
     db.transaction(() => {
         for (const r of records) {
             const name = (r.name || '').trim();
-            if (!name) continue;
+            const title = (r.title || '').trim();
             const empId = (r.employee_id || '').trim();
+            if (!name && !title) continue;
             let existing = empId
                 ? db.prepare('SELECT * FROM contacts_internal WHERE employee_id=?').get(empId)
                 : null;
-            if (!existing) existing = db.prepare('SELECT * FROM contacts_internal WHERE lower(trim(name))=lower(?)').get(name);
+            if (!existing && name) existing = db.prepare('SELECT * FROM contacts_internal WHERE lower(trim(name))=lower(?)').get(name);
+            if (!existing && !name && title) existing = db.prepare("SELECT * FROM contacts_internal WHERE name='' AND lower(trim(title))=lower(?)").get(title);
             if (existing) {
                 const diffs = Object.keys(FIELDS).filter(f =>
                     (r[f]||'').trim() !== '' && (r[f]||'').trim() !== (existing[f]||'').trim()
@@ -156,7 +161,7 @@ router.post('/internal/import', (req, res) => {
                 if (diffs.length) conflicts.push({ existing, incoming: r, diffs, labels: FIELDS });
                 else skipped++;
             } else {
-                stmt.run(uid(), name, empId, r.title||'', r.sector||'', r.dept||'',
+                stmt.run(uid(), name, empId, title, r.sector||'', r.dept||'',
                          r.mobile||'', r.extension||'', r.email||'', r.notes||'', req.user.id);
                 inserted++;
             }
