@@ -89,8 +89,8 @@ router.post('/external/import', (req, res) => {
     let inserted = 0, skipped = 0;
     const conflicts = [];
     const stmt = db.prepare(`INSERT INTO contacts_external
-        (id,name,title,org,city,mobile,email,notes,car_plate,car_make,car_color,created_by)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`);
+        (id,name,title,org,city,mobile,email,notes,car_plate,car_make,car_color,suffix,created_by)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`);
     const FIELDS = { title:'المسمى', org:'الجهة', city:'المدينة',
                      mobile:'الجوال', email:'البريد', car_plate:'رقم اللوحة',
                      car_make:'الماركة', car_color:'اللون', notes:'ملاحظات' };
@@ -111,7 +111,7 @@ router.post('/external/import', (req, res) => {
             } else {
                 stmt.run(uid(), name, title, r.org||'', r.city||'',
                          r.mobile||'', r.email||'', r.notes||'',
-                         r.car_plate||'', r.car_make||'', r.car_color||'', req.user.id);
+                         r.car_plate||'', r.car_make||'', r.car_color||'', r.suffix||'سلمه الله', req.user.id);
                 inserted++;
             }
         }
@@ -139,8 +139,8 @@ router.post('/internal/import', (req, res) => {
     let inserted = 0, skipped = 0;
     const conflicts = [];
     const stmt = db.prepare(`INSERT INTO contacts_internal
-        (id,name,employee_id,title,sector,dept,mobile,extension,email,notes,created_by)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?)`);
+        (id,name,employee_id,title,sector,dept,mobile,extension,email,notes,suffix,created_by)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`);
     const FIELDS = { title:'المسمى', sector:'القطاع', dept:'الإدارة',
                      mobile:'الجوال', extension:'الداخلي', email:'البريد', notes:'ملاحظات' };
     db.transaction(() => {
@@ -162,7 +162,7 @@ router.post('/internal/import', (req, res) => {
                 else skipped++;
             } else {
                 stmt.run(uid(), name, empId, title, r.sector||'', r.dept||'',
-                         r.mobile||'', r.extension||'', r.email||'', r.notes||'', req.user.id);
+                         r.mobile||'', r.extension||'', r.email||'', r.notes||'', r.suffix||'سلمه الله', req.user.id);
                 inserted++;
             }
         }
