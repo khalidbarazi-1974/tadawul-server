@@ -283,7 +283,10 @@ body{font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;background:#f0f4f8;c
         <button class="btn-from-list" onclick="toggleDpCC()"><i class="fa-solid fa-magnifying-glass"></i> إضافة نسخة</button>
         <div class="dp-panel" id="dpPanelCC" style="display:none;">
           <div class="dp-ctrl">
-            <div class="dp-combo" style="flex:1;">
+            <label><input type="radio" name="ccType" value="ext" checked onchange="onRecipTypeCCChange()"> خارجي</label>
+            <label><input type="radio" name="ccType" value="int" onchange="onRecipTypeCCChange()"> داخلي</label>
+            <select id="ccOrgFilter" onchange="filterCCList()" style="display:none;" data-no-ss><option value="">كل الجهات</option></select>
+            <div class="dp-combo">
               <button class="dp-combo-btn" onclick="toggleComboCC(event)">
                 <span id="dpComboLabelCC">اختر جهة نسخ...</span>
                 <i class="fa-solid fa-chevron-down" style="font-size:11px;color:#9ca3af;"></i>
@@ -545,7 +548,7 @@ let toSelected = [];   // [{title, suffix, org}]
 let ccSelected = [];   // [{title, suffix}]
 let dpSelTo = new Set();
 let dpSelCC = new Set();
-let _ccPool  = [];
+let CC_RECIPIENTS = [];
 
 // ── "To" picker ──
 function toggleDpTo() {
@@ -691,6 +694,8 @@ function toggleDpCC() {
     document.getElementById('ccSearch').value = '';
     document.getElementById('dpComboDropCC').style.display = 'block';
     document.getElementById('ccSearch').focus();
+    CC_RECIPIENTS = activeCCRecipients();
+    rebuildOrgFilterCC();
     filterCCList();
   } else {
     panel.style.display = 'none';
@@ -710,27 +715,32 @@ function closeDpCC() {
 }
 
 function filterCCList() {
+  const orgF = (document.getElementById('ccOrgFilter')?.value || '').toLowerCase();
   const q    = (document.getElementById('ccSearch')?.value || '').toLowerCase();
   const list = document.getElementById('ccPickerList');
   if (!list) return;
-  const all = [...extContacts, ...intContacts];
-  _ccPool = !q ? all.slice(0, 30) : all.filter(r => r.title.toLowerCase().includes(q)).slice(0, 30);
-  if (!_ccPool.length) {
-    list.innerHTML = '<div style="padding:8px 12px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
+  const filtered = CC_RECIPIENTS.filter(r =>
+    (!orgF || (r.org||'').toLowerCase() === orgF) &&
+    (!q    || r.title.toLowerCase().includes(q))
+  );
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:10px 14px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
     updateDpCountCC();
     return;
   }
-  list.innerHTML = _ccPool.map((r, i) => {
+  list.innerHTML = filtered.map((r) => {
+    const idx    = CC_RECIPIENTS.indexOf(r);
     const isConf = ccSelected.some(s => s.title === r.title);
     const isSel  = dpSelCC.has(r);
-    const orgBadge = r.org ? `<div class="dp-org">${r.org}</div>` : '';
+    const orgBadge = r.org && document.querySelector('input[name="ccType"]:checked')?.value !== 'int'
+      ? `<div class="dp-org">${r.org}</div>` : '';
     if (isConf) {
       return `<div class="dp-item added">
         <span class="dp-chk"><i class="fa-solid fa-check" style="color:#9ca3af;"></i></span>
         <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
       </div>`;
     }
-    return `<div class="dp-item${isSel?' sel':''}" onclick="toggleCCItem(${i})">
+    return `<div class="dp-item${isSel?' sel':''}" onclick="toggleCCItem(${idx})">
       <span class="dp-chk">${isSel ? '<i class="fa-solid fa-check"></i>' : ''}</span>
       <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
     </div>`;
@@ -738,8 +748,8 @@ function filterCCList() {
   updateDpCountCC();
 }
 
-function toggleCCItem(i) {
-  const r = _ccPool[i];
+function toggleCCItem(idx) {
+  const r = CC_RECIPIENTS[idx];
   if (!r) return;
   if (dpSelCC.has(r)) dpSelCC.delete(r); else dpSelCC.add(r);
   filterCCList();
@@ -841,6 +851,7 @@ async function loadContacts() {
     extContacts = ext.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '', org: c.org || '' }));
     intContacts = int_.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '', org: c.sector || c.dept || '' }));
     RECIPIENTS = activeRecipients();
+    CC_RECIPIENTS = activeCCRecipients();
     rebuildOrgFilter();
     filterToList();
     rebuildDropdowns();
@@ -856,6 +867,34 @@ function onRecipTypeChange() {
   filterToList();
   document.getElementById('dpComboDropTo').style.display = 'block';
   document.getElementById('toSearch').focus();
+}
+
+function activeCCRecipients() {
+  const sel = document.querySelector('input[name="ccType"]:checked');
+  return (sel && sel.value === 'int') ? intContacts : extContacts;
+}
+
+function rebuildOrgFilterCC() {
+  const sel = document.getElementById('ccOrgFilter');
+  if (!sel) return;
+  const isExt = document.querySelector('input[name="ccType"]:checked')?.value !== 'int';
+  if (isExt) {
+    const orgs = [...new Set(CC_RECIPIENTS.map(r => r.org).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">كل الجهات</option>' + orgs.map(o => `<option value="${o}">${o}</option>`).join('');
+    sel.style.display = '';
+  } else {
+    sel.style.display = 'none';
+    sel.value = '';
+  }
+}
+
+function onRecipTypeCCChange() {
+  CC_RECIPIENTS = activeCCRecipients();
+  dpSelCC.clear();
+  rebuildOrgFilterCC();
+  filterCCList();
+  document.getElementById('dpComboDropCC').style.display = 'block';
+  document.getElementById('ccSearch').focus();
 }
 
 function rebuildDropdowns() {
@@ -1162,15 +1201,15 @@ const runB = t      => `<w:r><w:rPr>${RRP}<w:b/><w:bCs/></w:rPr><w:t xml:space="
 
 const bodyPara  = t => `<w:p><w:pPr><w:spacing w:line="240" w:lineRule="auto"/><w:ind w:firstLine="360"/><w:jc w:val="both"/><w:rPr>${RRP}</w:rPr></w:pPr>${run(t)}</w:p>`;
 const centeredPara = t => `<w:p><w:pPr><w:spacing w:line="240" w:lineRule="auto"/><w:jc w:val="center"/><w:rPr>${RRP}</w:rPr></w:pPr>${run(t)}</w:p>`;
+const dynTabs   = (len, rp=RRP) => ('<w:r><w:rPr>' + rp + '</w:rPr><w:tab/></w:r>').repeat(Math.max(1, Math.round((8520 - len * 120) / 720)));
 const toPara    = ({title, suffix}) => {
-  const tabs = ('<w:r><w:rPr>' + RRP + '</w:rPr><w:tab/></w:r>').repeat(5);
   return '<w:p><w:pPr><w:spacing w:line="276" w:lineRule="auto"/><w:rPr>' + RRP + '</w:rPr></w:pPr>'
-    + run(title) + tabs + (suffix ? run(suffix) : '') + '</w:p>';
+    + run(title) + dynTabs(title.length) + (suffix ? run(suffix) : '') + '</w:p>';
 };
 const ccPara    = ({title, suffix}) => {
-  const tabs = ('<w:r><w:rPr>' + RRP + '</w:rPr><w:tab/></w:r>').repeat(3);
+  const full = 'نسخة مع التحية ل' + title;
   return '<w:p><w:pPr><w:spacing w:line="276" w:lineRule="auto"/><w:ind w:right="-567"/><w:rPr>' + RRP + '</w:rPr></w:pPr>'
-    + run('نسخة مع التحية ل' + title) + tabs + (suffix ? run(suffix) : '') + '</w:p>';
+    + run(full) + dynTabs(full.length) + (suffix ? run(suffix) : '') + '</w:p>';
 };
 const plainPara = t => `<w:p><w:pPr><w:spacing w:line="276" w:lineRule="auto"/><w:jc w:val="right"/><w:rPr>${RRP}</w:rPr></w:pPr>${run(t)}</w:p>`;
 const emptyPara = () => `<w:p><w:pPr><w:rPr>${RRP}</w:rPr></w:pPr></w:p>`;
