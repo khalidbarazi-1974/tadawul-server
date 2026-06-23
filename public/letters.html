@@ -1202,6 +1202,13 @@ const runB = t      => `<w:r><w:rPr>${RRP}<w:b/><w:bCs/></w:rPr><w:t xml:space="
 const bodyPara  = t => `<w:p><w:pPr><w:spacing w:line="240" w:lineRule="auto"/><w:ind w:firstLine="360"/><w:jc w:val="both"/><w:rPr>${RRP}</w:rPr></w:pPr>${run(t)}</w:p>`;
 const centeredPara = t => `<w:p><w:pPr><w:spacing w:line="240" w:lineRule="auto"/><w:jc w:val="center"/><w:rPr>${RRP}</w:rPr></w:pPr>${run(t)}</w:p>`;
 const dynTabs   = (len, rp=RRP) => ('<w:r><w:rPr>' + rp + '</w:rPr><w:tab/></w:r>').repeat(Math.max(1, Math.round((8520 - len * 120) / 720)));
+const withOrg   = r => {
+  if (!r.org) return r.title;
+  const tl = r.title;
+  const orgWords = r.org.split(/\s+/).filter(w => w.length > 3);
+  if (orgWords.some(w => tl.includes(w))) return tl;
+  return tl + ' ب' + r.org;
+};
 const toPara    = ({title, suffix}) => {
   return '<w:p><w:pPr><w:spacing w:line="276" w:lineRule="auto"/><w:rPr>' + RRP + '</w:rPr></w:pPr>'
     + run(title) + dynTabs(title.length) + (suffix ? run(suffix) : '') + '</w:p>';
@@ -1633,7 +1640,7 @@ async function generate() {
       }
       docXml = docXml.replace('XSUBJX', subjXml);
       docXml = docXml.replace('XCLSXIMPRX', priority ? xe(cls) + ' - ' + xe(priority) : xe(cls));
-      docXml = docXml.replace('<!--XTOPLH-->', toLines.map(r => toPara({ ...r, title: r.org ? r.title + ' ب' + r.org : r.title })).join(''));
+      docXml = docXml.replace('<!--XTOPLH-->', toLines.map(r => toPara({ ...r, title: withOrg(r) })).join(''));
       function _measurePx(txt) {
         const el = document.createElement('span');
         el.style.cssText = "font-family:'IBM Plex Sans Arabic',Arial;font-size:16pt;position:fixed;top:-9999px;visibility:hidden;white-space:nowrap";
@@ -1672,7 +1679,7 @@ async function generate() {
 
 
       // CC lines
-      docXml = docXml.replace('<!--XCCPLH-->', ccLines.map(r => ccPara({ ...r, title: r.org ? r.title + ' ب' + r.org : r.title })).join(''));
+      docXml = docXml.replace('<!--XCCPLH-->', ccLines.map(r => ccPara({ ...r, title: withOrg(r) })).join(''));
 
       // Reference paragraph
       let refXml = '';
