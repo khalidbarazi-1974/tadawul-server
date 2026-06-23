@@ -23,7 +23,7 @@ router.get('/external', (req, res) => {
 
 router.post('/external', (req, res) => {
     const { name, prefix, title, org, city, mobile, email, notes, suffix, car_plate, car_make, car_color } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
+    if (!name?.trim() && !title?.trim()) return res.status(400).json({ error: 'الاسم أو المسمى مطلوب' });
     const id = uid();
     db.prepare(`INSERT INTO contacts_external
         (id, name, prefix, title, org, city, mobile, email, notes, suffix, car_plate, car_make, car_color, created_by)
@@ -35,7 +35,7 @@ router.post('/external', (req, res) => {
 
 router.put('/external/:id', (req, res) => {
     const { name, prefix, title, org, city, mobile, email, notes, suffix, car_plate, car_make, car_color } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
+    if (!name?.trim() && !title?.trim()) return res.status(400).json({ error: 'الاسم أو المسمى مطلوب' });
     const info = db.prepare(`UPDATE contacts_external
         SET name=?,prefix=?,title=?,org=?,city=?,mobile=?,email=?,notes=?,suffix=?,car_plate=?,car_make=?,car_color=? WHERE id=?`)
       .run(name.trim(), prefix||'', title||'', org||'', city||'', mobile||'', email||'', notes||'',
@@ -57,7 +57,7 @@ router.get('/internal', (req, res) => {
 
 router.post('/internal', (req, res) => {
     const { name, employee_id, prefix, title, grade, sector, dept, mobile, extension, email, notes, suffix, car_plate, car_make, car_color } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
+    if (!name?.trim() && !title?.trim()) return res.status(400).json({ error: 'الاسم أو المسمى مطلوب' });
     const id = uid();
     db.prepare(`INSERT INTO contacts_internal
         (id, name, employee_id, prefix, title, grade, sector, dept, mobile, extension, email, notes, suffix, car_plate, car_make, car_color, created_by)
@@ -68,7 +68,7 @@ router.post('/internal', (req, res) => {
 
 router.put('/internal/:id', (req, res) => {
     const { name, employee_id, prefix, title, grade, sector, dept, mobile, extension, email, notes, suffix, car_plate, car_make, car_color } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: 'الاسم مطلوب' });
+    if (!name?.trim() && !title?.trim()) return res.status(400).json({ error: 'الاسم أو المسمى مطلوب' });
     const info = db.prepare(`UPDATE contacts_internal
         SET name=?,employee_id=?,prefix=?,title=?,grade=?,sector=?,dept=?,mobile=?,extension=?,email=?,notes=?,suffix=?,car_plate=?,car_make=?,car_color=? WHERE id=?`)
       .run(name.trim(), employee_id||'', prefix||'', title||'', grade||'', sector||'', dept||'', mobile||'', extension||'', email||'', notes||'', suffix||'', car_plate||'', car_make||'', car_color||'', req.params.id);

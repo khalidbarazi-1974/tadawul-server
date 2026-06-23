@@ -110,6 +110,8 @@ tr:hover td{background:#f5f3ff;}
 .list-card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.08);overflow:hidden;}
 .list-card table{width:100%;border-collapse:collapse;}
 .list-card th{background:#eef2ff;padding:10px 14px;font-size:12px;color:#3730a3;font-weight:700;text-align:right;border-bottom:2px solid #c7d2fe;}
+.sort-th{cursor:pointer;user-select:none;white-space:nowrap;}
+.sort-th:hover{background:#dde4ff;}
 .list-card td{padding:10px 14px;font-size:13px;color:#333;border-top:1px solid #f5f5f5;vertical-align:middle;}
 .list-card tr:hover td{background:#f5f3ff;}
 
@@ -188,7 +190,7 @@ tr:hover td{background:#f5f3ff;}
       <div class="list-card">
         <table>
           <thead>
-            <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>الجهة</th><th>الجوال</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
+            <tr id="extSortRow"><th>#</th><th class="sort-th" onclick="setExtSort('name')">الاسم</th><th class="sort-th" onclick="setExtSort('title')">المسمى</th><th class="sort-th" onclick="setExtSort('org')">الجهة</th><th class="sort-th" onclick="setExtSort('mobile')">الجوال</th><th class="sort-th" onclick="setExtSort('email')">البريد الإلكتروني</th><th style="width:100px;"></th></tr>
           </thead>
           <tbody id="listExtBody"></tbody>
         </table>
@@ -214,7 +216,7 @@ tr:hover td{background:#f5f3ff;}
       <div class="list-card">
         <table>
           <thead>
-            <tr><th>#</th><th>الاسم</th><th>المسمى</th><th>القطاع / الوكالة / الإدارة</th><th>الجوال</th><th>الداخلي</th><th>البريد الإلكتروني</th><th style="width:100px;"></th></tr>
+            <tr id="intSortRow"><th>#</th><th class="sort-th" onclick="setIntSort('name')">الاسم</th><th class="sort-th" onclick="setIntSort('title')">المسمى</th><th class="sort-th" onclick="setIntSort('sector')">القطاع / الوكالة / الإدارة</th><th class="sort-th" onclick="setIntSort('mobile')">الجوال</th><th class="sort-th" onclick="setIntSort('extension')">الداخلي</th><th class="sort-th" onclick="setIntSort('email')">البريد الإلكتروني</th><th style="width:100px;"></th></tr>
           </thead>
           <tbody id="listIntBody"></tbody>
         </table>
@@ -392,6 +394,38 @@ async function api(method, path, body) {
 }
 
 let extData = [], intData = [], editExtId = null, editIntId = null;
+let extSort = { col: null, asc: true }, intSort = { col: null, asc: true };
+function sortData(arr, col) {
+  return [...arr].sort((a, b) => {
+    const av = (a[col] || '').toString().toLowerCase();
+    const bv = (b[col] || '').toString().toLowerCase();
+    return av < bv ? -1 : av > bv ? 1 : 0;
+  });
+}
+function sortedExt(arr) {
+  if (!extSort.col) return arr;
+  const s = sortData(arr, extSort.col);
+  return extSort.asc ? s : s.reverse();
+}
+function sortedInt(arr) {
+  if (!intSort.col) return arr;
+  const s = sortData(arr, intSort.col);
+  return intSort.asc ? s : s.reverse();
+}
+function setExtSort(col) {
+  if (extSort.col === col) extSort.asc = !extSort.asc;
+  else { extSort.col = col; extSort.asc = true; }
+  renderExt();
+}
+function setIntSort(col) {
+  if (intSort.col === col) intSort.asc = !intSort.asc;
+  else { intSort.col = col; intSort.asc = true; }
+  renderInt();
+}
+function sortArrow(state, col) {
+  if (state.col !== col) return '';
+  return state.asc ? ' ▲' : ' ▼';
+}
 
 async function init() {
   document.getElementById('topbarUser').textContent = user.name || '';
@@ -411,10 +445,14 @@ async function loadInt() {
 function renderExt() {
   updateStats();
   const q = (document.getElementById('extSearch')?.value || '').toLowerCase();
-  const filtered = extData.filter(c => !q ||
+  const filtered = sortedExt(extData.filter(c => !q ||
     [c.name, c.title, c.org, c.city, c.mobile, c.email, c.car_plate, c.car_make, c.notes]
-      .some(v => (v || '').toLowerCase().includes(q)));
+      .some(v => (v || '').toLowerCase().includes(q))));
   document.getElementById('tabExtCount').textContent = filtered.length;
+  document.querySelectorAll('#extSortRow .sort-th').forEach(th => {
+    const col = th.getAttribute('onclick').match(/'(\w+)'/)[1];
+    th.textContent = th.textContent.replace(/ [▲▼]$/, '') + sortArrow(extSort, col);
+  });
 
   document.getElementById('gridExt').innerHTML = filtered.length
     ? filtered.map(c => extCard(c)).join('')
@@ -424,7 +462,7 @@ function renderExt() {
     ? filtered.map((c, i) => `
       <tr style="cursor:pointer;" onclick="openViewExt('${c.id}')">
         <td style="color:#aaa;font-size:12px;">${i + 1}</td>
-        <td style="font-weight:600;">${c.name}</td>
+        <td style="font-weight:600;">${c.name || '—'}</td>
         <td style="color:#64748b;">${c.title || '—'}</td>
         <td><span class="org-badge">${c.org || '—'}</span></td>
         <td style="font-size:12px;">${c.mobile || '—'}</td>
@@ -440,10 +478,14 @@ function renderExt() {
 function renderInt() {
   updateStats();
   const q = (document.getElementById('intSearch')?.value || '').toLowerCase();
-  const filtered = intData.filter(c => !q ||
+  const filtered = sortedInt(intData.filter(c => !q ||
     [c.name, c.employee_id, c.title, c.sector, c.dept, c.mobile, c.extension, c.email, c.notes]
-      .some(v => (v || '').toLowerCase().includes(q)));
+      .some(v => (v || '').toLowerCase().includes(q))));
   document.getElementById('tabIntCount').textContent = filtered.length;
+  document.querySelectorAll('#intSortRow .sort-th').forEach(th => {
+    const col = th.getAttribute('onclick').match(/'(\w+)'/)[1];
+    th.textContent = th.textContent.replace(/ [▲▼]$/, '') + sortArrow(intSort, col);
+  });
 
   document.getElementById('gridInt').innerHTML = filtered.length
     ? filtered.map(c => intCard(c)).join('')
@@ -453,7 +495,7 @@ function renderInt() {
     ? filtered.map((c, i) => `
       <tr style="cursor:pointer;" onclick="openViewInt('${c.id}')">
         <td style="color:#aaa;font-size:12px;">${i + 1}</td>
-        <td style="font-weight:600;">${c.name}</td>
+        <td style="font-weight:600;">${c.name || '—'}</td>
         <td style="color:#64748b;">${c.title || '—'}</td>
         <td><span class="dept-badge">${c.sector || ''}${c.dept ? ' / ' + c.dept : ''}</span></td>
         <td style="font-size:12px;">${c.mobile || '—'}</td>
@@ -568,7 +610,7 @@ async function saveExt() {
     car_make:  document.getElementById('extCarMake').value.trim(),
     car_color: document.getElementById('extCarColor').value.trim()
   };
-  if (!body.name) return alert('الاسم مطلوب');
+  if (!body.name && !body.title) return alert('الاسم أو المسمى مطلوب');
   try {
     if (editExtId) await api('PUT', `/contacts/external/${editExtId}`, body);
     else await api('POST', '/contacts/external', body);
@@ -631,7 +673,7 @@ async function saveInt() {
     car_make:    document.getElementById('intCarMake').value.trim(),
     car_color:   document.getElementById('intCarColor').value.trim()
   };
-  if (!body.name) return alert('الاسم مطلوب');
+  if (!body.name && !body.title) return alert('الاسم أو المسمى مطلوب');
   try {
     if (editIntId) await api('PUT', `/contacts/internal/${editIntId}`, body);
     else await api('POST', '/contacts/internal', body);
