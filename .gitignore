@@ -2,4 +2,7 @@ node_modules/
 database/tadawul.db
 database/tadawul.db-shm
 database/tadawul.db-wal
+data/tadawul.db
+data/tadawul.db-shm
+data/tadawul.db-wal
 .env

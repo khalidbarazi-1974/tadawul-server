@@ -4,7 +4,7 @@ const path = require('path');
 
 const DUMMY = (process.env.DUMMY_SEED || process.env.dummy_seed || '').trim().toLowerCase() === 'true';
 
-const db = new Database(process.env.DATABASE_PATH || path.join(__dirname, 'tadawul.db'));
+const db = new Database(process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'tadawul.db'));
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
