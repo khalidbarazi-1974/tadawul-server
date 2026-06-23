@@ -55,9 +55,6 @@ body{font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;background:#f0f4f8;c
 .recip-chip{display:inline-flex;align-items:center;gap:4px;background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:3px 10px;border-radius:20px;font-size:.82rem;font-weight:600;cursor:default;}
 .recip-chip button{background:none;border:none;color:#065f46;cursor:pointer;padding:0 2px;font-size:12px;display:flex;align-items:center;line-height:1;}
 .recip-chip button:hover{color:#b91c1c;}
-.org-tag{background:none;border:1px solid #6ee7b7;border-radius:10px;color:#047857;cursor:pointer;font-size:.75rem;padding:1px 7px;margin-right:2px;white-space:nowrap;line-height:1.4;}
-.org-tag:hover{background:#a7f3d0;}
-.org-tag.active{background:#065f46;color:#fff;border-color:#065f46;}
 .picker-manual{display:flex;gap:6px;margin-top:4px;}
 .picker-manual input{flex:1;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:.84rem;direction:rtl;}
 .picker-manual input:focus{outline:none;border-color:#006b5c;}
@@ -661,7 +658,7 @@ function withHonorific(title) {
 function confirmDpTo() {
   dpSelTo.forEach(r => {
     if (!toSelected.some(s => s.title === r.title))
-      toSelected.push({ ...r, title: withHonorific(r.title), addOrg: false });
+      toSelected.push({ ...r, title: withHonorific(r.title) });
   });
   dpSelTo.clear();
   closeDpTo();
@@ -672,10 +669,9 @@ function confirmDpTo() {
 function renderToChips() {
   const el = document.getElementById('toChips');
   if (!el) return;
-  el.innerHTML = toSelected.map((r, i) => {
-    const orgBtn = r.org ? `<button type="button" class="org-tag${r.addOrg?' active':''}" onclick="toSelected[${i}].addOrg=!toSelected[${i}].addOrg;renderToChips();">بـ ${r.org}</button>` : '';
-    return `<span class="recip-chip">${r.title}${orgBtn}<button type="button" onclick="toSelected.splice(${i},1);renderToChips();filterToList();">✕</button></span>`;
-  }).join('');
+  el.innerHTML = toSelected.map((r, i) =>
+    `<span class="recip-chip">${r.title}<button type="button" onclick="toSelected.splice(${i},1);renderToChips();filterToList();">✕</button></span>`
+  ).join('');
 }
 
 function addToManual() {
@@ -772,7 +768,7 @@ function updateDpCountCC() {
 function confirmDpCC() {
   dpSelCC.forEach(r => {
     if (!ccSelected.some(s => s.title === r.title))
-      ccSelected.push({ ...r, title: withHonorific(r.title), addOrg: false });
+      ccSelected.push({ ...r, title: withHonorific(r.title) });
   });
   dpSelCC.clear();
   closeDpCC();
@@ -782,10 +778,9 @@ function confirmDpCC() {
 function renderCCChips() {
   const el = document.getElementById('ccChips');
   if (!el) return;
-  el.innerHTML = ccSelected.map((r, i) => {
-    const orgBtn = r.org ? `<button type="button" class="org-tag${r.addOrg?' active':''}" onclick="ccSelected[${i}].addOrg=!ccSelected[${i}].addOrg;renderCCChips();">بـ ${r.org}</button>` : '';
-    return `<span class="recip-chip">${r.title}${orgBtn}<button type="button" onclick="ccSelected.splice(${i},1);renderCCChips();filterCCList();">✕</button></span>`;
-  }).join('');
+  el.innerHTML = ccSelected.map((r, i) =>
+    `<span class="recip-chip">${r.title}<button type="button" onclick="ccSelected.splice(${i},1);renderCCChips();filterCCList();">✕</button></span>`
+  ).join('');
 }
 
 function addCCManual() {
@@ -1638,7 +1633,7 @@ async function generate() {
       }
       docXml = docXml.replace('XSUBJX', subjXml);
       docXml = docXml.replace('XCLSXIMPRX', priority ? xe(cls) + ' - ' + xe(priority) : xe(cls));
-      docXml = docXml.replace('<!--XTOPLH-->', toLines.map(r => toPara({ ...r, title: r.addOrg && r.org ? r.title + ' بـ ' + r.org : r.title })).join(''));
+      docXml = docXml.replace('<!--XTOPLH-->', toLines.map(r => toPara({ ...r, title: r.org ? r.title + ' ب' + r.org : r.title })).join(''));
       function _measurePx(txt) {
         const el = document.createElement('span');
         el.style.cssText = "font-family:'IBM Plex Sans Arabic',Arial;font-size:16pt;position:fixed;top:-9999px;visibility:hidden;white-space:nowrap";
@@ -1677,7 +1672,7 @@ async function generate() {
 
 
       // CC lines
-      docXml = docXml.replace('<!--XCCPLH-->', ccLines.map(r => ccPara({ ...r, title: r.addOrg && r.org ? r.title + ' بـ ' + r.org : r.title })).join(''));
+      docXml = docXml.replace('<!--XCCPLH-->', ccLines.map(r => ccPara({ ...r, title: r.org ? r.title + ' ب' + r.org : r.title })).join(''));
 
       // Reference paragraph
       let refXml = '';
