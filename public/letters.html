@@ -310,6 +310,39 @@ body{font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;background:#f0f4f8;c
       </div>
       </div>
 
+      <div id="sec-copy"><div class="sec">صورة إلى (اختياري)</div>
+      <div class="recip-chips" id="copyChips"></div>
+      <div class="dp-wrap" id="dpWrapCopy">
+        <button class="btn-from-list" onclick="toggleDpCopy()"><i class="fa-solid fa-magnifying-glass"></i> إضافة صورة</button>
+        <div class="dp-panel" id="dpPanelCopy" style="display:none;">
+          <div class="dp-ctrl">
+            <label><input type="radio" name="copyType" value="ext" checked onchange="onRecipTypeCopyChange()"> خارجي</label>
+            <label><input type="radio" name="copyType" value="int" onchange="onRecipTypeCopyChange()"> داخلي</label>
+            <select id="copyOrgFilter" onchange="filterCopyList()" style="display:none;" data-no-ss><option value="">كل الجهات</option></select>
+            <div class="dp-combo">
+              <button class="dp-combo-btn" onclick="toggleComboCopy(event)">
+                <span id="dpComboLabelCopy">اختر جهة...</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:11px;color:#9ca3af;"></i>
+              </button>
+              <div class="dp-combo-drop" id="dpComboDropCopy" style="display:none;">
+                <div class="dp-combo-search">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input id="copySearch" type="text" autocomplete="off" oninput="filterCopyList()" placeholder="بحث...">
+                </div>
+                <div class="dp-list" id="copyPickerList"></div>
+                <div class="dp-footer">
+                  <span class="dp-sel-count" id="dpSelCountCopy"></span>
+                  <button class="btn-dp-confirm" id="dpConfirmBtnCopy" onclick="confirmDpCopy()" disabled>
+                    <i class="fa-solid fa-check"></i> إضافة المحددين
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
       <div id="sec-ref"><div class="sec">الإشارة / المرجع (اختياري)</div>
       <div class="row2">
         <div class="field">
@@ -527,7 +560,7 @@ const TMPL_MEM=`UEsDBBQABgAIAAAAIQA2G3WD6QEAAPAMAAATAAgCW0NvbnRlbnRfVHlwZXNdLnht
 
 // ── Letter document.xml template (placeholders replaced at runtime) ────────
 const DOC_TMPL=`
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" mc:Ignorable="w14 w15"><w:body><w:p><w:pPr><w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:rtl/></w:rPr><w:t xml:space="preserve">الموضوع: XSUBJX</w:t></w:r></w:p><w:p><w:pPr><w:bidi w:val="0"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>(XCLSXIMPRX)</w:t></w:r></w:p><!--XTOPLH--><!--XCCPLH--><w:p><w:pPr><w:spacing w:line="500" w:lineRule="exact"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>السلام عليكم ورحمة الله وبركاته</w:t></w:r></w:p><!--XREFPLH--><!--XBODYPLH--><w:p><w:pPr><w:spacing w:after="240" w:line="500" w:lineRule="exact"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>والسلام عليكم ورحمة الله وبركاته</w:t></w:r></w:p><w:p><w:pPr><w:spacing w:after="60" w:line="276" w:lineRule="auto"/><w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>XSIGTX</w:t></w:r></w:p><w:p><w:pPr><w:spacing w:line="500" w:lineRule="exact"/>XSIGNINX<w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t xml:space="preserve">XSIGNX</w:t></w:r></w:p><w:p><w:pPr><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr></w:p><w:sectPr><w:headerReference w:type="even" r:id="rId10"/><w:headerReference w:type="default" r:id="rId11"/><w:footerReference w:type="even" r:id="rId12"/><w:footerReference w:type="default" r:id="rId13"/><w:headerReference w:type="first" r:id="rId14"/><w:footerReference w:type="first" r:id="rId15"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="3600" w:right="926" w:bottom="1440" w:left="990" w:header="706" w:footer="706" w:gutter="0"/><w:cols w:space="708"/><w:bidi/><w:docGrid w:linePitch="360"/></w:sectPr></w:body></w:document>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" mc:Ignorable="w14 w15"><w:body><w:p><w:pPr><w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:rtl/></w:rPr><w:t xml:space="preserve">الموضوع: XSUBJX</w:t></w:r></w:p><w:p><w:pPr><w:bidi w:val="0"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>(XCLSXIMPRX)</w:t></w:r></w:p><!--XTOPLH--><!--XCCPLH--><w:p><w:pPr><w:spacing w:line="500" w:lineRule="exact"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>السلام عليكم ورحمة الله وبركاته</w:t></w:r></w:p><!--XREFPLH--><!--XBODYPLH--><w:p><w:pPr><w:spacing w:after="240" w:line="500" w:lineRule="exact"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>والسلام عليكم ورحمة الله وبركاته</w:t></w:r></w:p><w:p><w:pPr><w:spacing w:after="60" w:line="276" w:lineRule="auto"/><w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t>XSIGTX</w:t></w:r></w:p><w:p><w:pPr><w:spacing w:line="500" w:lineRule="exact"/>XSIGNINX<w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr><w:t xml:space="preserve">XSIGNX</w:t></w:r></w:p><w:p><w:pPr><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr></w:p><!--XCOPYPLH--><w:p><w:pPr><w:rPr><w:rFonts w:ascii="IBM Plex Sans Arabic" w:eastAsia="Times New Roman" w:hAnsi="IBM Plex Sans Arabic" w:cs="IBM Plex Sans Arabic"/><w:sz w:val="32"/><w:szCs w:val="32"/><w:rtl/></w:rPr></w:pPr></w:p><w:sectPr><w:headerReference w:type="even" r:id="rId10"/><w:headerReference w:type="default" r:id="rId11"/><w:footerReference w:type="even" r:id="rId12"/><w:footerReference w:type="default" r:id="rId13"/><w:headerReference w:type="first" r:id="rId14"/><w:footerReference w:type="first" r:id="rId15"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="3600" w:right="926" w:bottom="1440" w:left="990" w:header="706" w:footer="706" w:gutter="0"/><w:cols w:space="708"/><w:bidi/><w:docGrid w:linePitch="360"/></w:sectPr></w:body></w:document>
 `;
 
 // ── App logic ─────────────────────────────────────────────────────────────
@@ -549,6 +582,9 @@ let ccSelected = [];   // [{title, suffix}]
 let dpSelTo = new Set();
 let dpSelCC = new Set();
 let CC_RECIPIENTS = [];
+let copySelected = [];  // [{title, suffix}]
+let dpSelCopy = new Set();
+let COPY_RECIPIENTS = [];
 
 // ── "To" picker ──
 function toggleDpTo() {
@@ -794,6 +830,125 @@ function addCCManual() {
 
 function getCCLines() { return ccSelected; }
 
+// ── صورة ل picker ─────────────────────────────────────────────────────────────
+function toggleDpCopy() {
+  const panel = document.getElementById('dpPanelCopy');
+  if (panel.style.display === 'none') {
+    dpSelCopy.clear();
+    panel.style.display = 'block';
+    document.getElementById('copySearch').value = '';
+    document.getElementById('dpComboDropCopy').style.display = 'block';
+    document.getElementById('copySearch').focus();
+    COPY_RECIPIENTS = activeCopyRecipients();
+    rebuildOrgFilterCopy();
+    filterCopyList();
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function toggleComboCopy(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('dpComboDropCopy');
+  drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+  if (drop.style.display === 'block') document.getElementById('copySearch').focus();
+}
+
+function closeDpCopy() {
+  const p = document.getElementById('dpPanelCopy');
+  if (p) p.style.display = 'none';
+}
+
+function filterCopyList() {
+  const orgF = (document.getElementById('copyOrgFilter')?.value || '').toLowerCase();
+  const q    = (document.getElementById('copySearch')?.value || '').toLowerCase();
+  const list = document.getElementById('copyPickerList');
+  if (!list) return;
+  const filtered = COPY_RECIPIENTS.filter(r =>
+    (!orgF || (r.org||'').toLowerCase() === orgF) &&
+    (!q    || r.title.toLowerCase().includes(q))
+  );
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:10px 14px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
+    updateDpCountCopy();
+    return;
+  }
+  list.innerHTML = filtered.map((r) => {
+    const idx    = COPY_RECIPIENTS.indexOf(r);
+    const isConf = copySelected.some(s => s.title === r.title);
+    const isSel  = dpSelCopy.has(r);
+    const orgBadge = r.org && document.querySelector('input[name="copyType"]:checked')?.value !== 'int'
+      ? `<div class="dp-org">${r.org}</div>` : '';
+    if (isConf) {
+      return `<div class="dp-item added">
+        <span class="dp-chk"><i class="fa-solid fa-check" style="color:#9ca3af;"></i></span>
+        <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
+      </div>`;
+    }
+    return `<div class="dp-item${isSel?' sel':''}" onclick="toggleCopyItem(${idx})">
+      <span class="dp-chk">${isSel ? '<i class="fa-solid fa-check"></i>' : ''}</span>
+      <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
+    </div>`;
+  }).join('');
+  updateDpCountCopy();
+}
+
+function toggleCopyItem(idx) {
+  const r = COPY_RECIPIENTS[idx];
+  if (!r) return;
+  if (dpSelCopy.has(r)) dpSelCopy.delete(r); else dpSelCopy.add(r);
+  filterCopyList();
+}
+
+function updateDpCountCopy() {
+  const n = dpSelCopy.size;
+  const cnt = document.getElementById('dpSelCountCopy');
+  const btn = document.getElementById('dpConfirmBtnCopy');
+  const lbl = document.getElementById('dpComboLabelCopy');
+  if (cnt) cnt.textContent = n > 0 ? `تم تحديد ${n}` : '';
+  if (btn) btn.disabled = n === 0;
+  if (lbl) lbl.textContent = n > 0 ? `تم تحديد ${n}` : 'اختر جهة...';
+}
+
+function confirmDpCopy() {
+  dpSelCopy.forEach(r => {
+    if (!copySelected.some(s => s.title === r.title))
+      copySelected.push({ ...r });
+  });
+  dpSelCopy.clear();
+  closeDpCopy();
+  renderCopyChips();
+}
+
+function renderCopyChips() {
+  const el = document.getElementById('copyChips');
+  if (!el) return;
+  el.innerHTML = copySelected.map((r, i) =>
+    `<span class="recip-chip">${r.title}<button type="button" onclick="copySelected.splice(${i},1);renderCopyChips();filterCopyList();">✕</button></span>`
+  ).join('');
+}
+
+function getCopyLines() { return copySelected; }
+
+function activeCopyRecipients() {
+  const sel = document.querySelector('input[name="copyType"]:checked');
+  return (sel && sel.value === 'int') ? intDepts : extDepts;
+}
+
+function rebuildOrgFilterCopy() {
+  const sel = document.getElementById('copyOrgFilter');
+  if (sel) { sel.style.display = 'none'; sel.value = ''; }
+}
+
+function onRecipTypeCopyChange() {
+  COPY_RECIPIENTS = activeCopyRecipients();
+  dpSelCopy.clear();
+  rebuildOrgFilterCopy();
+  filterCopyList();
+  document.getElementById('dpComboDropCopy').style.display = 'block';
+  document.getElementById('copySearch').focus();
+}
+
 function refreshToRemoveBtns() {}
 function handleOtherSel() {}
 function addTo() {}
@@ -833,6 +988,24 @@ loadLists();
 
 // ── Contacts from API (replaces hardcoded RECIPIENTS) ─────────────────────
 let extContacts = [], intContacts = [];
+let extDepts = [], intDepts = [];
+
+function deriveDepts() {
+  const extOrgSet = new Set();
+  extContacts.forEach(c => { if (c.org) extOrgSet.add(c.org); });
+  extDepts = [...extOrgSet].sort((a,b) => a.localeCompare(b,'ar')).map(d => ({title:d,suffix:'',org:''}));
+
+  const intSet = new Set();
+  intContacts.forEach(c => {
+    const t = c.title.replace(/^سعادة\s+|^معالي\s+/,'').trim();
+    let m;
+    if ((m = t.match(/^وكيل\s+\S+\s+لل(.+)$/)))              { intSet.add('وكالة ال'+m[1].trim()); return; }
+    if ((m = t.match(/^وكيل\s+\S+\s+ل([^ل].+)$/)))           { intSet.add('وكالة '+m[1].trim()); return; }
+    if ((m = t.match(/^نائب\s+\S+\s+لقطاع\s+(.+)$/)))        { intSet.add('قطاع '+m[1].trim()); return; }
+    if ((m = t.match(/^المدير\s+التنفيذي\s+لإدارة\s+(.+)$/))) { intSet.add('إدارة '+m[1].trim()); return; }
+  });
+  intDepts = [...intSet].sort((a,b) => a.localeCompare(b,'ar')).map(d => ({title:d,suffix:'',org:''}));
+}
 
 function activeRecipients() {
   const sel = document.querySelector('input[name="recipType"]:checked');
@@ -850,8 +1023,10 @@ async function loadContacts() {
     ]);
     extContacts = ext.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '', org: c.org || '' }));
     intContacts = int_.map(c => ({ title: [c.prefix, c.title].filter(Boolean).join(' '), suffix: c.suffix || '', org: c.sector || c.dept || '' }));
+    deriveDepts();
     RECIPIENTS = activeRecipients();
     CC_RECIPIENTS = activeCCRecipients();
+    COPY_RECIPIENTS = activeCopyRecipients();
     rebuildOrgFilter();
     filterToList();
     rebuildDropdowns();
@@ -1181,6 +1356,7 @@ function resetForm() {
   if (nameEl) nameEl.readOnly = true;
   toSelected = []; renderToChips(); filterToList();
   ccSelected = []; renderCCChips();
+  copySelected = []; renderCopyChips();
   const mActEl = document.getElementById('m_acting');
   if (mActEl) mActEl.checked = false;
   document.querySelectorAll('input[name="m_req"]').forEach(cb => { cb.checked = false; });
@@ -1212,6 +1388,12 @@ const withOrg   = r => {
 const toPara    = ({title, suffix}) => {
   return '<w:p><w:pPr><w:spacing w:line="276" w:lineRule="auto"/><w:rPr>' + RRP + '</w:rPr></w:pPr>'
     + run(title) + dynTabs(title.length) + (suffix ? run(suffix) : '') + '</w:p>';
+};
+const COPY_FRAME = '<w:framePr w:w="4490" w:hAnchor="margin" w:xAlign="right" w:vAnchor="margin" w:yAlign="bottom" w:wrap="none"/>';
+const copyPara  = ({title, suffix}) => {
+  const full = title.startsWith('ال') ? 'صورة لل' + title.slice(2) : 'صورة ل' + title;
+  return '<w:p><w:pPr>' + COPY_FRAME + '<w:bidi/><w:spacing w:line="276" w:lineRule="auto"/><w:jc w:val="left"/><w:rPr>' + RRP9 + '</w:rPr></w:pPr>'
+    + run(full, true) + (suffix ? run(suffix, true) : '') + '</w:p>';
 };
 const ccPara    = ({title, suffix}) => {
   const full = 'نسخة مع التحية ل' + title;
@@ -1307,6 +1489,7 @@ const DRAFT_SECTIONS = {
   'sec-meta':  [null, 'tarsheeh', 'tarsheeh_jadwal'],
   'sec-to':    [null, 'wazeer', 'tarsheeh', 'tarsheeh_jadwal'],
   'sec-cc':    [null, 'tarsheeh', 'tarsheeh_jadwal'],
+  'sec-copy':  [null, 'tarsheeh', 'tarsheeh_jadwal'],
   'sec-ref':   [null, 'tarsheeh', 'tarsheeh_jadwal'],
   'bodySecHeader': [null, 'qarar', 'wazeer', 'tarsheeh', 'tarsheeh_jadwal'],
   'bodyTextSection': [null, 'qarar', 'wazeer', 'tarsheeh'],
@@ -1444,6 +1627,7 @@ function buildNomTableOOXML() {
 function getArchiveItems(listId) {
   if (listId === '#toList') return toSelected.map(r => ({ type:'chip', title: r.title, suffix: r.suffix||'' }));
   if (listId === '#ccList') return ccSelected.map(r => ({ type:'chip', title: r.title, suffix: r.suffix||'' }));
+  if (listId === '#copyList') return copySelected.map(r => ({ type:'chip', title: r.title, suffix: r.suffix||'' }));
   return [];
 }
 
@@ -1458,7 +1642,8 @@ function saveToArchive() {
       acting: document.getElementById('l_acting').checked,
       sigName: v('l_sig_name'), refNum: v('l_ref_num'), refDate: v('l_ref_date'),
       refSubj: v('l_ref_subj'), refReq: v('l_ref_req'), body: v('l_body'),
-      to: getArchiveItems('#toList'), cc: getArchiveItems('#ccList')
+      to: getArchiveItems('#toList'), cc: getArchiveItems('#ccList'),
+      copy: getArchiveItems('#copyList')
     };
   } else {
     label = (v('m_subject') || '—') + ' | ' + (v('m_date') || '');
@@ -1487,6 +1672,9 @@ function restoreArchiveItems(listId, items) {
   } else if (listId === 'ccList') {
     ccSelected = (items||[]).map(i => ({ title: i.title||i.text||'', suffix: i.suffix||'' })).filter(i=>i.title);
     renderCCChips();
+  } else if (listId === 'copyList') {
+    copySelected = (items||[]).map(i => ({ title: i.title||i.text||'', suffix: i.suffix||'' })).filter(i=>i.title);
+    renderCopyChips();
   }
 }
 
@@ -1518,6 +1706,7 @@ function loadFromArchive(idx) {
     sv('l_body', f.body || '');
     restoreArchiveItems('toList', f.to);
     restoreArchiveItems('ccList', f.cc);
+    restoreArchiveItems('copyList', f.copy);
   } else {
     sv('m_subject', f.subject || '');
     document.querySelectorAll('input[name="m_cls"]').forEach(cb => { cb.checked = (f.cls||[]).includes(cb.value); });
@@ -1596,6 +1785,7 @@ async function generate() {
       const refReq   = v('l_ref_req');
       const bodyText = v('l_body');
       const ccLines  = getCCLines();
+      const copyLines = getCopyLines();
 
       // Start from embedded template
       docXml = DOC_TMPL.trim();
@@ -1680,6 +1870,7 @@ async function generate() {
 
       // CC lines
       docXml = docXml.replace('<!--XCCPLH-->', ccLines.map(r => ccPara({ ...r, title: withOrg(r) })).join(''));
+      docXml = docXml.replace('<!--XCOPYPLH-->', copyLines.map(r => copyPara(r)).join(''));
 
       // Reference paragraph
       let refXml = '';
