@@ -316,9 +316,6 @@ body{font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;background:#f0f4f8;c
         <button class="btn-from-list" onclick="toggleDpCopy()"><i class="fa-solid fa-magnifying-glass"></i> إضافة صورة</button>
         <div class="dp-panel" id="dpPanelCopy" style="display:none;">
           <div class="dp-ctrl">
-            <label><input type="radio" name="copyType" value="ext" checked onchange="onRecipTypeCopyChange()"> خارجي</label>
-            <label><input type="radio" name="copyType" value="int" onchange="onRecipTypeCopyChange()"> داخلي</label>
-            <select id="copyOrgFilter" onchange="filterCopyList()" style="display:none;" data-no-ss><option value="">كل الجهات</option></select>
             <div class="dp-combo">
               <button class="dp-combo-btn" onclick="toggleComboCopy(event)">
                 <span id="dpComboLabelCopy">اختر جهة...</span>
@@ -618,6 +615,8 @@ document.addEventListener('click', function(e) {
   if (wTo && !e.composedPath().includes(wTo)) closeDpTo();
   const wCC = document.getElementById('dpWrapCC');
   if (wCC && !e.composedPath().includes(wCC)) closeDpCC();
+  const wCopy = document.getElementById('dpWrapCopy');
+  if (wCopy && !e.composedPath().includes(wCopy)) closeDpCopy();
 });
 
 function rebuildOrgFilter() {
@@ -839,8 +838,7 @@ function toggleDpCopy() {
     document.getElementById('copySearch').value = '';
     document.getElementById('dpComboDropCopy').style.display = 'block';
     document.getElementById('copySearch').focus();
-    COPY_RECIPIENTS = activeCopyRecipients();
-    rebuildOrgFilterCopy();
+    COPY_RECIPIENTS = deriveCopyList();
     filterCopyList();
   } else {
     panel.style.display = 'none';
@@ -860,14 +858,10 @@ function closeDpCopy() {
 }
 
 function filterCopyList() {
-  const orgF = (document.getElementById('copyOrgFilter')?.value || '').toLowerCase();
   const q    = (document.getElementById('copySearch')?.value || '').toLowerCase();
   const list = document.getElementById('copyPickerList');
   if (!list) return;
-  const filtered = COPY_RECIPIENTS.filter(r =>
-    (!orgF || (r.org||'').toLowerCase() === orgF) &&
-    (!q    || r.title.toLowerCase().includes(q))
-  );
+  const filtered = COPY_RECIPIENTS.filter(r => !q || r.title.toLowerCase().includes(q));
   if (!filtered.length) {
     list.innerHTML = '<div style="padding:10px 14px;color:#9ca3af;font-size:.84rem;">لا توجد نتائج</div>';
     updateDpCountCopy();
@@ -877,17 +871,15 @@ function filterCopyList() {
     const idx    = COPY_RECIPIENTS.indexOf(r);
     const isConf = copySelected.some(s => s.title === r.title);
     const isSel  = dpSelCopy.has(r);
-    const orgBadge = r.org && document.querySelector('input[name="copyType"]:checked')?.value !== 'int'
-      ? `<div class="dp-org">${r.org}</div>` : '';
     if (isConf) {
       return `<div class="dp-item added">
         <span class="dp-chk"><i class="fa-solid fa-check" style="color:#9ca3af;"></i></span>
-        <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
+        <div class="dp-info"><div class="dp-name">${r.title}</div></div>
       </div>`;
     }
     return `<div class="dp-item${isSel?' sel':''}" onclick="toggleCopyItem(${idx})">
       <span class="dp-chk">${isSel ? '<i class="fa-solid fa-check"></i>' : ''}</span>
-      <div class="dp-info"><div class="dp-name">${r.title}</div></div>${orgBadge}
+      <div class="dp-info"><div class="dp-name">${r.title}</div></div>
     </div>`;
   }).join('');
   updateDpCountCopy();
@@ -930,23 +922,30 @@ function renderCopyChips() {
 
 function getCopyLines() { return copySelected; }
 
-function activeCopyRecipients() {
-  const sel = document.querySelector('input[name="copyType"]:checked');
-  return (sel && sel.value === 'int') ? intDepts : extDepts;
-}
-
-function rebuildOrgFilterCopy() {
-  const sel = document.getElementById('copyOrgFilter');
-  if (sel) { sel.style.display = 'none'; sel.value = ''; }
-}
-
-function onRecipTypeCopyChange() {
-  COPY_RECIPIENTS = activeCopyRecipients();
-  dpSelCopy.clear();
-  rebuildOrgFilterCopy();
-  filterCopyList();
-  document.getElementById('dpComboDropCopy').style.display = 'block';
-  document.getElementById('copySearch').focus();
+function deriveCopyList() {
+  const all = [...extContacts, ...intContacts];
+  const seen = new Set();
+  const result = [];
+  all.forEach(c => {
+    let t = c.title.replace(/^سعادة\s+|^معالي\s+/, '').trim();
+    let dept = null;
+    let m;
+    if (/^نائب\s/.test(t)) {
+      dept = 'مكتب ' + t;
+    } else if ((m = t.match(/^وكيل\s+(.+)$/))) {
+      dept = 'وكالة ' + m[1].trim();
+    } else if ((m = t.match(/^مدير\s+عام\s+(.+)$/))) {
+      const rest = m[1].trim();
+      dept = 'الإدارة العامة ' + (rest.startsWith('ال') ? 'لل' + rest.slice(2) : 'لـ' + rest);
+    } else if ((m = t.match(/^المدير\s+التنفيذي\s+(.+)$/))) {
+      dept = 'الإدارة التنفيذية ' + m[1].trim();
+    }
+    if (dept && !seen.has(dept)) {
+      seen.add(dept);
+      result.push({ title: dept, suffix: '', org: '' });
+    }
+  });
+  return result.sort((a, b) => a.title.localeCompare(b.title, 'ar'));
 }
 
 function refreshToRemoveBtns() {}
@@ -1026,7 +1025,7 @@ async function loadContacts() {
     deriveDepts();
     RECIPIENTS = activeRecipients();
     CC_RECIPIENTS = activeCCRecipients();
-    COPY_RECIPIENTS = activeCopyRecipients();
+    COPY_RECIPIENTS = deriveCopyList();
     rebuildOrgFilter();
     filterToList();
     rebuildDropdowns();
