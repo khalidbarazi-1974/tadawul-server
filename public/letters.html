@@ -922,11 +922,18 @@ function renderCopyChips() {
 
 function getCopyLines() { return copySelected; }
 
+// Prepends ل/لل correctly: لل before ال-words, لـ before others, passthrough if already starts with ل
+function lamLink(rest) {
+  if (!rest) return '';
+  if (rest.startsWith('ل')) return rest;                           // already has ل/لل
+  if (rest.startsWith('ال')) return 'لل' + rest.slice(2);    // ال → لل (drop ال, add لل)
+  return 'لـ' + rest;
+}
+
 function deriveCopyList() {
-  const all = [...intContacts];
   const seen = new Set();
   const result = [];
-  all.forEach(c => {
+  intContacts.forEach(c => {
     let t = c.title.replace(/^سعادة\s+|^معالي\s+/, '').trim();
     let dept = null;
     let m;
@@ -935,10 +942,9 @@ function deriveCopyList() {
     } else if ((m = t.match(/^وكيل\s+(.+)$/))) {
       dept = 'وكالة ' + m[1].trim();
     } else if ((m = t.match(/^مدير\s+عام\s+(.+)$/))) {
-      const rest = m[1].trim();
-      dept = 'الإدارة العامة ' + (rest.startsWith('ال') ? 'لل' + rest.slice(2) : 'لـ' + rest);
+      dept = 'الإدارة العامة ' + lamLink(m[1].trim());
     } else if ((m = t.match(/^المدير\s+التنفيذي\s+(.+)$/))) {
-      dept = 'الإدارة التنفيذية ' + m[1].trim();
+      dept = 'الإدارة التنفيذية ' + lamLink(m[1].trim());
     }
     if (dept && !seen.has(dept)) {
       seen.add(dept);
@@ -1390,7 +1396,7 @@ const toPara    = ({title, suffix}) => {
 };
 const COPY_FRAME = '<w:framePr w:w="4490" w:hAnchor="margin" w:xAlign="right" w:vAnchor="margin" w:yAlign="bottom" w:wrap="none"/>';
 const copyPara  = ({title, suffix}) => {
-  const full = title.startsWith('ال') ? 'صورة لل' + title.slice(2) : 'صورة ل' + title;
+  const full = 'صورة ' + lamLink(title);
   return '<w:p><w:pPr>' + COPY_FRAME + '<w:bidi/><w:spacing w:line="276" w:lineRule="auto"/><w:jc w:val="left"/><w:rPr>' + RRP9 + '</w:rPr></w:pPr>'
     + run(full, true) + (suffix ? run(suffix, true) : '') + '</w:p>';
 };
