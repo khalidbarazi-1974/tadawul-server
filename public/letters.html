@@ -927,7 +927,7 @@ function lamLink(rest) {
   if (!rest) return '';
   if (rest.startsWith('ل')) return rest;                           // already has ل/لل
   if (rest.startsWith('ال')) return 'لل' + rest.slice(2);    // ال → لل (drop ال, add لل)
-  return 'لـ' + rest;
+  return 'ل' + rest;
 }
 
 function deriveCopyList() {
