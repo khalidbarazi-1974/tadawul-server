@@ -923,7 +923,7 @@ function renderCopyChips() {
 function getCopyLines() { return copySelected; }
 
 function deriveCopyList() {
-  const all = [...extContacts, ...intContacts];
+  const all = [...intContacts];
   const seen = new Set();
   const result = [];
   all.forEach(c => {
