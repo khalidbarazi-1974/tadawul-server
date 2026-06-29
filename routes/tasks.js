@@ -40,6 +40,8 @@ function taskWithGuidances(task) {
         createdBy:          task.created_by,
         createdByRole:      task.created_by_role,
         createdAt:          task.created_at,
+        progress:           task.progress ?? 0,
+        continuous:         !!task.continuous,
         guidances,
         pendingChanges:     changes
     };
@@ -75,7 +77,7 @@ router.get('/all', requireRole('deputy', 'admin'), (req, res) => {
 // ── Create task ───────────────────────────────────────────────────────────────
 
 router.post('/', (req, res) => {
-    const { name, description, priority, status, startDate, dueDate, deptId, assignedTo, meetingRef } = req.body;
+    const { name, description, priority, status, startDate, dueDate, deptId, assignedTo, meetingRef, progress, continuous } = req.body;
 
     const duplicate = db.prepare('SELECT id FROM tasks WHERE name = ? AND dept_id = ? AND description = ?').get(name?.trim(), deptId, description || '');
     if (duplicate) return res.status(409).json({ error: `يوجد موضوع مطابق تماماً في نفس الإدارة بالفعل` });
@@ -88,8 +90,9 @@ router.post('/', (req, res) => {
         INSERT INTO tasks
             (id, name, description, priority, status, start_date, due_date, dept_id,
              created_by, created_by_role, assigned_to, assigned_date,
-             is_new_for_employee, is_new_for_manager, approved, created_at, meeting_ref)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             is_new_for_employee, is_new_for_manager, approved, created_at, meeting_ref,
+             progress, continuous)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
         id, name, description || '', priority || 'متوسطة', status || 'جديد',
         startDate || '', dueDate || '', deptId,
@@ -100,7 +103,9 @@ router.post('/', (req, res) => {
         isEmployee ? 1 : 0,
         isEmployee ? 0 : 1,
         now,
-        meetingRef || null
+        meetingRef || null,
+        progress ?? 0,
+        continuous ? 1 : 0
     );
 
     res.json({ success: true, id });
@@ -109,14 +114,14 @@ router.post('/', (req, res) => {
 // ── Manager: direct update (no approval needed) ───────────────────────────────
 
 router.put('/:id', requireRole('manager', 'deputy', 'admin'), (req, res) => {
-    const { name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo, meetingRef } = req.body;
+    const { name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo, meetingRef, progress, continuous } = req.body;
     db.prepare(`
         UPDATE tasks SET name=?, description=?, priority=?, status=?,
             start_date=?, due_date=?, suggested_due_date=?, assigned_to=?,
-            meeting_ref=?, is_new_for_manager=0
+            meeting_ref=?, progress=?, continuous=?, is_new_for_manager=0
         WHERE id=?
     `).run(name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo,
-           meetingRef ?? null, req.params.id);
+           meetingRef ?? null, progress ?? 0, continuous ? 1 : 0, req.params.id);
     res.json({ success: true });
 });
 

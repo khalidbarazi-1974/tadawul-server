@@ -171,7 +171,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
 .stopwatch-widget.compact{padding:8px;}
 .stopwatch-display{display:flex;justify-content:center;align-items:center;margin-bottom:14px;transition:all .3s ease;}
 .stopwatch-widget.compact .stopwatch-display{margin-bottom:0;}
-.stopwatch-circle{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);transition:all .3s ease;position:relative;}
+.stopwatch-circle{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(240,253,244,0.55),rgba(236,253,245,0.55));transition:all .3s ease;position:relative;}
 .stopwatch-widget.compact .stopwatch-circle{width:110px;height:110px;}
 .stopwatch-svg{filter:drop-shadow(0 4px 8px rgba(0,0,0,.1));width:140px;height:140px;position:absolute;top:0;left:0;transform:rotate(-90deg);transition:all .3s ease;}
 .stopwatch-widget.compact .stopwatch-svg{width:110px;height:110px;}
@@ -182,7 +182,9 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
 .stopwatch-circle.completed{background:rgba(239,68,68,.15)!important;}
 .stopwatch-time{font-size:32px;font-weight:900;color:#1f2937;font-family:'Arial Black','Segoe UI',sans-serif;letter-spacing:2px;transition:all .3s ease;line-height:1;z-index:1;}
 .stopwatch-widget.compact .stopwatch-time{font-size:24px;letter-spacing:1px;}
-.stopwatch-circle.completed .stopwatch-time{font-size:16px;font-weight:700;letter-spacing:0;}
+.stopwatch-circle.completed .stopwatch-time{font-size:20px;font-weight:900;letter-spacing:1px;}
+@keyframes swFlash{0%,100%{background:rgba(239,68,68,.15);}50%{background:rgba(239,68,68,.5);}}
+.stopwatch-circle.flashing{animation:swFlash .75s ease;}
 .stopwatch-controls{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;transition:all .3s ease;}
 .stopwatch-controls.hidden{display:none;}
 .btn-timer-preset{padding:6px 12px;background:#f3f4f6;border:2px solid #e5e7eb;border-radius:10px;cursor:pointer;font-weight:600;font-size:12px;color:#4a5a5a;transition:all .3s ease;}
@@ -302,20 +304,21 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           <input type="text" id="filterSearch" placeholder="بحث..." oninput="renderTasks()" autocomplete="off" style="flex:1;min-width:140px;">
         </div>
         <div class="table-wrap">
-          <table style="table-layout:fixed;min-width:1020px;">
+          <table style="table-layout:fixed;min-width:1175px;">
           <thead><tr>
-            <th style="width:38px">#</th>
-            <th class="sortable" id="th-name" onclick="setSort('name')">الموضوع</th>
-            <th style="width:160px">الوصف</th>
-            <th class="sortable" style="width:74px" id="th-priority" onclick="setSort('priority')">الأولوية</th>
-            <th class="sortable" style="width:90px" id="th-status" onclick="setSort('status')">الحالة</th>
-            <th class="sortable" style="width:115px" id="th-assignedTo" onclick="setSort('assignedTo')">المسؤول</th>
-            <th class="sortable" style="width:92px" id="th-dueDate" onclick="setSort('dueDate')">الاستحقاق</th>
-            <th class="sortable" style="width:92px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
-            <th style="width:54px">المدة</th>
-            <th style="width:65px">تعليقات</th>
+            <th class="sortable" style="width:40px" id="th-index" onclick="setSort('index')">#</th>
+            <th class="sortable" style="width:180px" id="th-name" onclick="setSort('name')">اسم الموضوع</th>
+            <th class="sortable" style="width:260px" id="th-description" onclick="setSort('description')">التحديثات</th>
+            <th class="sortable" style="width:60px" id="th-guidance" onclick="setSort('guidance')">تعليق</th>
+            <th class="sortable" style="width:75px" id="th-priority" onclick="setSort('priority')">الأولوية</th>
+            <th class="sortable" style="width:85px" id="th-status" onclick="setSort('status')">الحالة</th>
+            <th class="sortable" style="width:100px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
+            <th class="sortable" style="width:100px" id="th-dueDate" onclick="setSort('dueDate')">تاريخ الاستحقاق</th>
+            <th class="sortable" style="width:60px" id="th-duration" onclick="setSort('duration')">المدة</th>
+            <th class="sortable" style="width:100px" id="th-progress" onclick="setSort('progress')">نسبة الإنجاز</th>
+            <th class="sortable" style="min-width:115px" id="th-assignedTo" onclick="setSort('assignedTo')">المسؤول</th>
           </tr></thead>
-          <tbody id="taskBody"><tr><td colspan="10" class="empty">لا توجد مواضيع</td></tr></tbody>
+          <tbody id="taskBody"><tr><td colspan="11" class="empty">لا توجد مواضيع</td></tr></tbody>
           </table>
         </div>
         <div id="kanbanView" style="display:none;"></div>
@@ -583,7 +586,7 @@ function updateStats(){
     countUp(document.getElementById('sPending'),(pending.pendingTasks||[]).length+pending.changes.length+pending.comments.length);
 }
 
-const SORT_COLS_TASK=['name','priority','status','assignedTo','dueDate','createdAt'];
+const SORT_COLS_TASK=['index','name','description','guidance','priority','status','assignedTo','dueDate','createdAt','duration','progress'];
 const PRIO_RANK={'عالية':3,'متوسطة':2,'منخفضة':1};
 function setSort(col){
     if(sortCol===col) sortDir=sortDir==='asc'?'desc':'asc';
@@ -607,12 +610,17 @@ function renderTasks(){
     updateSortIndicators();
     if(sortCol) list=list.slice().sort((a,b)=>{
         let va,vb;
-        if(sortCol==='name')         {va=a.name||'';vb=b.name||'';}
+        if(sortCol==='index')             {va=a.createdAt||'';vb=b.createdAt||'';}
+        else if(sortCol==='name')         {va=a.name||'';vb=b.name||'';}
+        else if(sortCol==='description')  {va=a.description||'';vb=b.description||'';}
+        else if(sortCol==='guidance')     {va=(a.guidances||[]).length;vb=(b.guidances||[]).length;}
         else if(sortCol==='priority')     {va=PRIO_RANK[a.priority]||0;vb=PRIO_RANK[b.priority]||0;}
         else if(sortCol==='status')       {va=a.status||'';vb=b.status||'';}
         else if(sortCol==='assignedTo')   {va=a.assignedTo||'';vb=b.assignedTo||'';}
         else if(sortCol==='dueDate')      {va=a.dueDate||'';vb=b.dueDate||'';}
         else if(sortCol==='createdAt')    {va=a.createdAt||'';vb=b.createdAt||'';}
+        else if(sortCol==='progress')     {va=a.progress||0;vb=b.progress||0;}
+        else if(sortCol==='duration')     {const r=t=>t.createdAt||t.startDate;va=r(a)?Math.floor((new Date()-new Date(r(a)))/86400000):0;vb=r(b)?Math.floor((new Date()-new Date(r(b)))/86400000):0;}
         else return 0;
         if(typeof va==='number') return sortDir==='asc'?va-vb:vb-va;
         return sortDir==='asc'?va.localeCompare(vb,'ar'):vb.localeCompare(va,'ar');
@@ -628,22 +636,32 @@ function renderTasks(){
     document.getElementById('kanbanView').style.display = 'none';
 
     if(!list.length){
-        tbody.innerHTML=`<tr><td colspan="10" class="empty">لا توجد مواضيع</td></tr>`;
+        tbody.innerHTML=`<tr><td colspan="11" class="empty">لا توجد مواضيع</td></tr>`;
         return;
     }
-    tbody.innerHTML=list.map((t,i)=>`
+    tbody.innerHTML=list.map((t,i)=>{
+        const pct = t.continuous ? 0 : (t.progress != null ? parseInt(t.progress) : 0);
+        const pctColor = pct >= 80 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444';
+        const progressCell = t.continuous
+            ? `<span style="font-size:12px;color:#6b7280;font-style:italic;">مستمر</span>`
+            : `<div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:8px;border-radius:4px;background:linear-gradient(to right,${pctColor} ${pct}%,#e5e7eb ${pct}%);"></div><span style="font-size:12px;font-weight:700;color:${pctColor};min-width:32px;">${pct}%</span></div>`;
+        const guidanceCount = t.guidances.length;
+        const pendingGuidance = t.guidances.filter(g=>!g.approved).length;
+        return `
         <tr onclick="openDetail('${t.id}')" style="cursor:pointer;">
             <td>${i+1}</td>
             <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><strong>${t.name}</strong>${t.pendingChanges.length?'<span style="width:8px;height:8px;background:#e74c3c;border-radius:50%;display:inline-block;margin-right:4px;"></span>':''}</td>
             <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666;">${t.description||'-'}</td>
+            <td style="text-align:center;">${guidanceCount}${pendingGuidance?`<span style="color:#e74c3c;font-size:11px;"> (⏳)</span>`:''}</td>
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
-            <td>${t.assignedTo||'-'}</td>
-            <td>${dueDateChip(t.dueDate)}</td>
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
-            <td>${delayBadge(t)}</td>
-            <td>${t.guidances.length}${t.guidances.filter(g=>!g.approved).length?`<span style="color:#e74c3c;font-size:11px;"> (⏳)</span>`:''}</td>
-        </tr>`).join('');
+            <td>${dueDateChip(t.dueDate)}</td>
+            <td style="text-align:center;">${delayBadge(t)}</td>
+            <td>${progressCell}</td>
+            <td>${t.assignedTo||'-'}</td>
+        </tr>`;
+    }).join('');
 }
 
 function renderApprovals(){
@@ -714,10 +732,17 @@ function sortedDeptEmps(deptId){
 }
 function populateAssign(deptId, selectedName=''){
     const sel=document.getElementById('fAssign');
+    const emps = sortedDeptEmps(deptId);
+    const inList = selectedName && emps.some(e=>e.name===selectedName);
     sel.innerHTML='<option value="">— بدون إسناد —</option>'+
-        sortedDeptEmps(deptId).map(e=>`<option value="${e.name}"${e.name===selectedName?' selected':''}>${e.name}</option>`).join('');
+        emps.map(e=>`<option value="${e.name}">${e.name}</option>`).join('') +
+        (selectedName && !inList ? `<option value="${selectedName}">${selectedName}</option>` : '');
+    if(selectedName) sel.value=selectedName;
+    sel.dispatchEvent(new Event('change'));
 }
+let _suppressDeptChange = false;
 function onDeptChange(){
+    if (_suppressDeptChange) return;
     populateAssign(document.getElementById('fDept').value);
 }
 
@@ -730,8 +755,10 @@ function openAddModal(){
     document.getElementById('fStatus').value='جديد';
     document.getElementById('fDue').value='';
     document.getElementById('fMeetingRef').value='';
-    document.getElementById('fDept').value=currentDeptId===-1 ? depts[0]?.id : currentDeptId;
-    populateAssign(document.getElementById('fDept').value);
+    const fDept=document.getElementById('fDept');
+    fDept.value=currentDeptId===-1 ? depts[0]?.id : currentDeptId;
+    fDept.dispatchEvent(new Event('change'));
+    populateAssign(fDept.value, user?.name||'');
     document.getElementById('deleteBtn').style.display='none';
     document.getElementById('taskModal').classList.add('open');
 }
@@ -747,7 +774,11 @@ function openEdit(){
     document.getElementById('fStatus').value=t.status;
     document.getElementById('fDue').value=t.dueDate||'';
     document.getElementById('fMeetingRef').value=t.meeting_ref||'';
-    document.getElementById('fDept').value=t.dept_id;
+    const fDept=document.getElementById('fDept');
+    _suppressDeptChange = true;
+    fDept.value=t.dept_id;
+    fDept.dispatchEvent(new Event('change'));
+    _suppressDeptChange = false;
     populateAssign(t.dept_id, t.assignedTo||'');
     document.getElementById('deleteBtn').style.display='inline-block';
     document.getElementById('taskModal').classList.add('open');
@@ -1009,7 +1040,7 @@ function renderKanban(list) {
 
 function showSkeleton() {
     document.getElementById('taskBody').innerHTML = Array(5).fill(0).map(() =>
-        `<tr>${Array(10).fill(0).map((_,i) => `<td><span class="skel" style="width:${[30,70,50,40,45,50,45,45,30,25][i]}%;"></span></td>`).join('')}</tr>`
+        `<tr>${Array(11).fill(0).map((_,i) => `<td><span class="skel" style="width:${[30,65,80,25,40,45,45,50,30,50,55][i]}%;"></span></td>`).join('')}</tr>`
     ).join('');
 }
 
@@ -1150,11 +1181,13 @@ init();
 lucide.createIcons();
 
 // ── Timer widget ──────────────────────────────────────────────────────────────
-let swInterval = null, swTime = 0, swTotal = 0, swRunning = false;
+let swInterval = null, swTime = 0, swTotal = 0, swRunning = false, swOvertime = false;
 
 function setStopwatchTime(minutes) {
     if (swRunning) pauseStopwatch();
+    swOvertime = false;
     swTime = swTotal = minutes * 60;
+    document.getElementById('stopwatchCircle').classList.remove('completed', 'flashing');
     updateSwDisplay();
     initSwRing();
     startStopwatch();
@@ -1162,10 +1195,10 @@ function setStopwatchTime(minutes) {
 
 function resetStopwatch() {
     pauseStopwatch();
+    swOvertime = false;
     swTime = swTotal = 0;
     document.getElementById('stopwatchTime').textContent = '00:00';
-    document.getElementById('stopwatchTime').style.fontSize = '';
-    document.getElementById('stopwatchCircle').classList.remove('completed', 'running');
+    document.getElementById('stopwatchCircle').classList.remove('completed', 'running', 'flashing');
     const p = document.querySelector('.stopwatch-progress');
     p.style.strokeDashoffset = 0;
     p.style.stroke = '#10b981';
@@ -1180,23 +1213,36 @@ function initSwRing() {
 
 function updateSwRing() {
     const p = document.querySelector('.stopwatch-progress');
+    if (swOvertime) {
+        p.style.strokeDashoffset = 2 * Math.PI * 70;
+        p.style.stroke = '#ef4444';
+        return;
+    }
     const ratio = swTotal > 0 ? swTime / swTotal : 0;
     p.style.strokeDashoffset = (2 * Math.PI * 70) * (1 - ratio);
     p.style.stroke = ratio > 0.5 ? '#10b981' : ratio > 0.2 ? '#f59e0b' : '#ef4444';
 }
 
 function startStopwatch() {
-    if (swTime <= 0) return;
+    if (swTotal <= 0) return;
     swRunning = true;
     document.getElementById('stopwatchControls').classList.add('hidden');
     document.getElementById('stopwatchWidget').classList.add('compact');
-    document.getElementById('stopwatchCircle').classList.remove('completed');
+    if (!swOvertime) document.getElementById('stopwatchCircle').classList.remove('completed');
     document.getElementById('stopwatchCircle').classList.add('running');
     swInterval = setInterval(() => {
         swTime--;
+        if (swTime === 0) {
+            swOvertime = true;
+            document.getElementById('stopwatchCircle').classList.add('completed');
+            document.getElementById('stopwatchCircle').classList.remove('running');
+            playSwSound();
+            flashSw();
+        } else if (swOvertime && (-swTime) % 15 === 0) {
+            flashSw();
+        }
         updateSwDisplay();
         updateSwRing();
-        if (swTime <= 0) completeStopwatch();
     }, 1000);
 }
 
@@ -1209,16 +1255,19 @@ function pauseStopwatch() {
 }
 
 function toggleStopwatch() {
-    if (swTime <= 0 && !swRunning) return;
+    if (swTotal <= 0) return;
     swRunning ? pauseStopwatch() : startStopwatch();
 }
 
-function completeStopwatch() {
-    pauseStopwatch();
-    document.getElementById('stopwatchCircle').classList.add('completed');
-    const el = document.getElementById('stopwatchTime');
-    el.textContent = 'انتهى الوقت';
-    el.style.fontSize = '16px';
+function flashSw() {
+    const c = document.getElementById('stopwatchCircle');
+    c.classList.remove('flashing');
+    void c.offsetWidth;
+    c.classList.add('flashing');
+    setTimeout(() => c.classList.remove('flashing'), 750);
+}
+
+function playSwSound() {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator(), gain = ctx.createGain();
@@ -1231,9 +1280,16 @@ function completeStopwatch() {
 }
 
 function updateSwDisplay() {
-    const m = Math.floor(swTime / 60), s = swTime % 60;
-    document.getElementById('stopwatchTime').textContent =
-        String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (swOvertime) {
+        const elapsed = -swTime;
+        const m = Math.floor(elapsed / 60), s = elapsed % 60;
+        document.getElementById('stopwatchTime').textContent =
+            '-' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    } else {
+        const m = Math.floor(swTime / 60), s = swTime % 60;
+        document.getElementById('stopwatchTime').textContent =
+            String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
 }
 
 // ── Draggable widget ──────────────────────────────────────────────────────────
