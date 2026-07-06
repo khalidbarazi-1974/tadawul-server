@@ -965,7 +965,7 @@ window.onload=async()=>{
   }catch(e){}
   try{apprSettings=await api('/appraisals/settings');}catch(e){}
   await loadCycles();
-  const ep=['deputy','admin'].includes(curUser.role)?'/employees/all':`/employees/dept/${curUser.deptId}`;
+  const ep=['deputy','admin'].includes(curUser.role)?'/employees':`/employees/dept/${curUser.deptId}`;
   try{allEmps=await api(ep);}catch(e){allEmps=[];}
   renderStaff();
   lucide.createIcons();

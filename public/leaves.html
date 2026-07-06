@@ -1109,7 +1109,7 @@ async function delHoliday(id){
 // ── Load Data ─────────────────────────────────────────────────────────────────
 async function loadData(){
   [allLeaves,allHols]=await Promise.all([api('/leaves'),api('/leaves/holidays')]);
-  const ep=['deputy','admin'].includes(curUser.role)?'/employees/all':`/employees/dept/${curUser.deptId}`;
+  const ep=['deputy','admin'].includes(curUser.role)?'/employees':`/employees/dept/${curUser.deptId}`;
   try{allEmps=await api(ep);}catch(e){allEmps=[];}
   renderLeaves(); renderStats();
   // re-render active tab
