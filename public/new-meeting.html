@@ -314,7 +314,7 @@ let allStaff = [], extContacts = [], intContacts = [];
 
 async function init() {
   [allStaff, extContacts, intContacts] = await Promise.all([
-    api('GET', '/employees/all').catch(() => []),
+    api('GET', '/employees').catch(() => []),
     api('GET', '/contacts/external').catch(() => []),
     api('GET', '/contacts/internal').catch(() => [])
   ]);

@@ -37,7 +37,7 @@ function fullMeeting(id) {
 }
 
 const insAttendee = () => db.prepare(
-    'INSERT INTO meeting_attendees (id,meeting_id,kind,ref_id,name,title,org) VALUES (?,?,?,?,?,?,?)'
+    'INSERT INTO meeting_attendees (id,meeting_id,kind,ref_id,name,title,org,remote) VALUES (?,?,?,?,?,?,?,?)'
 );
 const insAgenda   = () => db.prepare(
     'INSERT INTO meeting_agenda    (id,meeting_id,order_num,text) VALUES (?,?,?,?)'
@@ -52,7 +52,7 @@ const insAction   = () => db.prepare(
 function insertChildren(mid, attendees, agenda, decisions, actions) {
     const ia = insAttendee(), ig = insAgenda(), id2 = insDecision(), io = insAction();
     (attendees||[]).forEach(a =>
-        ia.run(uid(), mid, a.kind||'internal_staff', a.ref_id||'', a.name||'', a.title||'', a.org||''));
+        ia.run(uid(), mid, a.kind||'internal_staff', a.ref_id||'', a.name||'', a.title||'', a.org||'', a.remote?1:0));
     (agenda||[]).forEach((text, i) => { if (text?.trim()) ig.run(uid(), mid, i+1, text.trim()); });
     (decisions||[]).forEach((text, i) => { if (text?.trim()) id2.run(uid(), mid, i+1, text.trim()); });
     (actions||[]).forEach(ac => { if (ac.description?.trim()) io.run(uid(), mid, ac.description.trim(), ac.owner_name||'', ac.due_date||''); });

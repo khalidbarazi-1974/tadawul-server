@@ -389,29 +389,16 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
       </div>
     </div>
 
-    <div class="app-card card-appr" onclick="location.href='/appraisal.html'">
+    <div class="app-card card-appr" id="cardEmployees" onclick="location.href='/employees.html'" style="display:none">
       <div class="card-header-meta">
-        <div class="app-icon icon-appr">
-          <i data-lucide="bar-chart-3"></i>
+        <div class="app-icon" style="background:#0f5a8a">
+          <i data-lucide="users"></i>
         </div>
         <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
       </div>
       <div>
-        <div class="app-title">متابعة الأداء</div>
-        <div class="app-desc">دورات التقييم السنوية والأهداف والنتائج لجميع منسوبي الوكالة.</div>
-      </div>
-    </div>
-
-    <div class="app-card card-leaves" onclick="location.href='/leaves.html'">
-      <div class="card-header-meta">
-        <div class="app-icon icon-leaves">
-          <i data-lucide="calendar-range"></i>
-        </div>
-        <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
-      </div>
-      <div>
-        <div class="app-title">إدارة الإجازات</div>
-        <div class="app-desc">طلبات الإجازات والانتدابات والإجازات الرسمية وتتبع رصيد الموظفين المتبقي.</div>
+        <div class="app-title">إدارة الموظفين</div>
+        <div class="app-desc">استعراض وإدارة بيانات وصلاحيات منسوبي الوكالة.</div>
       </div>
     </div>
 
@@ -547,6 +534,10 @@ window.onload = async () => {
       'آخر دخول: ' + d.toLocaleString('ar-SA-u-ca-gregory-nu-latn', { dateStyle: 'short', timeStyle: 'short' });
   }
   document.getElementById('greeting').textContent = 'أهلاً وسهلاً، ' + user.name;
+  if (['deputy','admin'].includes(user.role)) {
+    const c = document.getElementById('cardEmployees');
+    if (c) c.style.display = '';
+  }
   try {
     const depts = await apiFetch('/departments');
     const dept = depts.find(d => d.id === user.deptId);

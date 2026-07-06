@@ -92,7 +92,7 @@ router.delete('/entries/:id', requireRole('manager', 'deputy', 'admin'), (req, r
 router.get('/workload', (req, res) => {
     const year = req.query.year ? parseInt(req.query.year) : null;
 
-    const empNames = db.prepare('SELECT name FROM employees').all().map(e => e.name);
+    const empNames = db.prepare('SELECT name FROM employees WHERE COALESCE(active,1)=1').all().map(e => e.name);
 
     function resolveEmpName(raw) {
         if (!raw) return null;

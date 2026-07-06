@@ -236,6 +236,8 @@ try { db.exec("ALTER TABLE contacts_internal ADD COLUMN car_make  TEXT DEFAULT '
 try { db.exec("ALTER TABLE contacts_internal ADD COLUMN car_color TEXT DEFAULT ''"); } catch(e) {}
 try { db.exec("ALTER TABLE tasks ADD COLUMN progress INTEGER DEFAULT 0"); } catch(e) {}
 try { db.exec("ALTER TABLE tasks ADD COLUMN continuous INTEGER DEFAULT 0"); } catch(e) {}
+try { db.exec("ALTER TABLE employees ADD COLUMN active INTEGER DEFAULT 1"); } catch(e) {}
+try { db.exec("ALTER TABLE meeting_attendees ADD COLUMN remote INTEGER DEFAULT 0"); } catch(e) {}
 db.exec("UPDATE contacts_external SET suffix='سلمه الله' WHERE suffix='' OR suffix IS NULL");
 db.exec("UPDATE contacts_internal SET suffix='سلمه الله' WHERE suffix='' OR suffix IS NULL");
 

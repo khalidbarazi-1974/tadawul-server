@@ -478,7 +478,7 @@ async function init() {
   document.getElementById('topUser').textContent = user.name || '';
   [meetings, allStaff, extContacts, intContacts, departments] = await Promise.all([
     api('GET', '/meetings').catch(() => []),
-    api('GET', '/employees/all').catch(() => []),
+    api('GET', '/employees').catch(() => []),
     api('GET', '/contacts/external').catch(() => []),
     api('GET', '/contacts/internal').catch(() => []),
     api('GET', '/departments').catch(() => [])
@@ -572,7 +572,7 @@ async function goStep2() {
   setBackOrCloseMode(false);
   document.getElementById('step1Ov').classList.remove('open');
   document.getElementById('step2Ov').classList.add('open');
-  setTimeout(renderPickerM, 50);
+  populatePicker();
 }
 
 function goBack() {
@@ -602,7 +602,9 @@ function setBackOrCloseMode(isEdit) {
 }
 
 function switchAttTab(tab) {}
-function populatePicker() { renderPickerM(); }
+function populatePicker() {
+  api('GET', '/employees').then(s => { allStaff = s; renderPickerM(); }).catch(() => renderPickerM());
+}
 function addAttendeeFromPicker() {}
 
 let activeAttTabM = 'int';
@@ -668,6 +670,11 @@ function toggleAttItemM(i) {
   renderActions();
 }
 
+function toggleRemote(i) {
+  formAttendees[i].remote = formAttendees[i].remote ? 0 : 1;
+  renderChipsM();
+}
+
 function renderChipsM() {
   const el = document.getElementById('attChipsM');
   if (!el) return;
@@ -676,7 +683,14 @@ function renderChipsM() {
     return;
   }
   el.innerHTML = formAttendees.map((a, i) =>
-    `<span class="att-chip">${a.name}<button type="button" onclick="removeAttendee(${i})">✕</button></span>`
+    `<span class="att-chip">
+      ${a.name}
+      <label style="display:inline-flex;align-items:center;gap:3px;font-weight:400;font-size:11px;cursor:pointer;margin:0 4px;color:#64748b;">
+        <input type="checkbox" ${a.remote?'checked':''} onchange="toggleRemote(${i})" style="cursor:pointer;">
+        عن بعد
+      </label>
+      <button type="button" onclick="removeAttendee(${i})">✕</button>
+    </span>`
   ).join('');
 }
 
@@ -806,7 +820,8 @@ async function openDetail(id) {
     const isExt = a.kind === 'external';
     const bg = isExt ? 'background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd' : 'background:#fff7ed;color:#b45309;border:1px solid #fcd34d';
     const label = a.name + (a.org ? ` — ${a.org}` : a.title ? ` — ${a.title}` : '');
-    return `<span style="${bg};padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">${label}</span>`;
+    const remoteBadge = a.remote ? `<span style="background:#f0fdf4;color:#166534;border:1px solid #86efac;padding:1px 6px;border-radius:10px;font-size:10px;margin-right:4px;">عن بعد</span>` : '';
+    return `<span style="${bg};padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">${label}${remoteBadge}</span>`;
   }).join('');
   document.getElementById('dAgenda').innerHTML = (m.agenda || []).map(a => `<li>${a.text || a}</li>`).join('');
   document.getElementById('dDecisions').innerHTML = (m.decisions || []).map(d => `<li>${d.text || d}</li>`).join('');
@@ -834,7 +849,7 @@ async function openEdit() {
   editingId = currentMeetingId;
   formType = m.type;
   formSubject = m.subject;
-  formAttendees = (m.attendees || []).map(a => ({kind: a.kind, ref_id: a.ref_id, name: a.name, title: a.title, org: a.org}));
+  formAttendees = (m.attendees || []).map(a => ({kind: a.kind, ref_id: a.ref_id, name: a.name, title: a.title, org: a.org, remote: a.remote||0}));
   formAgenda    = (m.agenda || []).map(a => a.text || a);
   formDecisions = (m.decisions || []).map(d => d.text || d);
   formActions   = (m.actions || []).map(ac => ({id: ac.id, task_id: ac.task_id||null, description: ac.description, owner_name: ac.owner_name, due_date: ac.due_date}));

@@ -11,7 +11,7 @@ router.post('/login', async (req, res) => {
     const { employeeId, password } = req.body;
     if (!employeeId || !password) return res.status(400).json({ error: 'بيانات ناقصة' });
 
-    const employee = db.prepare('SELECT * FROM employees WHERE LOWER(id) = LOWER(?)').get(employeeId);
+    const employee = db.prepare('SELECT * FROM employees WHERE LOWER(id) = LOWER(?) AND COALESCE(active,1)=1').get(employeeId);
     if (!employee) return res.status(401).json({ error: 'بيانات الدخول غير صحيحة' });
 
     const isMatch = await bcrypt.compare(password, employee.password_hash);
