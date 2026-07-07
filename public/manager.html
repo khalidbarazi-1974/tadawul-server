@@ -222,11 +222,11 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
     <div class="stat" id="stat-done"     onclick="setStatFilter('مكتمل')"><div class="n" id="sDone">0</div><div class="l">مكتملة</div></div>
     <div class="stat alert" id="stat-pt" onclick="setStatFilter('pending-tasks')"><div class="n" id="sPendingTasks">0</div><div class="l">مواضيع بانتظار الاعتماد</div></div>
     <div class="stat alert" id="stat-ch" onclick="setStatFilter('pending-changes')"><div class="n" id="sChanges">0</div><div class="l">تعديلات بانتظار الاعتماد</div></div>
-    <div class="stat alert" id="stat-cm" onclick="setStatFilter('pending-comments')"><div class="n" id="sComments">0</div><div class="l">تعليقات بانتظار الاعتماد</div></div>
+    <div class="stat alert" id="stat-late" onclick="setStatFilter('late')"><div class="n" id="sLate">0</div><div class="l">متأخرة</div></div>
   </div>
 
   <div class="card no-print" style="margin-bottom:20px;">
-    <div class="card-head"><h3>⏳ بانتظار الاعتماد</h3></div>
+    <div class="card-head"><h3>⏳ بانتظار الاعتماد <span id="sPending" style="color:#e74c3c;font-weight:700;"></span></h3></div>
     <div class="approval-grid" id="approvalPanel">
       <p>لا يوجد شيء بانتظار الاعتماد ✓</p>
     </div>
@@ -514,26 +514,23 @@ async function loadAll(silent = false) {
 
 function clearStatFilter() {
     activeStatFilter = null;
-    ['all','prog','done','pt','ch','cm'].forEach(id => {
+    ['all','prog','done','pt','ch','late'].forEach(id => {
         document.getElementById('stat-' + id).classList.remove('active-filter');
     });
 }
 
 function setStatFilter(key) {
-    // toggle off if already active
     if (activeStatFilter === key) { activeStatFilter = null; }
     else { activeStatFilter = key; }
 
-    // update visual active state
-    ['all','prog','done','pt','ch','cm'].forEach(id => {
+    ['all','prog','done','pt','ch','late'].forEach(id => {
         document.getElementById('stat-' + id).classList.remove('active-filter');
     });
-    const keyToId = { 'all':'all','قيد التنفيذ':'prog','مكتمل':'done','pending-tasks':'pt','pending-changes':'ch','pending-comments':'cm' };
+    const keyToId = { 'all':'all','قيد التنفيذ':'prog','مكتمل':'done','pending-tasks':'pt','pending-changes':'ch','late':'late' };
     if (activeStatFilter && keyToId[activeStatFilter]) {
         document.getElementById('stat-' + keyToId[activeStatFilter]).classList.add('active-filter');
     }
 
-    // pending-* stats scroll to approval panel
     if (activeStatFilter && activeStatFilter.startsWith('pending-')) {
         document.getElementById('approvalPanel').closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
@@ -547,7 +544,15 @@ function updateStats() {
     countUp(document.getElementById('sDone'), tasks.filter(t => t.status === 'مكتمل').length);
     countUp(document.getElementById('sPendingTasks'), pending.pendingTasks.length);
     countUp(document.getElementById('sChanges'), pending.changes.length);
-    countUp(document.getElementById('sComments'), pending.comments.length);
+    const todayD = new Date(); todayD.setHours(0,0,0,0);
+    const lateCount = tasks.filter(t => {
+        let eff; if(t.dueDate){const d=new Date(t.dueDate+'T00:00:00');if(!isNaN(d))eff=d;} if(!eff&&t.createdAt){eff=new Date(t.createdAt);eff.setDate(eff.getDate()+90);}
+        return eff && eff < todayD;
+    }).length;
+    countUp(document.getElementById('sLate'), lateCount);
+    const pendingCount = pending.pendingTasks.length + pending.changes.length + pending.comments.length;
+    const pendingEl = document.getElementById('sPending');
+    if (pendingEl) pendingEl.textContent = pendingCount > 0 ? `(${pendingCount})` : '';
 }
 
 const SORT_COLS_TASK = ['name','priority','status','assignedTo','dueDate','createdAt'];
@@ -576,9 +581,15 @@ function renderTasks() {
     const dateTo   = document.getElementById('filterDateTo').value;
 
     // stat box filter overrides status dropdown when active
-    const statStatus = (activeStatFilter && !activeStatFilter.startsWith('pending-')) ? activeStatFilter : null;
+    const statStatus = (activeStatFilter && !activeStatFilter.startsWith('pending-') && activeStatFilter !== 'late') ? activeStatFilter : null;
+    const statLateOnly = activeStatFilter === 'late';
+    const todayD = new Date(); todayD.setHours(0,0,0,0);
 
     let list = tasks.filter(t => {
+        if (statLateOnly) {
+            let eff; if(t.dueDate){const d=new Date(t.dueDate+'T00:00:00');if(!isNaN(d))eff=d;} if(!eff&&t.createdAt){eff=new Date(t.createdAt);eff.setDate(eff.getDate()+90);}
+            return eff && eff < todayD;
+        }
         const effectiveStatus = statStatus || status;
         if (effectiveStatus && effectiveStatus !== 'all' && t.status !== effectiveStatus) return false;
         if (priority && t.priority !== priority) return false;
