@@ -297,6 +297,55 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes toastIn { from { opacity: 0; transform: translateY(15px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* Greeting extras */
+.greeting-meta {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; font-size: 13px; color: var(--text-muted); margin-top: 10px;
+}
+.greeting-sep { opacity: 0.3; }
+.live-clock { font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+
+/* Card counter badge */
+.card-cnt {
+  background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 100px; padding: 2px 10px; font-size: 12px; font-weight: 700;
+  color: rgba(255,255,255,0.6); align-self: center;
+}
+
+/* Tasks summary strip */
+.tasks-strip {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px; border-radius: 14px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s; margin-bottom: 20px;
+}
+.tasks-strip:hover { opacity: 0.82; }
+.ts-red    { background: rgba(239,68,68,0.10);  border: 1px solid rgba(239,68,68,0.28);  color: #fca5a5; }
+.ts-orange { background: rgba(249,115,22,0.10); border: 1px solid rgba(249,115,22,0.28); color: #fdba74; }
+.ts-green  { background: rgba(34,197,94,0.10);  border: 1px solid rgba(34,197,94,0.28);  color: #86efac; }
+
+/* Upcoming meetings strip */
+.upcoming-section { width: 100%; margin-top: 24px; }
+.upcoming-hdr {
+  font-size: 13px; font-weight: 700; color: var(--text-muted);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.upcoming-strip {
+  display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.upcoming-item {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: 14px; padding: 12px 16px; min-width: 180px; flex-shrink: 0;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.upcoming-item:hover { border-color: rgba(217,119,6,0.5); }
+.upcoming-item-date { font-size: 11px; color: var(--c-meetings); font-weight: 700; margin-bottom: 4px; }
+.upcoming-item-title {
+  font-size: 13px; font-weight: 600; color: var(--text-main);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;
+}
+.upcoming-item-loc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -333,6 +382,16 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
     </div>
     <h2 id="greeting"></h2>
     <p id="greetingDept"></p>
+    <p class="greeting-meta">
+      <span id="hijriDate"></span>
+      <span class="greeting-sep">|</span>
+      <span class="live-clock" id="liveClock"></span>
+    </p>
+  </div>
+
+  <div class="tasks-strip" id="tasksStrip" style="display:none;" onclick="goTasks()">
+    <i id="tasksStripIcon" style="width:16px;height:16px;flex-shrink:0;"></i>
+    <span id="tasksStripText"></span>
   </div>
 
   <div class="apps-grid" id="gridContainer">
@@ -342,6 +401,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
         <div class="app-icon icon-meetings">
           <i data-lucide="users"></i>
         </div>
+        <span class="card-cnt" id="cntMeetings" style="display:none;"></span>
         <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
       </div>
       <div>
@@ -355,6 +415,7 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
         <div class="app-icon icon-tasks">
           <i data-lucide="clipboard-list"></i>
         </div>
+        <span class="card-cnt" id="cntTasks" style="display:none;"></span>
         <div class="card-arrow"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i></div>
       </div>
       <div>
@@ -428,6 +489,14 @@ body::after { bottom: -10%; left: -10%; background: var(--c-letters); }
       </div>
     </div>
 
+  </div>
+
+  <div class="upcoming-section" id="upcomingSection" style="display:none;">
+    <div class="upcoming-hdr">
+      <i data-lucide="calendar-clock" style="width:15px;height:15px;"></i>
+      اجتماعات قادمة
+    </div>
+    <div class="upcoming-strip" id="upcomingStrip"></div>
   </div>
 </div>
 
@@ -510,6 +579,100 @@ async function savePwd() {
   }
 }
 
+function startClock() {
+  function tick() {
+    const now = new Date();
+    document.getElementById('liveClock').textContent =
+      `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+function setGreetingText(name) {
+  const h = new Date().getHours();
+  document.getElementById('greeting').textContent = (h < 12 ? 'صباح الخير' : 'مساء الخير') + '، ' + name;
+  document.getElementById('hijriDate').textContent =
+    new Date().toLocaleDateString('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function setCnt(id, n) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = n;
+  el.style.display = n > 0 ? '' : 'none';
+}
+
+async function loadHubData() {
+  const today = new Date().toISOString().slice(0, 10);
+  const in7   = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+
+  try {
+    const meetings = await apiFetch('/meetings');
+    const upcoming = meetings
+      .filter(m => m.date >= today && m.date <= in7)
+      .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+    setCnt('cntMeetings', upcoming.length);
+    const strip = document.getElementById('upcomingStrip');
+    const sec   = document.getElementById('upcomingSection');
+    if (upcoming.length > 0) {
+      strip.innerHTML = upcoming.map(m =>
+        `<div class="upcoming-item" onclick="location.href='/meetings.html'">
+          <div class="upcoming-item-date">${m.date}${m.time ? ' — ' + m.time : ''}</div>
+          <div class="upcoming-item-title" title="${m.subject}">${m.subject}</div>
+          <div class="upcoming-item-loc">${m.location || ''}</div>
+        </div>`
+      ).join('');
+      sec.style.display = '';
+      lucide.createIcons({ nodes: [sec] });
+    }
+  } catch(e) {}
+
+  try {
+    const u = getUser();
+    const isManager = ['manager','deputy','admin'].includes(u.role);
+    const taskEp = u.role === 'employee' ? '/tasks/my'
+                 : (u.role === 'deputy' || u.role === 'admin') ? '/tasks/all'
+                 : `/tasks/dept/${u.deptId}`;
+    const fetches = [apiFetch(taskEp)];
+    if (isManager) fetches.push(apiFetch('/tasks/pending').catch(() => ({ pendingTasks: [] })));
+    const [tasks, pendingData] = await Promise.all(fetches);
+    const pendingTasks = (pendingData && pendingData.pendingTasks) || [];
+
+    const open       = tasks.filter(t => t.status !== 'مكتمل');
+    // Combine late from approved tasks (dueDate) and pending tasks (due_date)
+    const lateTasks  = [
+      ...tasks.filter(t => t.status !== 'مكتمل' && t.dueDate && t.dueDate < today),
+      ...pendingTasks.filter(t => t.status !== 'مكتمل' && (t.dueDate||t.due_date) && (t.dueDate||t.due_date) < today)
+    ];
+    const totalLate     = lateTasks.length;
+    const lateInProg    = lateTasks.filter(t => t.status === 'قيد التنفيذ').length;
+    const needsApproval = pendingTasks.length;
+
+    setCnt('cntTasks', open.length);
+
+    if (open.length > 0 || needsApproval > 0) {
+      const parts = [];
+      if (totalLate > 0) {
+        let s = totalLate + ' متأخرة';
+        if (lateInProg > 0) s += '، منها ' + lateInProg + ' قيد التنفيذ';
+        parts.push(s);
+      }
+      if (needsApproval > 0) parts.push(needsApproval + ' بانتظار الاعتماد');
+
+      const colorCls  = totalLate > 0 ? 'ts-red' : needsApproval > 0 ? 'ts-orange' : 'ts-green';
+      const iconName  = totalLate > 0 ? 'alert-triangle' : needsApproval > 0 ? 'clock' : 'check-circle';
+
+      const strip = document.getElementById('tasksStrip');
+      strip.className = 'tasks-strip ' + colorCls;
+      document.getElementById('tasksStripText').textContent = parts.join('  •  ');
+      document.getElementById('tasksStripIcon').setAttribute('data-lucide', iconName);
+      strip.style.display = '';
+      lucide.createIcons({ nodes: [strip] });
+    }
+  } catch(e) {}
+}
+
 // Mouse spotlight glow tracker effect
 document.getElementById('gridContainer').addEventListener('mousemove', (e) => {
   const cards = document.querySelectorAll('.app-card');
@@ -533,7 +696,8 @@ window.onload = async () => {
     document.getElementById('topLastLogin').textContent =
       'آخر دخول: ' + d.toLocaleString('ar-SA-u-ca-gregory-nu-latn', { dateStyle: 'short', timeStyle: 'short' });
   }
-  document.getElementById('greeting').textContent = 'أهلاً وسهلاً، ' + user.name;
+  setGreetingText(user.name);
+  startClock();
   if (['deputy','admin'].includes(user.role)) {
     const c = document.getElementById('cardEmployees');
     if (c) c.style.display = '';
@@ -544,6 +708,7 @@ window.onload = async () => {
     document.getElementById('greetingDept').textContent = dept ? dept.name : '';
   } catch(e) {}
   lucide.createIcons();
+  loadHubData();
 };
 </script>
 <script src="/js/ss.js"></script>

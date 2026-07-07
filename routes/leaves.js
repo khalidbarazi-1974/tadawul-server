@@ -42,11 +42,12 @@ function canManageLeave(req, leave) {
 }
 
 router.post('/', (req, res) => {
-    const { employeeId, employeeName, deptId, type, startDate, endDate, days, notes, status } = req.body;
+    const { employeeId, employeeName, deptId, type, startDate, endDate, days, notes } = req.body;
     const targetEmpId   = employeeId   || req.user.id;
     const targetEmpName = employeeName || req.user.name;
     const targetDeptId  = deptId       ?? req.user.deptId;
-    const targetStatus  = status === 'approved' ? 'approved' : 'planned';
+    const today         = new Date().toISOString().slice(0, 10);
+    const targetStatus  = startDate > today ? 'planned' : '';
 
     if (req.user.role === 'manager' && targetDeptId !== req.user.deptId) {
         return res.status(403).json({ error: 'غير مصرح — لا يمكن تقديم إجازة لقسم آخر' });
@@ -59,7 +60,7 @@ router.post('/', (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, targetEmpId, targetEmpName, targetDeptId, type, startDate, endDate, days || 0, targetStatus, notes || '', req.user.name, now);
 
-    if (targetStatus === 'approved' && type === 'اعتيادية') {
+    if (type === 'اعتيادية') {
         db.prepare('UPDATE employees SET annual_leave_balance = MAX(0, annual_leave_balance - ?) WHERE id = ?')
             .run(days || 0, targetEmpId);
     }
@@ -76,16 +77,17 @@ router.put('/:id', (req, res) => {
     const canMgr  = canManageLeave(req, leave);
     if (!isOwner && !canMgr) return res.status(403).json({ error: 'غير مصرح' });
 
-    const { type, startDate, endDate, days, notes, status } = req.body;
-    const newStatus = status === 'approved' ? 'approved' : 'planned';
+    const { type, startDate, endDate, days, notes } = req.body;
+    const today2    = new Date().toISOString().slice(0, 10);
+    const newStatus = startDate > today2 ? 'planned' : '';
     const newDays   = days || 0;
 
-    // Reconcile annual leave balance
-    if (leave.type === 'اعتيادية' && leave.status === 'approved') {
+    // Reconcile annual leave balance (always deducted for اعتيادية, no approval step)
+    if (leave.type === 'اعتيادية') {
         db.prepare('UPDATE employees SET annual_leave_balance = annual_leave_balance + ? WHERE id = ?')
             .run(leave.days, leave.employee_id);
     }
-    if (type === 'اعتيادية' && newStatus === 'approved') {
+    if (type === 'اعتيادية') {
         db.prepare('UPDATE employees SET annual_leave_balance = MAX(0, annual_leave_balance - ?) WHERE id = ?')
             .run(newDays, leave.employee_id);
     }
@@ -105,8 +107,8 @@ router.delete('/:id', (req, res) => {
     const canMgr  = canManageLeave(req, leave);
     if (!isOwner && !canMgr) return res.status(403).json({ error: 'غير مصرح' });
 
-    // Restore balance if approved annual leave is deleted
-    if (leave.status === 'approved' && leave.type === 'اعتيادية') {
+    // Restore balance for any annual leave deletion (always deducted on create)
+    if (leave.type === 'اعتيادية') {
         db.prepare('UPDATE employees SET annual_leave_balance = annual_leave_balance + ? WHERE id = ?')
             .run(leave.days, leave.employee_id);
     }
@@ -126,7 +128,7 @@ router.get('/holidays', (req, res) => {
 function syncAffectedLeaves(fromDate, toDate) {
     const affected = db.prepare(`
         SELECT * FROM leaves
-        WHERE type = 'اعتيادية' AND status = 'approved'
+        WHERE type = 'اعتيادية'
           AND start_date <= ? AND end_date >= ?
     `).all(toDate, fromDate);
 

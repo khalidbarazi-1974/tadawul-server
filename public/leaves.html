@@ -199,8 +199,8 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
       <div class="filter-bar">
         <select id="fSt" onchange="clearStatFilter();renderLeaves()">
           <option value="">جميع الحالات</option>
-          <option value="approved">معتمدة</option>
           <option value="planned">مخطط لها</option>
+          <option value="active">جارية / منتهية</option>
         </select>
         <select id="fTy" onchange="renderLeaves()">
           <option value="">جميع الأنواع</option>
@@ -346,13 +346,6 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
       <option value="مهمة رسمية">مهمة رسمية</option>
       <option value="بدون راتب">بدون راتب</option>
       <option value="دورة تدريبية">دورة تدريبية</option>
-    </select>
-  </div>
-  <div class="fr">
-    <label>الحالة</label>
-    <select id="fLStatus" data-no-ss>
-      <option value="planned">مخطط لها</option>
-      <option value="approved">معتمدة</option>
     </select>
   </div>
   <div class="f2">
@@ -547,7 +540,7 @@ function dateInfoHtml(ds){
 
 function deptName(id){const d=allDepts.find(d=>d.id===id);return d?d.name:'';}
 function balCls(n){return n<5?'bal-d':n<10?'bal-w':'bal-g';}
-function usedDays(eid){return allLeaves.filter(l=>l.employee_id===eid&&l.type==='اعتيادية'&&l.status==='approved').reduce((s,l)=>s+(l.days||0),0);}
+function usedDays(eid){return allLeaves.filter(l=>l.employee_id===eid&&l.type==='اعتيادية').reduce((s,l)=>s+(l.days||0),0);}
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 const TABS={leaves:'tabLeaves',employees:'tabEmployees',gantt:'tabGantt',holidays:'tabHolidays',reports:'tabReports'};
@@ -619,8 +612,8 @@ function setStatFilter(key){
 // ── Stats & Warnings ──────────────────────────────────────────────────────────
 function renderStats(){
   const today=new Date().toISOString().slice(0,10);
-  const onVac=allLeaves.filter(l=>l.status==='approved'&&l.start_date<=today&&l.end_date>=today).length;
-  const planned=allLeaves.filter(l=>l.status!=='approved').length;
+  const onVac=allLeaves.filter(l=>l.start_date<=today&&l.end_date>=today).length;
+  const planned=allLeaves.filter(l=>l.start_date>today).length;
   const prevEmps = document.querySelector('#stat-emps .stat-num');
   const prevVac  = document.querySelector('#stat-onvac .stat-num');
   const prevPlan = document.querySelector('#stat-planned .stat-num');
@@ -665,10 +658,10 @@ function renderLeaves(){
   document.getElementById('lEmpH').style.display=mgr?'':'none';
   const today=new Date().toISOString().slice(0,10);
   let rows=allLeaves;
-  if(activeStatFilter==='onvac') rows=rows.filter(l=>l.status==='approved'&&l.start_date<=today&&l.end_date>=today);
-  else if(activeStatFilter==='planned') rows=rows.filter(l=>l.status!=='approved');
-  else if(st==='planned') rows=rows.filter(l=>l.status!=='approved');
-  else if(st) rows=rows.filter(l=>l.status===st);
+  if(activeStatFilter==='onvac') rows=rows.filter(l=>l.start_date<=today&&l.end_date>=today);
+  else if(activeStatFilter==='planned') rows=rows.filter(l=>l.start_date>today);
+  else if(st==='planned') rows=rows.filter(l=>l.start_date>today);
+  else if(st==='active') rows=rows.filter(l=>l.start_date<=today);
   if(ty) rows=rows.filter(l=>l.type===ty);
   if(sr) rows=rows.filter(l=>l.employee_name.toLowerCase().includes(sr)||l.type.includes(sr));
   updSortInd({emp:'lEmpH',type:'th-ltype',start:'th-lstart',end:'th-lend',days:'th-ldays',status:'th-lstatus'},leaveSortCol,leaveSortDir);
@@ -687,8 +680,9 @@ function renderLeaves(){
     const col=LCOL[l.type]||'#aaa';
     const canEdit=mgr||l.employee_id===curUser.id;
     const canDel=mgr||l.employee_id===curUser.id;
-    const statusLabel=l.status==='approved'?'معتمدة':'مخطط لها';
-    const statusCls=l.status==='approved'?'ba':'bp';
+    const isPlanned=l.start_date>today;
+    const statusLabel=isPlanned?'مخطط':'';
+    const statusCls=isPlanned?'bp':'';
     return `<tr>
       <td>${i+1}</td>
       <td style="display:${mgr?'':'none'}">${l.employee_name}</td>
@@ -823,7 +817,8 @@ function renderGantt(){
       else if(hl) cellCls+=' hday';
       if(lv){
         const col=LCOL[lv.type]||'#999';
-        const alpha=lv.status==='approved'?'ff':'88';
+        const ganttToday=new Date().toISOString().slice(0,10);
+        const alpha=lv.start_date>ganttToday?'88':'ff';
         innerStyle=`background:${col}${alpha};`;
         tip=`title="${lv.type}${lv.status!=='approved'?' (مخطط لها)':''}"`;
       }
@@ -911,7 +906,6 @@ function openLeaveModal(editId){
   document.getElementById('fLFrom').value=edit?edit.start_date:'';
   document.getElementById('fLTo').value=edit?edit.end_date:'';
   document.getElementById('fLNotes').value=edit?(edit.notes||''):'';
-  document.getElementById('fLStatus').value=edit?(edit.status==='approved'?'approved':'planned'):'planned';
   document.getElementById('fromInfo').innerHTML=edit?dateInfoHtml(edit.start_date):'';
   document.getElementById('toInfo').innerHTML=edit?dateInfoHtml(edit.end_date):'';
   document.getElementById('wdBox').textContent='أيام العمل: —';
@@ -998,7 +992,6 @@ function updateWorkDays(){
 async function saveLeave(){
   const from=document.getElementById('fLFrom').value, to=document.getElementById('fLTo').value;
   const type=document.getElementById('fLTy').value, notes=document.getElementById('fLNotes').value;
-  const status=document.getElementById('fLStatus').value;
   if(!from||!to){toast('يرجى تحديد التواريخ','error');return;}
   if(to<from){toast('تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء','error');return;}
   if(isManager()&&!leaveEmpId){toast('يرجى اختيار موظف','error');return;}
@@ -1025,10 +1018,10 @@ async function saveLeave(){
   const doSave=async()=>{
     try{
       if(leaveEditId){
-        await api(`/leaves/${leaveEditId}`,{method:'PUT',body:JSON.stringify({type,startDate:from,endDate:to,days,notes,status})});
+        await api(`/leaves/${leaveEditId}`,{method:'PUT',body:JSON.stringify({type,startDate:from,endDate:to,days,notes})});
         toast('تم تحديث الإجازة','success');
       } else {
-        await api('/leaves',{method:'POST',body:JSON.stringify({employeeId:empId,employeeName:empName,deptId,type,startDate:from,endDate:to,days,notes,status})});
+        await api('/leaves',{method:'POST',body:JSON.stringify({employeeId:empId,employeeName:empName,deptId,type,startDate:from,endDate:to,days,notes})});
         toast('تم تسجيل الإجازة','success');
       }
       closeLeaveModal(); await loadData();
@@ -1039,7 +1032,7 @@ async function saveLeave(){
       showConfirm('تنبيه: كثافة إجازات',`ستتجاوز نسبة الموظفين المجازين في الإدارة 60% في فترة هذه الإجازة. هل تريد المتابعة؟`,doSave);
     } else { doSave(); }
   };
-  if(type==='اعتيادية'&&status==='approved'&&days>leaveBalance){
+  if(type==='اعتيادية'&&days>leaveBalance){
     showConfirm('تجاوز الرصيد',`الرصيد ${leaveBalance} يوم والطلب ${days} يوم. هل تريد المتابعة رغم تجاوز الرصيد؟`,doWithCapacity);
   } else { doWithCapacity(); }
 }
