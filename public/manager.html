@@ -1051,7 +1051,7 @@ function delayBadge(t) {
 }
 function priorityBadge(p){const m={'عالية':'badge-high','متوسطة':'badge-med','منخفضة':'badge-low'};return `<span class="badge ${m[p]||'badge-med'}">${p}</span>`;}
 function statusBadge(s){const m={'جديد':'badge-new','قيد التنفيذ':'badge-prog','مكتمل':'badge-done'};return `<span class="badge ${m[s]||'badge-new'}">${s}</span>`;}
-function fieldLabel(f){return{status:'الحالة',description:'الوصف',priority:'الأولوية',suggestedDueDate:'التاريخ المقترح',delete:'طلب حذف'}[f]||f;}
+function fieldLabel(f){return{status:'الحالة',description:'الوصف',priority:'الأولوية',progress:'نسبة الإنجاز',suggestedDueDate:'التاريخ المقترح',delete:'طلب حذف'}[f]||f;}
 function roleLabel(r){return{manager:'(مدير)',deputy:'(وكيل)',employee:''}[r]||'';}
 function formatDate(iso){if(!iso)return'';return new Date(iso).toLocaleString('ar-SA',{dateStyle:'short',timeStyle:'short'});}
 function today(){return new Date().toISOString().slice(0,10);}
