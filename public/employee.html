@@ -268,12 +268,12 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           <th style="width:40px">#</th>
           <th class="sortable" style="width:180px" id="th-name" onclick="setSort('name')">اسم الموضوع</th>
           <th style="width:260px">التحديثات</th>
+          <th style="width:60px">تعليق</th>
           <th class="sortable" style="width:75px" id="th-priority" onclick="setSort('priority')">الأولوية</th>
           <th class="sortable" style="width:85px" id="th-status" onclick="setSort('status')">الحالة</th>
+          <th class="sortable" style="width:100px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
           <th class="sortable" style="width:100px" id="th-dueDate" onclick="setSort('dueDate')">تاريخ الاستحقاق</th>
-          <th class="sortable" style="width:92px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
           <th style="width:60px">المدة</th>
-          <th style="width:60px">تعليق</th>
         </tr>
       </thead>
       <tbody id="taskBody">
@@ -599,12 +599,12 @@ function renderTasks() {
                 ${hasPendingChanges && !isRejected && !isPending ? '<span class="pending-dot" title="يوجد تغيير بانتظار الاعتماد"></span>' : ''}
             </td>
             <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666;">${t.description||'-'}</td>
+            <td>${t.guidances.length}${myPending ? ` <span style="color:#f57f17;font-size:11px;">(${myPending} بانتظار)</span>` : ''}</td>
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
-            <td>${dueDateChip(t.dueDate, t.createdAt)}</td>
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
+            <td>${dueDateChip(t.dueDate, t.createdAt)}</td>
             <td>${delayBadge(t)}</td>
-            <td>${t.guidances.length}${myPending ? ` <span style="color:#f57f17;font-size:11px;">(${myPending} بانتظار)</span>` : ''}</td>
         </tr>`;
     }).join('');
 }
