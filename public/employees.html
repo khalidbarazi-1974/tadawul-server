@@ -41,9 +41,9 @@ body{font-family:'Cairo','Segoe UI',Tahoma,sans-serif;background:#f1f5f9;color:#
 .stat-value{font-size:1.4rem;font-weight:700;color:#0f172a}
 
 /* ── Table ── */
-.table-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:auto}
+.table-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:auto;max-height:60vh}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-thead th{background:#f8fafc;padding:11px 14px;text-align:right;font-weight:600;color:#475569;border-bottom:1.5px solid #e2e8f0;white-space:nowrap;cursor:pointer;user-select:none}
+thead th{background:#f8fafc;padding:11px 14px;text-align:right;font-weight:600;color:#475569;border-bottom:1.5px solid #e2e8f0;white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0;z-index:2}
 thead th:hover{background:#f1f5f9}
 thead th.sort-asc::after{content:' ↑'}
 thead th.sort-desc::after{content:' ↓'}

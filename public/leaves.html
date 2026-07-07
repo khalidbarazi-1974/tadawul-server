@@ -38,7 +38,7 @@ body{font-family:'Cairo','Segoe UI',Tahoma,sans-serif;background:#f0f7f0;color:#
 .btn-add{background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;border:none;padding:7px 16px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;}
 .btn-add:hover{opacity:.9;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th{background:#f0f7f0;padding:8px 10px;text-align:right;font-weight:700;color:#2e7d32;border-bottom:2px solid #c8e6c9;white-space:nowrap;}
+th{background:#f0f7f0;padding:8px 10px;text-align:right;font-weight:700;color:#2e7d32;border-bottom:2px solid #c8e6c9;white-space:nowrap;position:sticky;top:0;z-index:2;}
 td{padding:7px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
 tr:hover td{background:#f8fff8;}
 .empty{text-align:center;color:#aaa;padding:32px 0;font-size:13px;}
@@ -218,7 +218,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
         <h2>إدارة الإجازات والانتدابات</h2>
         <p id="printMeta"></p>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow:auto;max-height:60vh;-webkit-overflow-scrolling:touch;">
         <table>
           <thead><tr>
             <th>#</th>
@@ -243,7 +243,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
         <select id="fEDept" onchange="renderEmployees()"><option value="">جميع الإدارات</option></select>
         <input type="text" id="fESrch" placeholder="بحث..." oninput="renderEmployees()" style="min-width:130px;">
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow:auto;max-height:60vh;-webkit-overflow-scrolling:touch;">
         <table>
           <thead><tr>
             <th>#</th>
@@ -296,7 +296,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
         <input type="text" id="fHSrch" placeholder="بحث..." oninput="renderHolidays()" style="min-width:180px;">
         <button class="btn-add" id="btnAddHol" style="display:none;" onclick="openHolModal()">+ إضافة إجازة رسمية</button>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow:auto;max-height:60vh;-webkit-overflow-scrolling:touch;">
         <table>
           <thead><tr>
             <th>#</th>
