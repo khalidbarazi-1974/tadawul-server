@@ -639,9 +639,13 @@ async function loadHubData() {
     const [tasks, pendingData] = await Promise.all(fetches);
     const pendingTasks = (pendingData && pendingData.pendingTasks) || [];
 
-    const open       = tasks.filter(t => t.status !== 'مكتمل');
-    // Late = approved tasks with dueDate < today (mirrors deputy.html — pendingTasks excluded)
-    const lateTasks  = tasks.filter(t => t.dueDate && t.dueDate < today);
+    const open    = tasks.filter(t => t.status !== 'مكتمل');
+    const todayD  = new Date(); todayD.setHours(0,0,0,0);
+    const lateTasks = tasks.filter(t => {
+      if (!t.dueDate || t.status === 'مكتمل') return false;
+      const d = new Date(t.dueDate + 'T00:00:00');
+      return !isNaN(d) && d < todayD;
+    });
     const totalLate     = lateTasks.length;
     const lateInProg    = lateTasks.filter(t => t.status === 'قيد التنفيذ').length;
     const needsApproval = pendingTasks.length;
