@@ -262,7 +262,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
       <input type="text" id="filterSearch" placeholder="بحث..." oninput="renderTasks()" style="flex:1;min-width:140px;">
     </div>
     <div class="table-wrap">
-    <table style="table-layout:fixed;min-width:960px;">
+    <table style="table-layout:fixed;min-width:1060px;">
       <thead>
         <tr>
           <th style="width:40px">#</th>
@@ -274,10 +274,11 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
           <th class="sortable" style="width:100px" id="th-createdAt" onclick="setSort('createdAt')">تاريخ الإنشاء</th>
           <th class="sortable" style="width:100px" id="th-dueDate" onclick="setSort('dueDate')">تاريخ الاستحقاق</th>
           <th style="width:60px">المدة</th>
+          <th style="width:100px">نسبة الإنجاز</th>
         </tr>
       </thead>
       <tbody id="taskBody">
-        <tr><td colspan="8" class="empty">لا توجد مواضيع</td></tr>
+        <tr><td colspan="10" class="empty">لا توجد مواضيع</td></tr>
       </tbody>
     </table>
     </div>
@@ -581,7 +582,7 @@ function renderTasks() {
 
     const tbody = document.getElementById('taskBody');
     if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="empty">لا توجد مواضيع</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="empty">لا توجد مواضيع</td></tr>';
         return;
     }
     tbody.innerHTML = list.map((t, i) => {
@@ -591,6 +592,11 @@ function renderTasks() {
         const myPending = t.guidances.filter(g => !g.approved && g.added_by_role === 'employee').length;
         const hasPendingChanges = t.pendingChanges.length > 0;
         const rowClass = isRejected ? 'rejected-row' : (isNew ? 'new-row' : '');
+        const pct = t.continuous ? 0 : (t.progress != null ? parseInt(t.progress) : 0);
+        const pctColor = pct >= 80 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444';
+        const progressCell = t.continuous
+            ? `<span style="font-size:12px;color:#6b7280;font-style:italic;">مستمر</span>`
+            : `<div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:8px;border-radius:4px;background:linear-gradient(to right,${pctColor} ${pct}%,#e5e7eb ${pct}%);"></div><span style="font-size:12px;font-weight:700;color:${pctColor};min-width:32px;">${pct}%</span></div>`;
         return `<tr class="${rowClass}" onclick="openDetail('${t.id}')" style="cursor:pointer;">
             <td>${i + 1}${isNew ? '<span class="new-indicator">جديد</span>' : ''}</td>
             <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><strong>${t.name}</strong>
@@ -605,6 +611,7 @@ function renderTasks() {
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
             <td>${dueDateChip(t.dueDate, t.createdAt)}</td>
             <td>${delayBadge(t)}</td>
+            <td>${progressCell}</td>
         </tr>`;
     }).join('');
 }
@@ -699,7 +706,7 @@ function renderKanban(list) {
 
 function showSkeleton() {
     document.getElementById('taskBody').innerHTML = Array(5).fill(0).map(() =>
-        `<tr>${Array(9).fill(0).map((_,i) => `<td><span class="skel" style="width:${[30,70,50,40,45,45,45,30,25][i]}%;"></span></td>`).join('')}</tr>`
+        `<tr>${Array(10).fill(0).map((_,i) => `<td><span class="skel" style="width:${[30,70,50,25,40,45,45,45,30,50][i]}%;"></span></td>`).join('')}</tr>`
     ).join('');
 }
 
@@ -796,6 +803,7 @@ function renderDetail() {
             <div><span style="color:#888;">تاريخ مقترح:</span> ${t.suggestedDueDate || '-'}</div>
             <div style="grid-column:1/-1;"><span style="color:#888;">الوصف:</span> ${t.description || '-'}</div>
             ${t.assignedTo ? `<div style="grid-column:1/-1;"><span style="color:#888;">مُحال من المدير إلى:</span> ${t.assignedTo}</div>` : ''}
+            ${!t.continuous ? `<div style="grid-column:1/-1;"><span style="color:#888;">نسبة الإنجاز:</span><div style="display:flex;align-items:center;gap:8px;margin-top:4px;"><div style="flex:1;height:10px;border-radius:5px;background:#e5e7eb;overflow:hidden;"><div style="height:100%;width:${t.progress!=null?parseInt(t.progress):0}%;background:${(p=>p>=80?'#10b981':p>=40?'#f59e0b':'#ef4444')(t.progress!=null?parseInt(t.progress):0)};border-radius:5px;"></div></div><span style="font-weight:700;color:${(p=>p>=80?'#10b981':p>=40?'#f59e0b':'#ef4444')(t.progress!=null?parseInt(t.progress):0)};min-width:36px;">${t.progress!=null?parseInt(t.progress):0}%</span></div></div>` : ''}
         </div>`;
 
     // pending changes
