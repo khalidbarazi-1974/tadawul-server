@@ -649,7 +649,7 @@ async function loadHubData() {
       }
       if (!effectiveDue && t.createdAt) {
         effectiveDue = new Date(t.createdAt);
-        effectiveDue.setDate(effectiveDue.getDate() + 30);
+        effectiveDue.setDate(effectiveDue.getDate() + 90);
       }
       return effectiveDue && effectiveDue < todayD;
     });

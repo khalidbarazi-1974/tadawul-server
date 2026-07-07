@@ -33,13 +33,13 @@ body{font-family:'Cairo','Segoe UI',Tahoma,sans-serif;background:#f0f2f5;min-hei
 .stat .l{font-size:12px;color:#888;margin-top:3px;}
 .stat.alert .n{color:#e74c3c;}
 .layout{display:grid;grid-template-columns:1fr 320px;gap:20px;}
-.card{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:hidden;}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:clip;}
 .card-head{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
 .card-head h3{font-size:15px;color:#333;font-weight:600;}
 .filter-bar{display:flex;gap:10px;padding:12px 20px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;align-items:center;}
 .filter-bar select,.filter-bar input{padding:7px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px;font-family:inherit;}
 table{width:100%;border-collapse:collapse;}
-th{background:#f5f6fa;padding:11px 14px;font-size:12px;color:#555;font-weight:600;text-align:right;}
+th{background:#f5f6fa;padding:11px 14px;font-size:12px;color:#555;font-weight:600;text-align:right;position:sticky;top:0;z-index:2;}
 td{padding:11px 14px;font-size:13px;color:#333;border-top:1px solid #f0f0f0;vertical-align:middle;}
 tr:hover td{background:#fdf8ff;}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
@@ -93,7 +93,7 @@ textarea{resize:vertical;}
 .error-msg{background:#ffebee;color:#c62828;border-radius:6px;padding:10px;font-size:13px;margin-top:10px;display:none;}
 .approval-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;padding:12px;}
 .approval-grid>p{grid-column:1/-1;text-align:center;padding:20px;color:#aaa;font-size:13px;}
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;max-height:60vh;}
 @media(max-width:1024px){
     .stats{grid-template-columns:repeat(3,1fr);}
     .layout{grid-template-columns:1fr;}
@@ -656,7 +656,7 @@ function renderTasks(){
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
-            <td>${dueDateChip(t.dueDate)}</td>
+            <td>${dueDateChip(t.dueDate, t.createdAt)}</td>
             <td style="text-align:center;">${delayBadge(t)}</td>
             <td>${progressCell}</td>
             <td>${t.assignedTo||'-'}</td>
@@ -753,7 +753,8 @@ function openAddModal(){
     document.getElementById('fDesc').value='';
     document.getElementById('fPriority').value='متوسطة';
     document.getElementById('fStatus').value='جديد';
-    document.getElementById('fDue').value='';
+    const _d90=new Date(); _d90.setDate(_d90.getDate()+90);
+    document.getElementById('fDue').value=_d90.toISOString().slice(0,10);
     document.getElementById('fMeetingRef').value='';
     const fDept=document.getElementById('fDept');
     fDept.value=currentDeptId===-1 ? depts[0]?.id : currentDeptId;
@@ -772,7 +773,8 @@ function openEdit(){
     document.getElementById('fDesc').value=t.description||'';
     document.getElementById('fPriority').value=t.priority;
     document.getElementById('fStatus').value=t.status;
-    document.getElementById('fDue').value=t.dueDate||'';
+    let _fDue=''; if(t.dueDate){const _d=new Date(t.dueDate+'T00:00:00');if(!isNaN(_d))_fDue=t.dueDate;} if(!_fDue&&t.createdAt){const _d=new Date(t.createdAt);_d.setDate(_d.getDate()+90);_fDue=_d.toISOString().slice(0,10);}
+    document.getElementById('fDue').value=_fDue;
     document.getElementById('fMeetingRef').value=t.meeting_ref||'';
     const fDept=document.getElementById('fDept');
     _suppressDeptChange = true;
@@ -997,16 +999,19 @@ function countUp(el, target, dur=500) {
     }, 16);
 }
 
-function dueDateChip(dueDate) {
-    if (!dueDate) return '<span class="chip chip-none">—</span>';
+function dueDateChip(dueDate, createdAt) {
+    let due;
+    if (dueDate) { const d = new Date(dueDate + 'T00:00:00'); if (!isNaN(d)) due = d; }
+    if (!due && createdAt) { due = new Date(createdAt); due.setDate(due.getDate() + 90); }
+    if (!due) return '<span class="chip chip-none">—</span>';
+    const dateStr = due.toISOString().slice(0, 10);
     const today = new Date(); today.setHours(0,0,0,0);
-    const due = new Date(dueDate + 'T00:00:00');
     const diff = Math.round((due - today) / 86400000);
     if (diff < 0)  return `<span class="chip chip-late">متأخر ${Math.abs(diff)} يوم</span>`;
     if (diff === 0) return `<span class="chip chip-today">اليوم</span>`;
     if (diff === 1) return `<span class="chip chip-tmrw">غداً</span>`;
     if (diff <= 7)  return `<span class="chip chip-soon">${diff} أيام</span>`;
-    return `<span class="chip chip-ok">${dueDate}</span>`;
+    return `<span class="chip chip-ok">${dateStr}</span>`;
 }
 
 function toggleView(mode) {
@@ -1030,7 +1035,7 @@ function renderKanban(list) {
                 <div class="kanban-card ${pc[t.priority]||'k-med'}" onclick="openDetail('${t.id}')">
                     <div class="kanban-card-name">${t.name}</div>
                     <div class="kanban-card-meta">
-                        ${priorityBadge(t.priority)} ${dueDateChip(t.dueDate)}
+                        ${priorityBadge(t.priority)} ${dueDateChip(t.dueDate, t.createdAt)}
                         ${t.assignedTo ? `<span>👤 ${t.assignedTo}</span>` : ''}
                     </div>
                 </div>`).join('') : '<div class="kanban-empty">لا توجد مواضيع</div>'}

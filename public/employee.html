@@ -39,9 +39,9 @@ body{font-family:'Cairo','Segoe UI',Tahoma,sans-serif;background:#f0f2f5;min-hei
 .btn-add:hover{background:#283593;}
 
 /* table */
-.card{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:hidden;}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:clip;}
 table{width:100%;border-collapse:collapse;}
-th{background:#f5f6fa;padding:12px 14px;font-size:13px;color:#555;font-weight:600;text-align:right;}
+th{background:#f5f6fa;padding:12px 14px;font-size:13px;color:#555;font-weight:600;text-align:right;position:sticky;top:0;z-index:2;}
 td{padding:12px 14px;font-size:14px;color:#333;border-top:1px solid #f0f0f0;vertical-align:middle;}
 tr:hover td{background:#fafbff;}
 tr.new-row td:first-child{border-right:3px solid #f39c12;}
@@ -108,7 +108,7 @@ textarea{resize:vertical;min-height:80px;}
 .empty{text-align:center;padding:48px;color:#aaa;font-size:15px;}
 .filter-bar{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;align-items:center;}
 .filter-bar select,.filter-bar input{padding:7px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px;font-family:inherit;}
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;max-height:60vh;}
 th.sortable{cursor:pointer;user-select:none;}
 th.sortable:hover{background:#eceef5;}
 th.sort-asc::after{content:' ▲';font-size:9px;opacity:.7;}
@@ -601,7 +601,7 @@ function renderTasks() {
             <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666;">${t.description||'-'}</td>
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
-            <td>${dueDateChip(t.dueDate)}</td>
+            <td>${dueDateChip(t.dueDate, t.createdAt)}</td>
             <td style="text-align:center;color:#666;font-size:12px;">${t.createdAt?t.createdAt.slice(0,10):'-'}</td>
             <td>${delayBadge(t)}</td>
             <td>${t.guidances.length}${myPending ? ` <span style="color:#f57f17;font-size:11px;">(${myPending} بانتظار)</span>` : ''}</td>
@@ -656,16 +656,19 @@ function countUp(el, target, dur=500) {
     }, 16);
 }
 
-function dueDateChip(dueDate) {
-    if (!dueDate) return '<span class="chip chip-none">—</span>';
+function dueDateChip(dueDate, createdAt) {
+    let due;
+    if (dueDate) { const d = new Date(dueDate + 'T00:00:00'); if (!isNaN(d)) due = d; }
+    if (!due && createdAt) { due = new Date(createdAt); due.setDate(due.getDate() + 90); }
+    if (!due) return '<span class="chip chip-none">—</span>';
+    const dateStr = due.toISOString().slice(0, 10);
     const today = new Date(); today.setHours(0,0,0,0);
-    const due = new Date(dueDate + 'T00:00:00');
     const diff = Math.round((due - today) / 86400000);
     if (diff < 0)  return `<span class="chip chip-late">متأخر ${Math.abs(diff)} يوم</span>`;
     if (diff === 0) return `<span class="chip chip-today">اليوم</span>`;
     if (diff === 1) return `<span class="chip chip-tmrw">غداً</span>`;
     if (diff <= 7)  return `<span class="chip chip-soon">${diff} أيام</span>`;
-    return `<span class="chip chip-ok">${dueDate}</span>`;
+    return `<span class="chip chip-ok">${dateStr}</span>`;
 }
 
 function toggleView(mode) {
@@ -688,7 +691,7 @@ function renderKanban(list) {
             ${cards.length ? cards.map(t => `
                 <div class="kanban-card ${pc[t.priority]||'k-med'}" onclick="openDetail('${t.id}')">
                     <div class="kanban-card-name">${t.name}</div>
-                    <div class="kanban-card-meta">${priorityBadge(t.priority)} ${dueDateChip(t.dueDate)}</div>
+                    <div class="kanban-card-meta">${priorityBadge(t.priority)} ${dueDateChip(t.dueDate, t.createdAt)}</div>
                 </div>`).join('') : '<div class="kanban-empty">لا توجد مواضيع</div>'}
         </div>`;
     }).join('')}</div>`;
@@ -724,7 +727,8 @@ function openAddModal() {
     document.getElementById('fName').value = '';
     document.getElementById('fDesc').value = '';
     document.getElementById('fPriority').value = 'متوسطة';
-    document.getElementById('fDue').value = '';
+    const _d90=new Date(); _d90.setDate(_d90.getDate()+90);
+    document.getElementById('fDue').value = _d90.toISOString().slice(0,10);
     document.getElementById('changeSection').style.display = 'none';
     document.getElementById('saveBtn').style.display = 'inline-block';
     document.getElementById('taskModal').classList.add('open');
@@ -889,7 +893,8 @@ function openEditMode() {
     document.getElementById('fName').value = currentTask.name;
     document.getElementById('fDesc').value = currentTask.description || '';
     document.getElementById('fPriority').value = currentTask.priority;
-    document.getElementById('fDue').value = currentTask.dueDate || '';
+    let _fDue=''; const _ct=currentTask; if(_ct.dueDate){const _d=new Date(_ct.dueDate+'T00:00:00');if(!isNaN(_d))_fDue=_ct.dueDate;} if(!_fDue&&_ct.createdAt){const _d=new Date(_ct.createdAt);_d.setDate(_d.getDate()+90);_fDue=_d.toISOString().slice(0,10);}
+    document.getElementById('fDue').value = _fDue;
     document.getElementById('changeField').value = 'status';
     updateChangeInput();
     document.getElementById('changeSection').style.display = 'block';
