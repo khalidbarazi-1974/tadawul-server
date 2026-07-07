@@ -114,14 +114,18 @@ router.post('/', (req, res) => {
 // ── Manager: direct update (no approval needed) ───────────────────────────────
 
 router.put('/:id', requireRole('manager', 'deputy', 'admin'), (req, res) => {
-    const { name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo, meetingRef, progress, continuous } = req.body;
+    const { name, description, priority, startDate, dueDate, suggestedDueDate, assignedTo, meetingRef, continuous } = req.body;
+    let { status, progress } = req.body;
+    progress = parseInt(progress) || 0;
+    if (status === 'مكتمل') progress = 100;
+    else if (progress === 100) status = 'مكتمل';
     db.prepare(`
         UPDATE tasks SET name=?, description=?, priority=?, status=?,
             start_date=?, due_date=?, suggested_due_date=?, assigned_to=?,
             meeting_ref=?, progress=?, continuous=?, is_new_for_manager=0
         WHERE id=?
     `).run(name, description, priority, status, startDate, dueDate, suggestedDueDate, assignedTo,
-           meetingRef ?? null, progress ?? 0, continuous ? 1 : 0, req.params.id);
+           meetingRef ?? null, progress, continuous ? 1 : 0, req.params.id);
     res.json({ success: true });
 });
 
@@ -161,6 +165,11 @@ router.patch('/changes/:changeId/approve', requireRole('manager', 'deputy', 'adm
         const fieldMap = { status: 'status', description: 'description', priority: 'priority', progress: 'progress', suggestedDueDate: 'suggested_due_date' };
         const dbField = fieldMap[change.field];
         db.prepare(`UPDATE tasks SET ${dbField} = ? WHERE id = ?`).run(change.new_value, change.task_id);
+        // keep status and progress in sync
+        if (change.field === 'status' && change.new_value === 'مكتمل')
+            db.prepare('UPDATE tasks SET progress = 100 WHERE id = ?').run(change.task_id);
+        else if (change.field === 'progress' && parseInt(change.new_value) === 100)
+            db.prepare("UPDATE tasks SET status = 'مكتمل' WHERE id = ?").run(change.task_id);
         db.prepare(`UPDATE task_changes SET status='approved', reviewed_by=?, reviewed_at=? WHERE id=?`)
             .run(req.user.name, now, change.id);
     }
