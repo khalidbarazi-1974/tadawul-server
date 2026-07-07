@@ -640,11 +640,8 @@ async function loadHubData() {
     const pendingTasks = (pendingData && pendingData.pendingTasks) || [];
 
     const open       = tasks.filter(t => t.status !== 'مكتمل');
-    // Late = dueDate < today for ALL tasks (matching deputy.html dueDateChip which ignores status)
-    const lateTasks  = [
-      ...tasks.filter(t => t.dueDate && t.dueDate < today),
-      ...pendingTasks.filter(t => (t.dueDate||t.due_date) && (t.dueDate||t.due_date) < today)
-    ];
+    // Late = approved tasks with dueDate < today (mirrors deputy.html — pendingTasks excluded)
+    const lateTasks  = tasks.filter(t => t.dueDate && t.dueDate < today);
     const totalLate     = lateTasks.length;
     const lateInProg    = lateTasks.filter(t => t.status === 'قيد التنفيذ').length;
     const needsApproval = pendingTasks.length;
