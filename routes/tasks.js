@@ -132,7 +132,7 @@ router.post('/:id/request-change', requireRole('employee'), (req, res) => {
     const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
     if (!task) return res.status(404).json({ error: 'الموضوع غير موجود' });
 
-    const fieldMap = { status: 'status', description: 'description', priority: 'priority', suggestedDueDate: 'suggested_due_date' };
+    const fieldMap = { status: 'status', description: 'description', priority: 'priority', progress: 'progress', suggestedDueDate: 'suggested_due_date' };
     const dbField = fieldMap[field];
     if (!dbField) return res.status(400).json({ error: 'حقل غير صالح' });
 
@@ -158,7 +158,7 @@ router.patch('/changes/:changeId/approve', requireRole('manager', 'deputy', 'adm
         db.prepare('UPDATE meeting_actions SET task_id=NULL WHERE task_id=?').run(change.task_id);
         db.prepare('DELETE FROM tasks WHERE id = ?').run(change.task_id);
     } else {
-        const fieldMap = { status: 'status', description: 'description', priority: 'priority', suggestedDueDate: 'suggested_due_date' };
+        const fieldMap = { status: 'status', description: 'description', priority: 'priority', progress: 'progress', suggestedDueDate: 'suggested_due_date' };
         const dbField = fieldMap[change.field];
         db.prepare(`UPDATE tasks SET ${dbField} = ? WHERE id = ?`).run(change.new_value, change.task_id);
         db.prepare(`UPDATE task_changes SET status='approved', reviewed_by=?, reviewed_at=? WHERE id=?`)

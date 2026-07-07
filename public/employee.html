@@ -354,6 +354,7 @@ th.sort-desc::after{content:' ▼';font-size:9px;opacity:.7;}
             <select id="changeField" onchange="updateChangeInput()">
               <option value="status">الحالة</option>
               <option value="priority">الأولوية</option>
+              <option value="progress">نسبة الإنجاز</option>
               <option value="suggestedDueDate">التاريخ المقترح</option>
               <option value="description">الوصف</option>
             </select>
@@ -887,6 +888,9 @@ function updateChangeInput() {
             <option${t.priority==='متوسطة'?' selected':''}>متوسطة</option>
             <option${t.priority==='منخفضة'?' selected':''}>منخفضة</option>
         </select>`;
+    } else if (field === 'progress') {
+        const cur = t.progress != null ? parseInt(t.progress) : 0;
+        wrap.innerHTML = `<input type="number" id="changeValueInput" min="0" max="100" value="${cur}" style="width:100px;"> %`;
     } else if (field === 'suggestedDueDate') {
         wrap.innerHTML = `<input type="date" id="changeValueInput" value="${t.suggestedDueDate||''}">`;
     } else {
